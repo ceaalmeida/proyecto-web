@@ -26,6 +26,17 @@ import {
 import "./styles.css"; // Importa tu archivo CSS
 import AnimalTable from "./cargar/animales/page"
 import { useRouter } from "next/navigation";
+import ActivitiesTable from "./cargar/actividades/page";
+import AdopcionesTable from "./cargar/adopciones/page";
+import ProveedorAlimentosTable from "./cargar/proveedores-alimentos/page";
+import ProveedorServiciosTable from "./cargar/proveedor-servicios-complementarios/page";
+import TransporteTable from "./cargar/transportes/page";
+import DonacionesTable from "./cargar/donaciones/page";
+import ContractTable from "./cargar/contratos/page";
+import ServiceTypeTable from "./cargar/tipo-servicios/page";
+import VeterinarianTable from "./cargar/veterinarios/page";
+import FoodTypeTable from "./cargar/tipos-alimentos/page";
+
 export default function Component() {
   const [activeTab, setActiveTab] = useState("dashboard");
 
@@ -87,11 +98,60 @@ export default function Component() {
           
         }
         {
-          
-          activeTab==='logout'&& (          
-            
+          activeTab==='activities'&&(
+              <ActivitiesTable/>
+            )
+        }
+        {
+          activeTab ==='adoption'&&(
+              <AdopcionesTable/>
+            )
+        }
+        {
+          activeTab ==='donations' &&(
+              <DonacionesTable/>
+            )
+        }
+        {
+          activeTab ==='contracts'&&(
+              <ContractTable/>
+            )
+        }
+
+        {
+          activeTab === 'food-provider'&&(
+              <ProveedorAlimentosTable/>
+            )
+        }
+        {
+          activeTab ==='complementary-services'&&(
+              <ProveedorServiciosTable/>
+            )
+        }
+        {
+          activeTab ==='transport'&&(
+              <TransporteTable/>
+            )
+        }
+        {
+          activeTab==='logout'&& (
             router.push("/")
           )
+        }
+        {
+          activeTab === 'services'&&(
+              <ServiceTypeTable/>
+            )
+        }
+        {
+          activeTab ==='vets'&&(
+              <VeterinarianTable/>
+            )
+        }
+        {
+          activeTab ==='food'&&(
+              <FoodTypeTable/>
+            )
         }
       </main>
     </div>

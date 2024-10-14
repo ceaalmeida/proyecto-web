@@ -268,7 +268,7 @@ export default function AnimalTable() {
         <DialogContent>
           <DialogContentText>{mensaje}</DialogContentText>
           <DialogActions>
-          <Button onClick={setClose}>Cerrar</Button>
+          <Button onClick={setClose}></Button>
           </DialogActions>          
         </DialogContent>
       </Dialog>

@@ -26,6 +26,7 @@ import {
 import "./styles.css"; // Importa tu archivo CSS
 import AnimalTable from "./cargar/animales/page"
 import { useRouter } from "next/navigation";
+import ActivitiesTable from "./cargar/actividades/page";
 
 export default function Component() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -86,6 +87,11 @@ export default function Component() {
             <AnimalTable></AnimalTable>
           )
           
+        }
+        {
+          activeTab==='activities'&&(
+              <ActivitiesTable/>
+            )
         }
         {
           activeTab==='logout'&& (

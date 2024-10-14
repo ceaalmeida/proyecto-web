@@ -157,7 +157,7 @@ export default function AnimalTable() {
       >
         <ViewColumnIcon />
       </IconButton>
-      <Menu
+      <Menu 
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={() => setAnchorEl(null)}

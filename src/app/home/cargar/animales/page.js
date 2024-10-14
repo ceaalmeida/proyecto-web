@@ -125,7 +125,7 @@ export default function AnimalTable() {
         animals.map((animal) =>
             animal.ID_Animal === editingAnimal.ID_Animal ? editingAnimal : animal
         )
-    );
+    );                                                                                
     setOpenEditDialog(false);
   };
 

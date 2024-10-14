@@ -28,7 +28,7 @@ export default function Login({ onLogin }) {
     if (user === "qwe" && password === "qwe") {
       setError("");
       
-      router.push('/home')
+      router.push('/home.user')
       setUser("");
       setPassword("")
       
@@ -91,8 +91,7 @@ export default function Login({ onLogin }) {
             type="submit"
             fullWidth
             variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-            
+            sx={{ mt: 3, mb: 2 }}            
           >
             Iniciar Sesión
           </Button>

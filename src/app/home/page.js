@@ -27,6 +27,8 @@ import "./styles.css"; // Importa tu archivo CSS
 import AnimalTable from "./cargar/animales/page"
 import { useRouter } from "next/navigation";
 import ActivitiesTable from "./cargar/actividades/page";
+import AdopcionesTable from "./cargar/adopciones/page";
+import ProveedorAlimentosTable from "./cargar/proveedores-alimentos/page";
 
 export default function Component() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -91,6 +93,17 @@ export default function Component() {
         {
           activeTab==='activities'&&(
               <ActivitiesTable/>
+            )
+        }
+        {
+          activeTab ==='adoption'&&(
+              <AdopcionesTable/>
+            )
+        }
+
+        {
+          activeTab === 'food-provider'&&(
+              <ProveedorAlimentosTable/>
             )
         }
         {

@@ -28,39 +28,35 @@ import {
     ViewColumn as ViewColumnIcon,
 } from "@mui/icons-material";
 
-const initialAdopciones = [
+const initialProveedoresServicios = [
     {
         id: 1,
-        idAnimal: "A001",
-        idAdoptante: "AD001",
-        fecha: "2024-01-15",
-        cuota: 200,
+        nombre: "Limpieza Animal",
+        tipoServicio: "Limpieza",
+        direccion: "Calle 78, Ciudad",
     },
     {
         id: 2,
-        idAnimal: "A002",
-        idAdoptante: "AD002",
-        fecha: "2024-02-12",
-        cuota: 150,
+        nombre: "Transporte Express",
+        tipoServicio: "Transporte",
+        direccion: "Avenida 102, Ciudad",
     },
 ];
 
-export default function AdopcionesTable() {
-    const [adopciones, setAdopciones] = useState(initialAdopciones);
+export default function ProveedorServiciosTable() {
+    const [proveedores, setProveedores] = useState(initialProveedoresServicios);
     const [sortOrder, setSortOrder] = useState("asc");
     const [visibleColumns, setVisibleColumns] = useState([
-        "idAnimal",
-        "idAdoptante",
-        "fecha",
-        "cuota",
+        "nombre",
+        "tipoServicio",
+        "direccion",
     ]);
     const [searchTerm, setSearchTerm] = useState("");
-    const [editingAdopcion, setEditingAdopcion] = useState(null);
-    const [newAdopcion, setNewAdopcion] = useState({
-        idAnimal: "",
-        idAdoptante: "",
-        fecha: "",
-        cuota: "",
+    const [editingProveedor, setEditingProveedor] = useState(null);
+    const [newProveedor, setNewProveedor] = useState({
+        nombre: "",
+        tipoServicio: "",
+        direccion: "",
     });
     const [openAddDialog, setOpenAddDialog] = useState(false);
     const [openEditDialog, setOpenEditDialog] = useState(false);
@@ -75,27 +71,27 @@ export default function AdopcionesTable() {
     };
 
     const handleDelete = (id) => {
-        setAdopciones(adopciones.filter((adopcion) => adopcion.id !== id));
+        setProveedores(proveedores.filter((proveedor) => proveedor.id !== id));
     };
 
-    const handleEdit = (adopcion) => {
-        setEditingAdopcion(adopcion);
+    const handleEdit = (proveedor) => {
+        setEditingProveedor(proveedor);
         setOpenEditDialog(true);
     };
 
     const handleSaveEdit = () => {
-        setAdopciones(
-            adopciones.map((adopcion) =>
-                adopcion.id === editingAdopcion.id ? editingAdopcion : adopcion
+        setProveedores(
+            proveedores.map((proveedor) =>
+                proveedor.id === editingProveedor.id ? editingProveedor : proveedor
             )
         );
         setOpenEditDialog(false);
     };
 
     const handleAdd = () => {
-        const id = Math.max(...adopciones.map((a) => a.id)) + 1;
-        setAdopciones([...adopciones, { ...newAdopcion, id }]);
-        setNewAdopcion({ idAnimal: "", idAdoptante: "", fecha: "", cuota: "" });
+        const id = Math.max(...proveedores.map((p) => p.id)) + 1;
+        setProveedores([...proveedores, { ...newProveedor, id }]);
+        setNewProveedor({ nombre: "", tipoServicio: "", direccion: "" });
         setOpenAddDialog(false);
     };
 
@@ -107,24 +103,24 @@ export default function AdopcionesTable() {
         );
     };
 
-    const filteredAdopciones = adopciones
-        .filter((adopcion) =>
-            Object.values(adopcion).some((value) =>
+    const filteredProveedores = proveedores
+        .filter((proveedor) =>
+            Object.values(proveedor).some((value) =>
                 value.toString().toLowerCase().includes(searchTerm.toLowerCase())
             )
         )
         .sort((a, b) => {
             if (sortOrder === "asc") {
-                return a.idAnimal.localeCompare(b.idAnimal);
+                return a.nombre.localeCompare(b.nombre);
             } else {
-                return b.idAnimal.localeCompare(a.idAnimal);
+                return b.nombre.localeCompare(a.nombre);
             }
         });
 
     return (
         <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
             <TextField
-                label="Buscar adopciones"
+                label="Buscar proveedores"
                 variant="outlined"
                 value={searchTerm}
                 onChange={handleSearch}
@@ -141,7 +137,7 @@ export default function AdopcionesTable() {
                 open={Boolean(anchorEl)}
                 onClose={() => setAnchorEl(null)}
             >
-                {["idAnimal", "idAdoptante", "fecha", "cuota"].map((column) => (
+                {["nombre", "tipoServicio", "direccion"].map((column) => (
                     <MenuItem key={column}>
                         <FormControlLabel
                             control={
@@ -159,43 +155,41 @@ export default function AdopcionesTable() {
                 <Table sx={{ minWidth: 650 }} aria-label="simple table">
                     <TableHead>
                         <TableRow>
-                            {visibleColumns.includes("idAnimal") && (
+                            {visibleColumns.includes("nombre") && (
                                 <TableCell onClick={handleSort} sx={{ cursor: "pointer" }}>
-                                    ID Animal {sortOrder === "asc" ? "↑" : "↓"}
+                                    Nombre {sortOrder === "asc" ? "↑" : "↓"}
                                 </TableCell>
                             )}
-                            {visibleColumns.includes("idAdoptante") && (
-                                <TableCell>ID Adoptante</TableCell>
+                            {visibleColumns.includes("tipoServicio") && (
+                                <TableCell>Tipo de Servicio</TableCell>
                             )}
-                            {visibleColumns.includes("fecha") && <TableCell>Fecha</TableCell>}
-                            {visibleColumns.includes("cuota") && <TableCell>Cuota</TableCell>}
+                            {visibleColumns.includes("direccion") && (
+                                <TableCell>Dirección</TableCell>
+                            )}
                             <TableCell>Acciones</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {filteredAdopciones.map((adopcion) => (
-                            <TableRow key={adopcion.id}>
-                                {visibleColumns.includes("idAnimal") && (
-                                    <TableCell>{adopcion.idAnimal}</TableCell>
+                        {filteredProveedores.map((proveedor) => (
+                            <TableRow key={proveedor.id}>
+                                {visibleColumns.includes("nombre") && (
+                                    <TableCell>{proveedor.nombre}</TableCell>
                                 )}
-                                {visibleColumns.includes("idAdoptante") && (
-                                    <TableCell>{adopcion.idAdoptante}</TableCell>
+                                {visibleColumns.includes("tipoServicio") && (
+                                    <TableCell>{proveedor.tipoServicio}</TableCell>
                                 )}
-                                {visibleColumns.includes("fecha") && (
-                                    <TableCell>{adopcion.fecha}</TableCell>
-                                )}
-                                {visibleColumns.includes("cuota") && (
-                                    <TableCell>{adopcion.cuota}</TableCell>
+                                {visibleColumns.includes("direccion") && (
+                                    <TableCell>{proveedor.direccion}</TableCell>
                                 )}
                                 <TableCell>
                                     <IconButton
-                                        onClick={() => handleEdit(adopcion)}
+                                        onClick={() => handleEdit(proveedor)}
                                         color="primary"
                                     >
                                         <EditIcon />
                                     </IconButton>
                                     <IconButton
-                                        onClick={() => handleDelete(adopcion.id)}
+                                        onClick={() => handleDelete(proveedor.id)}
                                         color="error"
                                     >
                                         <DeleteIcon />
@@ -212,17 +206,17 @@ export default function AdopcionesTable() {
                 onClick={() => setOpenAddDialog(true)}
                 sx={{ mt: 2 }}
             >
-                Agregar Adopción
+                Agregar Proveedor de Servicios
             </Button>
 
-            {/* Diálogo para agregar adopción */}
+            {/* Diálogo para agregar proveedor */}
             <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
-                <DialogTitle>Agregar Nueva Adopción</DialogTitle>
+                <DialogTitle>Agregar Nuevo Proveedor</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Por favor, ingrese los detalles de la nueva adopción.
+                        Por favor, ingrese los detalles del nuevo proveedor.
                     </DialogContentText>
-                    {["idAnimal", "idAdoptante", "fecha", "cuota"].map((field) => (
+                    {["nombre", "tipoServicio", "direccion"].map((field) => (
                         <TextField
                             key={field}
                             margin="dense"
@@ -230,9 +224,9 @@ export default function AdopcionesTable() {
                             type="text"
                             fullWidth
                             variant="standard"
-                            value={newAdopcion[field]}
+                            value={newProveedor[field]}
                             onChange={(e) =>
-                                setNewAdopcion({ ...newAdopcion, [field]: e.target.value })
+                                setNewProveedor({ ...newProveedor, [field]: e.target.value })
                             }
                         />
                     ))}
@@ -243,15 +237,15 @@ export default function AdopcionesTable() {
                 </DialogActions>
             </Dialog>
 
-            {/* Diálogo para editar adopción */}
+            {/* Diálogo para editar proveedor */}
             <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
-                <DialogTitle>Editar Adopción</DialogTitle>
+                <DialogTitle>Editar Proveedor</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Por favor, modifique los detalles de la adopción.
+                        Por favor, modifique los detalles del proveedor.
                     </DialogContentText>
-                    {editingAdopcion &&
-                        ["idAnimal", "idAdoptante", "fecha", "cuota"].map((field) => (
+                    {editingProveedor &&
+                        ["nombre", "tipoServicio", "direccion"].map((field) => (
                             <TextField
                                 key={field}
                                 margin="dense"
@@ -259,10 +253,10 @@ export default function AdopcionesTable() {
                                 type="text"
                                 fullWidth
                                 variant="standard"
-                                value={editingAdopcion[field]}
+                                value={editingProveedor[field]}
                                 onChange={(e) =>
-                                    setEditingAdopcion({
-                                        ...editingAdopcion,
+                                    setEditingProveedor({
+                                        ...editingProveedor,
                                         [field]: e.target.value,
                                     })
                                 }

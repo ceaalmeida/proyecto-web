@@ -30,14 +30,14 @@ import {
 
 const initialDonaciones = [
     {
-        id: 1,
+        id: "1",
         nombreDonante: "Juan Pérez",
         monto: 150.0,
         fecha: "2024-10-01",
         tipoDonacion: "Monetaria",
     },
     {
-        id: 2,
+        id: "2",
         nombreDonante: "Maria Gómez",
         monto: 200.0,
         fecha: "2024-09-25",
@@ -93,7 +93,7 @@ export default function DonacionesTable() {
     };
 
     const handleAdd = () => {
-        const id = Math.max(...donaciones.map((d) => d.id)) + 1;
+        const id = (donaciones.length + 1).toString();
         setDonaciones([...donaciones, { ...newDonacion, id }]);
         setNewDonacion({
             nombreDonante: "",
@@ -276,7 +276,7 @@ export default function DonacionesTable() {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
-                    <Button onClick={handleSaveEdit}>Guardar Cambios</Button>
+                    <Button onClick={handleSaveEdit}>Guardar</Button>
                 </DialogActions>
             </Dialog>
         </Paper>

@@ -30,40 +30,48 @@ import {
 
 const initialAnimals = [
   {
-    id: 1,
-    nombre: "Max",
-    idEspecie: "Perro",
-    idRaza: "Labrador",
-    edad: 3,
-    idProvincia: "La Habana",
-    peso: 25.5
+    ID_Animal: "A001",
+    Nombre: "Max",
+    Especie: "Perro",
+    Raza: "Labrador",
+    Edad: 3,
+    Peso: 25.5,
+    Dias_Refugio: 10,
+    Precio_Mantenimiento: 150,
+    Precio_Adopción: 300,
   },
   {
-    id: 2,
-    nombre: "Luna",
-    idEspecie: "Gato",
-    idRaza: "Siamés",
-    edad: 2,
-    idProvincia: "Matanzas",
-    peso: 4.2
+    ID_Animal: "A002",
+    Nombre: "Luna",
+    Especie: "Gato",
+    Raza: "Siamés",
+    Edad: 2,
+    Peso: 4.2,
+    Dias_Refugio: 5,
+    Precio_Mantenimiento: 100,
+    Precio_Adopción: 250,
   },
   {
-    id: 3,
-    nombre: "Rocky",
-    idEspecie: "Perro",
-    idRaza: "Pastor Alemán",
-    edad: 5,
-    idProvincia: "Villa Clara",
-    peso: 30.0
+    ID_Animal: "A003",
+    Nombre: "Rocky",
+    Especie: "Perro",
+    Raza: "Pastor Alemán",
+    Edad: 5,
+    Peso: 30.0,
+    Dias_Refugio: 20,
+    Precio_Mantenimiento: 200,
+    Precio_Adopción: 350,
   },
   {
-    id: 4,
-    nombre: "Milo",
-    idEspecie: "Gato",
-    idRaza: "Persa",
-    edad: 4,
-    idProvincia: "Santiago de Cuba",
-    peso: 4.5
+    ID_Animal: "A004",
+    Nombre: "Milo",
+    Especie: "Gato",
+    Raza: "Persa",
+    Edad: 4,
+    Peso: 4.5,
+    Dias_Refugio: 15,
+    Precio_Mantenimiento: 120,
+    Precio_Adopción: 270,
   },
 ];
 
@@ -71,22 +79,25 @@ export default function AnimalTable() {
   const [animals, setAnimals] = useState(initialAnimals);
   const [sortOrder, setSortOrder] = useState("asc");
   const [visibleColumns, setVisibleColumns] = useState([
-    "nombre",
-    "idEspecie",
-    "idRaza",
-    "edad",
-    "idProvincia",
-    "peso",
+    "Nombre",
+    "Especie",
+    "Raza",
+    "Edad",
+    "Peso",
+    "Precio_Adopción",
   ]);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingAnimal, setEditingAnimal] = useState(null);
   const [newAnimal, setNewAnimal] = useState({
-    nombre: "",
-    idEspecie: "",
-    idRaza: "",
-    edad: "",
-    idProvincia: "",
-    peso: "",
+    ID_Animal: "",
+    Nombre: "",
+    Especie: "",
+    Raza: "",
+    Edad: "",
+    Peso: "",
+    Dias_Refugio: "",
+    Precio_Mantenimiento: "",
+    Precio_Adopción: "",
   });
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
@@ -101,7 +112,7 @@ export default function AnimalTable() {
   };
 
   const handleDelete = (id) => {
-    setAnimals(animals.filter((animal) => animal.id !== id));
+    setAnimals(animals.filter((animal) => animal.ID_Animal !== id));
   };
 
   const handleEdit = (animal) => {
@@ -112,22 +123,24 @@ export default function AnimalTable() {
   const handleSaveEdit = () => {
     setAnimals(
         animals.map((animal) =>
-            animal.id === editingAnimal.id ? editingAnimal : animal
+            animal.ID_Animal === editingAnimal.ID_Animal ? editingAnimal : animal
         )
     );
     setOpenEditDialog(false);
   };
 
   const handleAdd = () => {
-    const id = Math.max(...animals.map((a) => a.id)) + 1;
-    setAnimals([...animals, { ...newAnimal, id }]);
+    setAnimals([...animals, { ...newAnimal }]);
     setNewAnimal({
-      nombre: "",
-      idEspecie: "",
-      idRaza: "",
-      edad: "",
-      idProvincia: "",
-      peso: "",
+      ID_Animal: "",
+      Nombre: "",
+      Especie: "",
+      Raza: "",
+      Edad: "",
+      Peso: "",
+      Dias_Refugio: "",
+      Precio_Mantenimiento: "",
+      Precio_Adopción: "",
     });
     setOpenAddDialog(false);
   };
@@ -148,9 +161,9 @@ export default function AnimalTable() {
       )
       .sort((a, b) => {
         if (sortOrder === "asc") {
-          return a.nombre.localeCompare(b.nombre);
+          return a.Nombre.localeCompare(b.Nombre);
         } else {
-          return b.nombre.localeCompare(a.nombre);
+          return b.Nombre.localeCompare(a.Nombre);
         }
       });
 
@@ -174,7 +187,7 @@ export default function AnimalTable() {
             open={Boolean(anchorEl)}
             onClose={() => setAnchorEl(null)}
         >
-          {["nombre", "idEspecie", "idRaza", "edad", "idProvincia", "peso"].map((column) => (
+          {["Nombre", "Especie", "Raza", "Edad", "Peso", "Precio_Adopción"].map((column) => (
               <MenuItem key={column}>
                 <FormControlLabel
                     control={
@@ -183,7 +196,7 @@ export default function AnimalTable() {
                           onChange={() => toggleColumn(column)}
                       />
                     }
-                    label={column.charAt(0).toUpperCase() + column.slice(1)}
+                    label={column}
                 />
               </MenuItem>
           ))}
@@ -192,39 +205,39 @@ export default function AnimalTable() {
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead>
               <TableRow>
-                {visibleColumns.includes("nombre") && (
+                {visibleColumns.includes("Nombre") && (
                     <TableCell onClick={handleSort} sx={{ cursor: "pointer" }}>
                       Nombre {sortOrder === "asc" ? "↑" : "↓"}
                     </TableCell>
                 )}
-                {visibleColumns.includes("idEspecie") && <TableCell>Especie</TableCell>}
-                {visibleColumns.includes("idRaza") && <TableCell>Raza</TableCell>}
-                {visibleColumns.includes("edad") && <TableCell>Edad</TableCell>}
-                {visibleColumns.includes("idProvincia") && <TableCell>Provincia</TableCell>}
-                {visibleColumns.includes("peso") && <TableCell>Peso</TableCell>}
+                {visibleColumns.includes("Especie") && <TableCell>Especie</TableCell>}
+                {visibleColumns.includes("Raza") && <TableCell>Raza</TableCell>}
+                {visibleColumns.includes("Edad") && <TableCell>Edad</TableCell>}
+                {visibleColumns.includes("Peso") && <TableCell>Peso</TableCell>}
+                {visibleColumns.includes("Precio_Adopción") && <TableCell>Precio de Adopción</TableCell>}
                 <TableCell>Acciones</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {filteredAnimals.map((animal) => (
-                  <TableRow key={animal.id}>
-                    {visibleColumns.includes("nombre") && (
-                        <TableCell>{animal.nombre}</TableCell>
+                  <TableRow key={animal.ID_Animal}>
+                    {visibleColumns.includes("Nombre") && (
+                        <TableCell>{animal.Nombre}</TableCell>
                     )}
-                    {visibleColumns.includes("idEspecie") && (
-                        <TableCell>{animal.idEspecie}</TableCell>
+                    {visibleColumns.includes("Especie") && (
+                        <TableCell>{animal.Especie}</TableCell>
                     )}
-                    {visibleColumns.includes("idRaza") && (
-                        <TableCell>{animal.idRaza}</TableCell>
+                    {visibleColumns.includes("Raza") && (
+                        <TableCell>{animal.Raza}</TableCell>
                     )}
-                    {visibleColumns.includes("edad") && (
-                        <TableCell>{animal.edad}</TableCell>
+                    {visibleColumns.includes("Edad") && (
+                        <TableCell>{animal.Edad}</TableCell>
                     )}
-                    {visibleColumns.includes("idProvincia") && (
-                        <TableCell>{animal.idProvincia}</TableCell>
+                    {visibleColumns.includes("Peso") && (
+                        <TableCell>{animal.Peso}</TableCell>
                     )}
-                    {visibleColumns.includes("peso") && (
-                        <TableCell>{animal.peso}</TableCell>
+                    {visibleColumns.includes("Precio_Adopción") && (
+                        <TableCell>{animal.Precio_Adopción}</TableCell>
                     )}
                     <TableCell>
                       <IconButton
@@ -234,7 +247,7 @@ export default function AnimalTable() {
                         <EditIcon />
                       </IconButton>
                       <IconButton
-                          onClick={() => handleDelete(animal.id)}
+                          onClick={() => handleDelete(animal.ID_Animal)}
                           color="error"
                       >
                         <DeleteIcon />
@@ -261,26 +274,33 @@ export default function AnimalTable() {
             <DialogContentText>
               Por favor, ingrese los detalles del nuevo animal.
             </DialogContentText>
-            {["nombre", "idEspecie", "idRaza", "edad", "idProvincia", "peso"].map((field) => (
+            {[
+              "ID_Animal",
+              "Nombre",
+              "Especie",
+              "Raza",
+              "Edad",
+              "Peso",
+              "Dias_Refugio",
+              "Precio_Mantenimiento",
+              "Precio_Adopción",
+            ].map((field) => (
                 <TextField
                     key={field}
-                    margin="dense"
-                    label={field.charAt(0).toUpperCase() + field.slice(1)}
-                    type="text"
+                    label={field}
                     fullWidth
-                    variant="standard"
+                    variant="outlined"
                     value={newAnimal[field]}
                     onChange={(e) =>
                         setNewAnimal({ ...newAnimal, [field]: e.target.value })
                     }
+                    sx={{ mb: 2 }}
                 />
             ))}
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setOpenAddDialog(false)}>Cancelar</Button>
-            <Button onClick={handleAdd} color="primary">
-              Agregar
-            </Button>
+            <Button onClick={handleAdd}>Agregar</Button>
           </DialogActions>
         </Dialog>
 
@@ -289,32 +309,44 @@ export default function AnimalTable() {
           <DialogTitle>Editar Animal</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Actualice los detalles del animal seleccionado.
+              Por favor, edite los detalles del animal.
             </DialogContentText>
-            {["nombre", "idEspecie", "idRaza", "edad", "idProvincia", "peso"].map((field) => (
-                <TextField
-                    key={field}
-                    margin="dense"
-                    label={field.charAt(0).toUpperCase() + field.slice(1)}
-                    type="text"
-                    fullWidth
-                    variant="standard"
-                    value={editingAnimal ? editingAnimal[field] : ""}
-                    onChange={(e) =>
-                        setEditingAnimal({ ...editingAnimal, [field]: e.target.value })
-                    }
-                />
-            ))}
+            {editingAnimal && (
+                <>
+                  {[
+                    "ID_Animal",
+                    "Nombre",
+                    "Especie",
+                    "Raza",
+                    "Edad",
+                    "Peso",
+                    "Dias_Refugio",
+                    "Precio_Mantenimiento",
+                    "Precio_Adopción",
+                  ].map((field) => (
+                      <TextField
+                          key={field}
+                          label={field}
+                          fullWidth
+                          variant="outlined"
+                          value={editingAnimal[field]}
+                          onChange={(e) =>
+                              setEditingAnimal({
+                                ...editingAnimal,
+                                [field]: e.target.value,
+                              })
+                          }
+                          sx={{ mb: 2 }}
+                      />
+                  ))}
+                </>
+            )}
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
-            <Button onClick={handleSaveEdit} color="primary">
-              Guardar
-            </Button>
+            <Button onClick={handleSaveEdit}>Guardar</Button>
           </DialogActions>
         </Dialog>
       </Paper>
   );
 }
-
-

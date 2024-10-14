@@ -30,18 +30,22 @@ import {
 
 const initialAdopciones = [
     {
-        id: 1,
+        idAdopcion: "AD001",
         idAnimal: "A001",
-        idAdoptante: "AD001",
         fecha: "2024-01-15",
-        cuota: 200,
+        costoAdopcion: 200,
+        nombreAdoptante: "Juan Pérez",
+        emailAdoptante: "juan@example.com",
+        telefonoAdoptante: "123456789",
     },
     {
-        id: 2,
+        idAdopcion: "AD002",
         idAnimal: "A002",
-        idAdoptante: "AD002",
         fecha: "2024-02-12",
-        cuota: 150,
+        costoAdopcion: 150,
+        nombreAdoptante: "María Gómez",
+        emailAdoptante: "maria@example.com",
+        telefonoAdoptante: "987654321",
     },
 ];
 
@@ -49,18 +53,24 @@ export default function AdopcionesTable() {
     const [adopciones, setAdopciones] = useState(initialAdopciones);
     const [sortOrder, setSortOrder] = useState("asc");
     const [visibleColumns, setVisibleColumns] = useState([
+        "idAdopcion",
         "idAnimal",
-        "idAdoptante",
         "fecha",
-        "cuota",
+        "costoAdopcion",
+        "nombreAdoptante",
+        "emailAdoptante",
+        "telefonoAdoptante",
     ]);
     const [searchTerm, setSearchTerm] = useState("");
     const [editingAdopcion, setEditingAdopcion] = useState(null);
     const [newAdopcion, setNewAdopcion] = useState({
+        idAdopcion: "",
         idAnimal: "",
-        idAdoptante: "",
         fecha: "",
-        cuota: "",
+        costoAdopcion: "",
+        nombreAdoptante: "",
+        emailAdoptante: "",
+        telefonoAdoptante: "",
     });
     const [openAddDialog, setOpenAddDialog] = useState(false);
     const [openEditDialog, setOpenEditDialog] = useState(false);
@@ -75,7 +85,7 @@ export default function AdopcionesTable() {
     };
 
     const handleDelete = (id) => {
-        setAdopciones(adopciones.filter((adopcion) => adopcion.id !== id));
+        setAdopciones(adopciones.filter((adopcion) => adopcion.idAdopcion !== id));
     };
 
     const handleEdit = (adopcion) => {
@@ -86,16 +96,23 @@ export default function AdopcionesTable() {
     const handleSaveEdit = () => {
         setAdopciones(
             adopciones.map((adopcion) =>
-                adopcion.id === editingAdopcion.id ? editingAdopcion : adopcion
+                adopcion.idAdopcion === editingAdopcion.idAdopcion ? editingAdopcion : adopcion
             )
         );
         setOpenEditDialog(false);
     };
 
     const handleAdd = () => {
-        const id = Math.max(...adopciones.map((a) => a.id)) + 1;
-        setAdopciones([...adopciones, { ...newAdopcion, id }]);
-        setNewAdopcion({ idAnimal: "", idAdoptante: "", fecha: "", cuota: "" });
+        setAdopciones([...adopciones, { ...newAdopcion }]);
+        setNewAdopcion({
+            idAdopcion: "",
+            idAnimal: "",
+            fecha: "",
+            costoAdopcion: "",
+            nombreAdoptante: "",
+            emailAdoptante: "",
+            telefonoAdoptante: "",
+        });
         setOpenAddDialog(false);
     };
 
@@ -115,9 +132,9 @@ export default function AdopcionesTable() {
         )
         .sort((a, b) => {
             if (sortOrder === "asc") {
-                return a.idAnimal.localeCompare(b.idAnimal);
+                return a.idAdopcion.localeCompare(b.idAdopcion);
             } else {
-                return b.idAnimal.localeCompare(a.idAnimal);
+                return b.idAdopcion.localeCompare(a.idAdopcion);
             }
         });
 
@@ -141,7 +158,7 @@ export default function AdopcionesTable() {
                 open={Boolean(anchorEl)}
                 onClose={() => setAnchorEl(null)}
             >
-                {["idAnimal", "idAdoptante", "fecha", "cuota"].map((column) => (
+                {visibleColumns.map((column) => (
                     <MenuItem key={column}>
                         <FormControlLabel
                             control={
@@ -159,33 +176,45 @@ export default function AdopcionesTable() {
                 <Table sx={{ minWidth: 650 }} aria-label="simple table">
                     <TableHead>
                         <TableRow>
-                            {visibleColumns.includes("idAnimal") && (
+                            {visibleColumns.includes("idAdopcion") && (
                                 <TableCell onClick={handleSort} sx={{ cursor: "pointer" }}>
-                                    ID Animal {sortOrder === "asc" ? "↑" : "↓"}
+                                    ID Adopción {sortOrder === "asc" ? "↑" : "↓"}
                                 </TableCell>
                             )}
-                            {visibleColumns.includes("idAdoptante") && (
-                                <TableCell>ID Adoptante</TableCell>
+                            {visibleColumns.includes("idAnimal") && (
+                                <TableCell>ID Animal</TableCell>
                             )}
                             {visibleColumns.includes("fecha") && <TableCell>Fecha</TableCell>}
-                            {visibleColumns.includes("cuota") && <TableCell>Cuota</TableCell>}
+                            {visibleColumns.includes("costoAdopcion") && <TableCell>Costo Adopción</TableCell>}
+                            {visibleColumns.includes("nombreAdoptante") && <TableCell>Nombre Adoptante</TableCell>}
+                            {visibleColumns.includes("emailAdoptante") && <TableCell>Email Adoptante</TableCell>}
+                            {visibleColumns.includes("telefonoAdoptante") && <TableCell>Teléfono Adoptante</TableCell>}
                             <TableCell>Acciones</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {filteredAdopciones.map((adopcion) => (
-                            <TableRow key={adopcion.id}>
+                            <TableRow key={adopcion.idAdopcion}>
+                                {visibleColumns.includes("idAdopcion") && (
+                                    <TableCell>{adopcion.idAdopcion}</TableCell>
+                                )}
                                 {visibleColumns.includes("idAnimal") && (
                                     <TableCell>{adopcion.idAnimal}</TableCell>
-                                )}
-                                {visibleColumns.includes("idAdoptante") && (
-                                    <TableCell>{adopcion.idAdoptante}</TableCell>
                                 )}
                                 {visibleColumns.includes("fecha") && (
                                     <TableCell>{adopcion.fecha}</TableCell>
                                 )}
-                                {visibleColumns.includes("cuota") && (
-                                    <TableCell>{adopcion.cuota}</TableCell>
+                                {visibleColumns.includes("costoAdopcion") && (
+                                    <TableCell>{adopcion.costoAdopcion}</TableCell>
+                                )}
+                                {visibleColumns.includes("nombreAdoptante") && (
+                                    <TableCell>{adopcion.nombreAdoptante}</TableCell>
+                                )}
+                                {visibleColumns.includes("emailAdoptante") && (
+                                    <TableCell>{adopcion.emailAdoptante}</TableCell>
+                                )}
+                                {visibleColumns.includes("telefonoAdoptante") && (
+                                    <TableCell>{adopcion.telefonoAdoptante}</TableCell>
                                 )}
                                 <TableCell>
                                     <IconButton
@@ -195,7 +224,7 @@ export default function AdopcionesTable() {
                                         <EditIcon />
                                     </IconButton>
                                     <IconButton
-                                        onClick={() => handleDelete(adopcion.id)}
+                                        onClick={() => handleDelete(adopcion.idAdopcion)}
                                         color="error"
                                     >
                                         <DeleteIcon />
@@ -215,27 +244,87 @@ export default function AdopcionesTable() {
                 Agregar Adopción
             </Button>
 
-            {/* Diálogo para agregar adopción */}
             <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
                 <DialogTitle>Agregar Nueva Adopción</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Por favor, ingrese los detalles de la nueva adopción.
+                        Llenar los detalles de la nueva adopción.
                     </DialogContentText>
-                    {["idAnimal", "idAdoptante", "fecha", "cuota"].map((field) => (
-                        <TextField
-                            key={field}
-                            margin="dense"
-                            label={field.charAt(0).toUpperCase() + field.slice(1)}
-                            type="text"
-                            fullWidth
-                            variant="standard"
-                            value={newAdopcion[field]}
-                            onChange={(e) =>
-                                setNewAdopcion({ ...newAdopcion, [field]: e.target.value })
-                            }
-                        />
-                    ))}
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="ID Adopción"
+                        fullWidth
+                        variant="outlined"
+                        value={newAdopcion.idAdopcion}
+                        onChange={(e) =>
+                            setNewAdopcion({ ...newAdopcion, idAdopcion: e.target.value })
+                        }
+                    />
+                    <TextField
+                        margin="dense"
+                        label="ID Animal"
+                        fullWidth
+                        variant="outlined"
+                        value={newAdopcion.idAnimal}
+                        onChange={(e) =>
+                            setNewAdopcion({ ...newAdopcion, idAnimal: e.target.value })
+                        }
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Fecha"
+                        type="date"
+                        fullWidth
+                        variant="outlined"
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        value={newAdopcion.fecha}
+                        onChange={(e) =>
+                            setNewAdopcion({ ...newAdopcion, fecha: e.target.value })
+                        }
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Costo Adopción"
+                        fullWidth
+                        variant="outlined"
+                        value={newAdopcion.costoAdopcion}
+                        onChange={(e) =>
+                            setNewAdopcion({ ...newAdopcion, costoAdopcion: e.target.value })
+                        }
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Nombre Adoptante"
+                        fullWidth
+                        variant="outlined"
+                        value={newAdopcion.nombreAdoptante}
+                        onChange={(e) =>
+                            setNewAdopcion({ ...newAdopcion, nombreAdoptante: e.target.value })
+                        }
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Email Adoptante"
+                        fullWidth
+                        variant="outlined"
+                        value={newAdopcion.emailAdoptante}
+                        onChange={(e) =>
+                            setNewAdopcion({ ...newAdopcion, emailAdoptante: e.target.value })
+                        }
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Teléfono Adoptante"
+                        fullWidth
+                        variant="outlined"
+                        value={newAdopcion.telefonoAdoptante}
+                        onChange={(e) =>
+                            setNewAdopcion({ ...newAdopcion, telefonoAdoptante: e.target.value })
+                        }
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenAddDialog(false)}>Cancelar</Button>
@@ -243,35 +332,116 @@ export default function AdopcionesTable() {
                 </DialogActions>
             </Dialog>
 
-            {/* Diálogo para editar adopción */}
             <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
                 <DialogTitle>Editar Adopción</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Por favor, modifique los detalles de la adopción.
+                        Modificar los detalles de la adopción.
                     </DialogContentText>
-                    {editingAdopcion &&
-                        ["idAnimal", "idAdoptante", "fecha", "cuota"].map((field) => (
+                    {editingAdopcion && (
+                        <>
                             <TextField
-                                key={field}
                                 margin="dense"
-                                label={field.charAt(0).toUpperCase() + field.slice(1)}
-                                type="text"
+                                label="ID Adopción"
                                 fullWidth
-                                variant="standard"
-                                value={editingAdopcion[field]}
+                                variant="outlined"
+                                value={editingAdopcion.idAdopcion}
                                 onChange={(e) =>
                                     setEditingAdopcion({
                                         ...editingAdopcion,
-                                        [field]: e.target.value,
+                                        idAdopcion: e.target.value,
+                                    })
+                                }
+                                disabled
+                            />
+                            <TextField
+                                margin="dense"
+                                label="ID Animal"
+                                fullWidth
+                                variant="outlined"
+                                value={editingAdopcion.idAnimal}
+                                onChange={(e) =>
+                                    setEditingAdopcion({
+                                        ...editingAdopcion,
+                                        idAnimal: e.target.value,
                                     })
                                 }
                             />
-                        ))}
+                            <TextField
+                                margin="dense"
+                                label="Fecha"
+                                type="date"
+                                fullWidth
+                                variant="outlined"
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                value={editingAdopcion.fecha}
+                                onChange={(e) =>
+                                    setEditingAdopcion({
+                                        ...editingAdopcion,
+                                        fecha: e.target.value,
+                                    })
+                                }
+                            />
+                            <TextField
+                                margin="dense"
+                                label="Costo Adopción"
+                                fullWidth
+                                variant="outlined"
+                                value={editingAdopcion.costoAdopcion}
+                                onChange={(e) =>
+                                    setEditingAdopcion({
+                                        ...editingAdopcion,
+                                        costoAdopcion: e.target.value,
+                                    })
+                                }
+                            />
+                            <TextField
+                                margin="dense"
+                                label="Nombre Adoptante"
+                                fullWidth
+                                variant="outlined"
+                                value={editingAdopcion.nombreAdoptante}
+                                onChange={(e) =>
+                                    setEditingAdopcion({
+                                        ...editingAdopcion,
+                                        nombreAdoptante: e.target.value,
+                                    })
+                                }
+                            />
+                            <TextField
+                                margin="dense"
+                                label="Email Adoptante"
+                                fullWidth
+                                variant="outlined"
+                                value={editingAdopcion.emailAdoptante}
+                                onChange={(e) =>
+                                    setEditingAdopcion({
+                                        ...editingAdopcion,
+                                        emailAdoptante: e.target.value,
+                                    })
+                                }
+                            />
+                            <TextField
+                                margin="dense"
+                                label="Teléfono Adoptante"
+                                fullWidth
+                                variant="outlined"
+                                value={editingAdopcion.telefonoAdoptante}
+                                onChange={(e) =>
+                                    setEditingAdopcion({
+                                        ...editingAdopcion,
+                                        telefonoAdoptante: e.target.value,
+                                    })
+                                }
+                            />
+                        </>
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
-                    <Button onClick={handleSaveEdit}>Guardar Cambios</Button>
+                    <Button onClick={handleSaveEdit}>Guardar</Button>
                 </DialogActions>
             </Dialog>
         </Paper>

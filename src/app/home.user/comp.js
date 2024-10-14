@@ -13,12 +13,13 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 
-const pages = ['Products', 'Pricing', 'Blog'];
+const pages = ['Animales', 'Contratos', 'Adopciones'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
-export const ResponsiveAppBar=()=> {
+export const ResponsiveAppBar=({onButtonClick})=> {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const [activeButton, setActiveButton] = React.useState("");
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -30,6 +31,7 @@ export const ResponsiveAppBar=()=> {
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
+  
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
@@ -115,7 +117,7 @@ export const ResponsiveAppBar=()=> {
             {pages.map((page) => (
               <Button
                 key={page}
-                onClick={handleCloseNavMenu}
+                onClick={()=>onButtonClick (page)}
                 sx={{ my: 2, color: 'white', display: 'block' }}
               >
                 {page}
@@ -152,7 +154,7 @@ export const ResponsiveAppBar=()=> {
             </Menu>
           </Box>
         </Toolbar>
-      </Container>
+      </Container> 
     </AppBar>
   );
 }

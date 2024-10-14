@@ -1,4 +1,3 @@
-"use client";
 import React, { useState } from "react";
 import {
   Box,
@@ -11,30 +10,21 @@ import {
   CssBaseline,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { Link } from "lucide-react";
-import {Component} from "./home/page"
-import { useRouter } from "next/navigation";
 
 export default function Login({ onLogin }) {
-  const [user, setUser] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const router=useRouter();
 
   const handleSubmit = (event) => {
     event.preventDefault();
     // Aquí normalmente se haría una llamada a una API para autenticar
     // Por ahora, simularemos una autenticación básica
-    if (user === "qwe" && password === "qwe") {
+    if (email === "admin@example.com" && password === "password") {
       setError("");
-      
-      router.push('/home')
-      setUser("");
-      setPassword("")
-      
-      // onLogin(user);
+      onLogin(email);
     } else {
-      setError("Usuario o contraseña incorrectos");
+      setError("Correo electrónico o contraseña incorrectos");
     }
   };
 
@@ -62,13 +52,13 @@ export default function Login({ onLogin }) {
             margin="normal"
             required
             fullWidth
-            id="user"
-            label="Usuario"
-            name="user"
-            autoComplete="user"
+            id="email"
+            label="Correo Electrónico"
+            name="email"
+            autoComplete="email"
             autoFocus
-            value={user}
-            onChange={(e) => setUser(e.target.value)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
           <TextField
             margin="normal"
@@ -92,11 +82,9 @@ export default function Login({ onLogin }) {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
-            
           >
             Iniciar Sesión
           </Button>
-          <h1>Crear cuenta</h1>
         </Box>
       </Paper>
     </Container>

@@ -34,7 +34,8 @@ import TransporteTable from "./cargar/transportes/page";
 import DonacionesTable from "./cargar/donaciones/page";
 import ContractTable from "./cargar/contratos/page";
 import ServiceTypeTable from "./cargar/tipo-servicios/page";
-import VeterinarianTable from "@/app/home/cargar/veterinarios/page";
+import VeterinarianTable from "./cargar/veterinarios/page";
+import FoodTypeTable from "./cargar/tipos-alimentos/page";
 
 export default function Component() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -145,6 +146,11 @@ export default function Component() {
         {
           activeTab ==='vets'&&(
               <VeterinarianTable/>
+            )
+        }
+        {
+          activeTab ==='food'&&(
+              <FoodTypeTable/>
             )
         }
       </main>

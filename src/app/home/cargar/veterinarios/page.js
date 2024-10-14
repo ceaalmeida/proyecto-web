@@ -82,14 +82,7 @@ export default function VeterinarianTable() {
 
     return (
         <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
-            <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => setOpenAddDialog(true)}
-                sx={{ mb: 2 }}
-            >
-                Agregar Veterinario
-            </Button>
+
             <TableContainer component={Paper}>
                 <Table sx={{ minWidth: 650 }} aria-label="simple table">
                     <TableHead>
@@ -137,6 +130,14 @@ export default function VeterinarianTable() {
                     </TableBody>
                 </Table>
             </TableContainer>
+            <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setOpenAddDialog(true)}
+                sx={{  mt: 2}}
+            >
+                Agregar Veterinario
+            </Button>
 
             {/* Diálogo para agregar veterinario */}
             <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>

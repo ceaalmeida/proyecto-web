@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import {
   Table,
@@ -55,6 +55,23 @@ export default function AnimalTable() {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [showAlert, setShowAlert] = useState(false);
+  const [mensaje, setMensaje] = useState("");
+
+  const letras = /^[a-zA-Z]+$/;
+  const num = /^[0-9]+$/;
+
+  // const Alerta = ({ mensaje, close }) => {
+  //   return (
+  //     <Dialog open={showAlert} onClose={setClose}>
+  //       <DialogTitle>Alerta</DialogTitle>
+  //       <DialogContent>
+  //         <DialogContentText>{mensaje}</DialogContentText>
+  //         <Button onClick={close()}></Button>
+  //       </DialogContent>
+  //     </Dialog>
+  //   );
+  // };
 
   const handleSort = () => {
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -84,9 +101,23 @@ export default function AnimalTable() {
 
   const handleAdd = () => {
     const id = Math.max(...animals.map((a) => a.id)) + 1;
-    setAnimals([...animals, { ...newAnimal, id }]);
-    setNewAnimal({ nombre: "", especie: "", raza: "", edad: "" });
-    setOpenAddDialog(false);
+
+    if (
+      letras.test(newAnimal.nombre) &&
+      letras.test(newAnimal.especie) &&
+      letras.test(newAnimal.raza)
+    ) {
+      console.log("Biba cuva");
+      setAnimals([...animals, { ...newAnimal, id }]);
+      setNewAnimal({ nombre: "", especie: "", raza: "", edad: "" });
+      setOpenAddDialog(false);
+    } else {
+      setShowAlert(true);
+      setMensaje("Los datos introducidos son incorrectos");
+    }
+  };
+  const setClose = () => {
+    setShowAlert(false);
   };
 
   const toggleColumn = (column) => {
@@ -204,8 +235,7 @@ export default function AnimalTable() {
       >
         Agregar Animal
       </Button>
-
-      {/* Diálogo para agregar animal */}
+      ;{/* Diálogo para agregar animal */}
       <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
         <DialogTitle>Agregar Nuevo Animal</DialogTitle>
         <DialogContent>
@@ -221,9 +251,9 @@ export default function AnimalTable() {
               fullWidth
               variant="standard"
               value={newAnimal[field]}
-              onChange={(e) =>
-                setNewAnimal({ ...newAnimal, [field]: e.target.value })
-              }
+              onChange={(e) => {
+                setNewAnimal({ ...newAnimal, [field]: e.target.value });
+              }}
             />
           ))}
         </DialogContent>
@@ -232,7 +262,16 @@ export default function AnimalTable() {
           <Button onClick={handleAdd}>Agregar</Button>
         </DialogActions>
       </Dialog>
-
+      {/* Mensaje Error */}
+      <Dialog open={showAlert} onClose={setClose}>
+        <DialogTitle>Alerta</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{mensaje}</DialogContentText>
+          <DialogActions>
+          <Button onClick={setClose}>Cerrar</Button>
+          </DialogActions>          
+        </DialogContent>
+      </Dialog>
       {/* Diálogo para editar animal */}
       <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
         <DialogTitle>Editar Animal</DialogTitle>
@@ -250,15 +289,16 @@ export default function AnimalTable() {
                 fullWidth
                 variant="standard"
                 value={editingAnimal[field]}
-                onChange={(e) =>
+                onChange={(e) => {
                   setEditingAnimal({
                     ...editingAnimal,
                     [field]: e.target.value,
-                  })
-                }
+                  });
+                }}
               />
             ))}
         </DialogContent>
+
         <DialogActions>
           <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
           <Button onClick={handleSaveEdit}>Guardar Cambios</Button>

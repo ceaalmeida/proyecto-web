@@ -124,3 +124,15 @@
     margin-top: 2rem; /* mt-8 */
   }
   
+  .submenu-button {
+    padding-left: 2rem; /* Añade un margen para diferenciar */
+    font-size: 0.9rem;
+  }
+
+  .submenu-active-icon{
+    color: #3182ce; /* bg-primary */
+    /* margin-left: 0.5rem; mr-2 */
+    transition: color 0.3s ease;
+    justify-self: right;
+  }
+  

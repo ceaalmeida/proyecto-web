@@ -274,16 +274,15 @@ export default function AnimalTable() {
             <DialogContentText>
               Por favor, ingrese los detalles del nuevo animal.
             </DialogContentText>
-            {[
-              "ID_Animal",
+            {[              
               "Nombre",
               "Especie",
               "Raza",
               "Edad",
               "Peso",
-              "Dias_Refugio",
-              "Precio_Mantenimiento",
-              "Precio_Adopción",
+              "Dias Refugio",
+              "Precio Mantenimiento",
+              "Precio Adopción",
             ].map((field) => (
                 <TextField
                     key={field}
@@ -314,7 +313,7 @@ export default function AnimalTable() {
             {editingAnimal && (
                 <>
                   {[
-                    "ID_Animal",
+                    
                     "Nombre",
                     "Especie",
                     "Raza",

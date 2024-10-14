@@ -1,3 +1,4 @@
+"use client"
 import React, { useState } from "react";
 import {
     Table,
@@ -14,8 +15,6 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
-    Checkbox,
-    FormControlLabel,
     IconButton,
     Menu,
     MenuItem,
@@ -28,32 +27,22 @@ import {
 } from "@mui/icons-material";
 
 const initialActivities = [
-    { id: 1, nombre: "Max", especie: "Perro", raza: "Labrador", edad: 3 },
-    { id: 2, nombre: "Luna", especie: "Gato", raza: "Siamés", edad: 2 },
-    { id: 3, nombre: "Rocky", especie: "Perro", raza: "Pastor Alemán", edad: 5 },
-    { id: 4, nombre: "Milo", especie: "Gato", raza: "Persa", edad: 4 },
+    { id: 1, descripcion: "Cuidado de perros", precio: 100, precioTransporte: 20 },
+    { id: 2, descripcion: "Adopción de gatos", precio: 150, precioTransporte: 25 },
 ];
 
-export default function ActivitiesTable() {
+export default function ActivityTable() {
     const [activities, setActivities] = useState(initialActivities);
     const [sortOrder, setSortOrder] = useState("asc");
-    const [visibleColumns, setVisibleColumns] = useState([
-        "nombre",
-        "especie",
-        "raza",
-        "edad",
-    ]);
     const [searchTerm, setSearchTerm] = useState("");
-    const [editing, setEditing] = useState(null);
-    const [newAnimal, setNewAnimal] = useState({
-        nombre: "",
-        especie: "",
-        raza: "",
-        edad: "",
+    const [editingActivity, setEditingActivity] = useState(null);
+    const [newActivity, setNewActivity] = useState({
+        descripcion: "",
+        precio: "",
+        precioTransporte: "",
     });
     const [openAddDialog, setOpenAddDialog] = useState(false);
     const [openEditDialog, setOpenEditDialog] = useState(false);
-    const [anchorEl, setAnchorEl] = useState(null);
 
     const handleSort = () => {
         setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -64,18 +53,18 @@ export default function ActivitiesTable() {
     };
 
     const handleDelete = (id) => {
-        setActivities(activities.filter((animal) => animal.id !== id));
+        setActivities(activities.filter((activity) => activity.id !== id));
     };
 
-    const handleEdit = (animal) => {
-        setEditing(animal);
+    const handleEdit = (activity) => {
+        setEditingActivity(activity);
         setOpenEditDialog(true);
     };
 
     const handleSaveEdit = () => {
         setActivities(
-            activities.map((animal) =>
-                animal.id === editing.id ? editing : animal
+            activities.map((activity) =>
+                activity.id === editingActivity.id ? editingActivity : activity
             )
         );
         setOpenEditDialog(false);
@@ -83,108 +72,67 @@ export default function ActivitiesTable() {
 
     const handleAdd = () => {
         const id = Math.max(...activities.map((a) => a.id)) + 1;
-        setActivities([...activities, { ...newAnimal, id }]);
-        setNewAnimal({ nombre: "", especie: "", raza: "", edad: "" });
+        setActivities([...activities, { ...newActivity, id }]);
+        setNewActivity({ descripcion: "", precio: "", precioTransporte: "" });
         setOpenAddDialog(false);
     };
 
-    const toggleColumn = (column) => {
-        setVisibleColumns((prev) =>
-            prev.includes(column)
-                ? prev.filter((col) => col !== column)
-                : [...prev, column]
-        );
-    };
-
-    const filteredAnimals = activities
-        .filter((animal) =>
-            Object.values(animal).some((value) =>
-                value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-            )
+    const filteredActivities = activities.filter((activity) =>
+        Object.values(activity).some((value) =>
+            value.toString().toLowerCase().includes(searchTerm.toLowerCase())
         )
-        .sort((a, b) => {
-            if (sortOrder === "asc") {
-                return a.nombre.localeCompare(b.nombre);
-            } else {
-                return b.nombre.localeCompare(a.nombre);
-            }
-        });
+    ).sort((a, b) => {
+        if (sortOrder === "asc") {
+            return a.descripcion.localeCompare(b.descripcion);
+        } else {
+            return b.descripcion.localeCompare(a.descripcion);
+        }
+    });
 
     return (
         <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
             <TextField
-                label="Buscar animales"
+                label="Buscar actividades"
                 variant="outlined"
                 value={searchTerm}
                 onChange={handleSearch}
                 sx={{ mb: 2 }}
             />
-            <IconButton
-                onClick={(event) => setAnchorEl(event.currentTarget)}
-                sx={{ mb: 2, ml: 2 }}
+            <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setOpenAddDialog(true)}
+                sx={{ mt: 2 }}
             >
-                <ViewColumnIcon />
-            </IconButton>
-            <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={() => setAnchorEl(null)}
-            >
-                {["nombre", "especie", "raza", "edad"].map((column) => (
-                    <MenuItem key={column}>
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={visibleColumns.includes(column)}
-                                    onChange={() => toggleColumn(column)}
-                                />
-                            }
-                            label={column.charAt(0).toUpperCase() + column.slice(1)}
-                        />
-                    </MenuItem>
-                ))}
-            </Menu>
+                Agregar Actividad
+            </Button>
             <TableContainer component={Paper}>
                 <Table sx={{ minWidth: 650 }} aria-label="simple table">
                     <TableHead>
                         <TableRow>
-                            {visibleColumns.includes("nombre") && (
-                                <TableCell onClick={handleSort} sx={{ cursor: "pointer" }}>
-                                    Nombre {sortOrder === "asc" ? "↑" : "↓"}
-                                </TableCell>
-                            )}
-                            {visibleColumns.includes("especie") && (
-                                <TableCell>Especie</TableCell>
-                            )}
-                            {visibleColumns.includes("raza") && <TableCell>Raza</TableCell>}
-                            {visibleColumns.includes("edad") && <TableCell>Edad</TableCell>}
+                            <TableCell onClick={handleSort} sx={{ cursor: "pointer" }}>
+                                Descripción {sortOrder === "asc" ? "↑" : "↓"}
+                            </TableCell>
+                            <TableCell>Precio</TableCell>
+                            <TableCell>Precio Transporte</TableCell>
                             <TableCell>Acciones</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {filteredAnimals.map((animal) => (
-                            <TableRow key={animal.id}>
-                                {visibleColumns.includes("nombre") && (
-                                    <TableCell>{animal.nombre}</TableCell>
-                                )}
-                                {visibleColumns.includes("especie") && (
-                                    <TableCell>{animal.especie}</TableCell>
-                                )}
-                                {visibleColumns.includes("raza") && (
-                                    <TableCell>{animal.raza}</TableCell>
-                                )}
-                                {visibleColumns.includes("edad") && (
-                                    <TableCell>{animal.edad}</TableCell>
-                                )}
+                        {filteredActivities.map((activity) => (
+                            <TableRow key={activity.id}>
+                                <TableCell>{activity.descripcion}</TableCell>
+                                <TableCell>{activity.precio}</TableCell>
+                                <TableCell>{activity.precioTransporte}</TableCell>
                                 <TableCell>
                                     <IconButton
-                                        onClick={() => handleEdit(animal)}
+                                        onClick={() => handleEdit(activity)}
                                         color="primary"
                                     >
                                         <EditIcon />
                                     </IconButton>
                                     <IconButton
-                                        onClick={() => handleDelete(animal.id)}
+                                        onClick={() => handleDelete(activity.id)}
                                         color="error"
                                     >
                                         <DeleteIcon />
@@ -195,23 +143,15 @@ export default function ActivitiesTable() {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => setOpenAddDialog(true)}
-                sx={{ mt: 2 }}
-            >
-                Agregar Animal
-            </Button>
 
-            {/* Diálogo para agregar animal */}
+            {/* Diálogo para agregar actividad */}
             <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
-                <DialogTitle>Agregar Nuevo Animal</DialogTitle>
+                <DialogTitle>Agregar Nueva Actividad</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Por favor, ingrese los detalles del nuevo animal.
+                        Por favor, ingrese los detalles de la nueva actividad.
                     </DialogContentText>
-                    {["nombre", "especie", "raza", "edad"].map((field) => (
+                    {["descripcion", "precio", "precioTransporte"].map((field) => (
                         <TextField
                             key={field}
                             margin="dense"
@@ -219,9 +159,9 @@ export default function ActivitiesTable() {
                             type="text"
                             fullWidth
                             variant="standard"
-                            value={newAnimal[field]}
+                            value={newActivity[field]}
                             onChange={(e) =>
-                                setNewAnimal({ ...newAnimal, [field]: e.target.value })
+                                setNewActivity({ ...newActivity, [field]: e.target.value })
                             }
                         />
                     ))}
@@ -232,15 +172,15 @@ export default function ActivitiesTable() {
                 </DialogActions>
             </Dialog>
 
-            {/* Diálogo para editar animal */}
+            {/* Diálogo para editar actividad */}
             <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
-                <DialogTitle>Editar Animal</DialogTitle>
+                <DialogTitle>Editar Actividad</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Por favor, modifique los detalles del animal.
+                        Por favor, modifique los detalles de la actividad.
                     </DialogContentText>
-                    {editing &&
-                        ["nombre", "especie", "raza", "edad"].map((field) => (
+                    {editingActivity &&
+                        ["descripcion", "precio", "precioTransporte"].map((field) => (
                             <TextField
                                 key={field}
                                 margin="dense"
@@ -248,10 +188,10 @@ export default function ActivitiesTable() {
                                 type="text"
                                 fullWidth
                                 variant="standard"
-                                value={editing[field]}
+                                value={editingActivity[field]}
                                 onChange={(e) =>
-                                    setEditing({
-                                        ...editing,
+                                    setEditingActivity({
+                                        ...editingActivity,
                                         [field]: e.target.value,
                                     })
                                 }

@@ -152,7 +152,7 @@ export default function Component() {
         {activeTab === "food-provider" && <ProveedorAlimentosTable />}
         {activeTab === "complementary-services" && <ProveedorServiciosTable />}
         {activeTab === "transport" && <TransporteTable />}
-        {activeTab === "logout" && router.push("/")}
+        {activeTab === "logout" && router.back("/")}
         {activeTab === "services" && <ServiceTypeTable />}
         {activeTab === "vets" && <VeterinarianTable />}
         {activeTab === "food" && <FoodTypeTable />}

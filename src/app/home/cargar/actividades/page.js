@@ -98,14 +98,7 @@ export default function ActivityTable() {
                 onChange={handleSearch}
                 sx={{ mb: 2 }}
             />
-            <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => setOpenAddDialog(true)}
-                sx={{ mt: 2 }}
-            >
-                Agregar Actividad
-            </Button>
+
             <TableContainer component={Paper}>
                 <Table sx={{ minWidth: 650 }} aria-label="simple table">
                     <TableHead>
@@ -143,6 +136,14 @@ export default function ActivityTable() {
                     </TableBody>
                 </Table>
             </TableContainer>
+            <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setOpenAddDialog(true)}
+                sx={{ mt: 2 }}
+            >
+                Agregar Actividad
+            </Button>
 
             {/* Diálogo para agregar actividad */}
             <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>

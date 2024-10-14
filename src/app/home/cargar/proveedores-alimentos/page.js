@@ -32,14 +32,16 @@ const initialProveedoresAlimentos = [
     {
         id: 1,
         nombre: "Alimentos Gourmet",
-        tipoAlimento: "Seco",
         direccion: "Calle 123, Ciudad",
+        email: "contacto@alimentosgourmet.com",
+        idAlimento: "1",
     },
     {
         id: 2,
         nombre: "NutriPet",
-        tipoAlimento: "Húmedo",
         direccion: "Avenida 456, Ciudad",
+        email: "info@nutripet.com",
+        idAlimento: "2",
     },
 ];
 
@@ -48,15 +50,16 @@ export default function ProveedorAlimentosTable() {
     const [sortOrder, setSortOrder] = useState("asc");
     const [visibleColumns, setVisibleColumns] = useState([
         "nombre",
-        "tipoAlimento",
         "direccion",
+        "email",
     ]);
     const [searchTerm, setSearchTerm] = useState("");
     const [editingProveedor, setEditingProveedor] = useState(null);
     const [newProveedor, setNewProveedor] = useState({
         nombre: "",
-        tipoAlimento: "",
         direccion: "",
+        email: "",
+        idAlimento: "",
     });
     const [openAddDialog, setOpenAddDialog] = useState(false);
     const [openEditDialog, setOpenEditDialog] = useState(false);
@@ -91,7 +94,7 @@ export default function ProveedorAlimentosTable() {
     const handleAdd = () => {
         const id = Math.max(...proveedores.map((p) => p.id)) + 1;
         setProveedores([...proveedores, { ...newProveedor, id }]);
-        setNewProveedor({ nombre: "", tipoAlimento: "", direccion: "" });
+        setNewProveedor({ nombre: "", direccion: "", email: "", idAlimento: "" });
         setOpenAddDialog(false);
     };
 
@@ -137,7 +140,7 @@ export default function ProveedorAlimentosTable() {
                 open={Boolean(anchorEl)}
                 onClose={() => setAnchorEl(null)}
             >
-                {["nombre", "tipoAlimento", "direccion"].map((column) => (
+                {["nombre", "direccion", "email"].map((column) => (
                     <MenuItem key={column}>
                         <FormControlLabel
                             control={
@@ -160,11 +163,11 @@ export default function ProveedorAlimentosTable() {
                                     Nombre {sortOrder === "asc" ? "↑" : "↓"}
                                 </TableCell>
                             )}
-                            {visibleColumns.includes("tipoAlimento") && (
-                                <TableCell>Tipo de Alimento</TableCell>
-                            )}
                             {visibleColumns.includes("direccion") && (
                                 <TableCell>Dirección</TableCell>
+                            )}
+                            {visibleColumns.includes("email") && (
+                                <TableCell>Email</TableCell>
                             )}
                             <TableCell>Acciones</TableCell>
                         </TableRow>
@@ -175,11 +178,11 @@ export default function ProveedorAlimentosTable() {
                                 {visibleColumns.includes("nombre") && (
                                     <TableCell>{proveedor.nombre}</TableCell>
                                 )}
-                                {visibleColumns.includes("tipoAlimento") && (
-                                    <TableCell>{proveedor.tipoAlimento}</TableCell>
-                                )}
                                 {visibleColumns.includes("direccion") && (
                                     <TableCell>{proveedor.direccion}</TableCell>
+                                )}
+                                {visibleColumns.includes("email") && (
+                                    <TableCell>{proveedor.email}</TableCell>
                                 )}
                                 <TableCell>
                                     <IconButton
@@ -216,7 +219,7 @@ export default function ProveedorAlimentosTable() {
                     <DialogContentText>
                         Por favor, ingrese los detalles del nuevo proveedor.
                     </DialogContentText>
-                    {["nombre", "tipoAlimento", "direccion"].map((field) => (
+                    {["nombre", "direccion", "email", "idAlimento"].map((field) => (
                         <TextField
                             key={field}
                             margin="dense"
@@ -245,7 +248,7 @@ export default function ProveedorAlimentosTable() {
                         Por favor, modifique los detalles del proveedor.
                     </DialogContentText>
                     {editingProveedor &&
-                        ["nombre", "tipoAlimento", "direccion"].map((field) => (
+                        ["nombre", "direccion", "email", "idAlimento"].map((field) => (
                             <TextField
                                 key={field}
                                 margin="dense"

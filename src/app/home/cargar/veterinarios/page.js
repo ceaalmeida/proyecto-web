@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import {
     Table,
@@ -44,6 +44,7 @@ export default function VeterinarianTable() {
     });
     const [openAddDialog, setOpenAddDialog] = useState(false);
     const [openEditDialog, setOpenEditDialog] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
 
     const handleDelete = (id) => {
         setVeterinarians(veterinarians.filter((veterinarian) => veterinarian.id !== id));
@@ -80,8 +81,22 @@ export default function VeterinarianTable() {
         setOpenAddDialog(false);
     };
 
+    // Filtrado por términos de búsqueda
+    const filteredVeterinarians = veterinarians.filter((veterinarian) =>
+        Object.values(veterinarian).some((value) =>
+            value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+        )
+    );
+
     return (
         <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
+            <TextField
+                variant="outlined"
+                label="Buscar Veterinario"
+                fullWidth
+                margin="normal"
+                onChange={(e) => setSearchTerm(e.target.value)}
+            />
 
             <TableContainer component={Paper}>
                 <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -100,7 +115,7 @@ export default function VeterinarianTable() {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {veterinarians.map((veterinarian) => (
+                        {filteredVeterinarians.map((veterinarian) => (
                             <TableRow key={veterinarian.id}>
                                 <TableCell>{veterinarian.nombre}</TableCell>
                                 <TableCell>{veterinarian.clinica}</TableCell>
@@ -134,7 +149,7 @@ export default function VeterinarianTable() {
                 variant="contained"
                 startIcon={<AddIcon />}
                 onClick={() => setOpenAddDialog(true)}
-                sx={{  mt: 2}}
+                sx={{ mt: 2 }}
             >
                 Agregar Veterinario
             </Button>

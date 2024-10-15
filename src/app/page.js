@@ -1,108 +1,78 @@
 "use client";
-import React, { useState } from "react";
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Container,
-  Paper,
-  Avatar,
-  CssBaseline,
-} from "@mui/material";
+import {useRouter} from "next/navigation";
+import {Box, Button, Container, CssBaseline, Paper, TextField, Typography} from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { Link } from "lucide-react";
-import {Component} from "./home/page"
-import { useRouter } from "next/navigation";
+import {PawPrint} from "lucide-react";
+import {useState} from "react";
 
-export default function Login({ onLogin }) {
-  const [user, setUser] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const router=useRouter();
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    // Aquí normalmente se haría una llamada a una API para autenticar
-    // Por ahora, simularemos una autenticación básica
-    if (user === "qwe" && password === "qwe") {
-      setError("");
-      
-      router.push('/home.user')
-      setUser("");
-      setPassword("")
-      
-      // onLogin(user);
-    } else if(user === "asd" && password === "asd"){
-      router.push('/home')
-      setUser("");
-      setPassword("")
+export default function App({onLogin}) {
+    const router = useRouter()
+    const [login, setLogin] = useState(true)
+    const [signin, setSignin] = useState(false)
 
-    }else{
-      setError("Usuario o contraseña incorrectos");
+    const handleEventLogIn = (event)=>{
+        event.preventDefault()
+        setLogin(true)
+        if(!signin){
+            router.push('/login')
+        }
+    };
+
+    const handleEventSignIn = (event)=>{
+        event.preventDefault()
+        setSignin(true)
+        if(!login){
+            router.push('/login/create-account')
+        }
     }
-  };
+    return (
+        <Container component={"main"} maxWidth={'sx'}>
+            <CssBaseline/>
+            <Paper
+                elevation={3}
+                sx={{
+                    mt: 8,
+                    p: 4,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center'
+                }}
+            >
+                <div>
+                    <Typography component="h1" variant="h3">
+                        Amigos de Patas
+                        {<PawPrint>
 
-  return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <Paper
-        elevation={3}
-        sx={{
-          mt: 8,
-          p: 4,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Iniciar Sesión
-        </Typography>
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="user"
-            label="Usuario"
-            name="user"
-            autoComplete="user"
-            autoFocus
-            value={user}
-            onChange={(e) => setUser(e.target.value)}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Contraseña"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          {error && (
-            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-              {error}
-            </Typography>
-          )}
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}            
-          >
-            Iniciar Sesión
-          </Button>
-          <h1>Crear cuenta</h1>
-        </Box>
-      </Paper>
-    </Container>
-  );
+                        </PawPrint>}
+                    </Typography>
+
+                </div>
+                <div>
+                    <Button
+                        type="button"
+                        fullWidth
+                        variant="contained"
+                        sx={{ mt: 3, mb: 2 }}
+                        onClick={handleEventLogIn}
+                    >
+                        Iniciar Sesión
+                    </Button>
+
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        sx={{ mt: 3, mb: 2 }}
+                        onClick={handleEventSignIn}
+                    >
+                        Registrarse
+                    </Button>
+                </div>
+
+            </Paper>
+
+        </Container>
+    )
+
 }

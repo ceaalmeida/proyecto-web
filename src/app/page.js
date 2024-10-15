@@ -24,13 +24,12 @@ export default function App({onLogin}) {
                 <div>
                     <Typography component="h1" variant="h5">
                         Amigos de Patas
+                        {<PawPrint>
+
+                        </PawPrint>}
                     </Typography>
-                    <PawPrint>
-                        
-                    </PawPrint>
 
-
-                </div>
+                 </div>
                 <Box component={'form'} noValidate sx={{mt: 1}}>
                     <TextField>
                         Candela

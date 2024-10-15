@@ -1,0 +1,8 @@
+.section {
+    display: flex;
+    flex-direction: row; 
+    /*background-color: #070404;*/
+}
+.card {
+    margin: 15px
+}

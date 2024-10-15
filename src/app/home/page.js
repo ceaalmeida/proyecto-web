@@ -2,12 +2,14 @@
 
 import React, { useState } from "react";
 
+
 import {
   Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  Collapse,
   Collapse,
 } from "@mui/material";
 import {
@@ -90,81 +92,83 @@ export default function Component() {
         <ResponsiveAppBar onButtonClick={manejadorOpciones}></ResponsiveAppBar>
       </div>
       {/* Sidebar */}
-      <div className="container">
-        <aside className="sidebar">
-          <nav className="sidebar-nav">
-            {sidebarItems.map((item) =>
-              item.key !== "contracts" ? (
+      <aside className="sidebar">
+        <div className="sidebar-header">
+          <h1 className="text-2xl font-bold text-primary">Amigos de Patas</h1>
+        </div>
+        <nav className="sidebar-nav">
+          {sidebarItems.map((item) =>
+            item.key !== "contracts" ? (
+              <Button
+                key={item.key}
+                className={`sidebar-button ${
+                  activeTab === item.key ? "active" : ""
+                }`}
+                onClick={() => setActiveTab(item.key)}
+                startIcon={<item.icon className="mr-2 h-5 w-5" />}
+              >
+                {item.label}
+              </Button>
+            ) : (
+              <div key={item.key}>
                 <Button
-                  key={item.key}
-                  className={`sidebar-button ${activeTab === item.key ? "active" : ""
-                    }`}
-                  onClick={() => setActiveTab(item.key)}
+                  className={`sidebar-button ${
+                    isContractMenuOpen ? "active" : ""
+                  }`}
+                  onClick={() => setIsContractMenuOpen(!isContractMenuOpen)}
                   startIcon={<item.icon className="mr-2 h-5 w-5" />}
                 >
                   {item.label}
+                  {!isContractMenuOpen ? (
+                    <ChevronRight
+                      className=".submenu-active-icon" 
+                    ></ChevronRight>
+                  ):(
+                    <ChevronDown className=".submenu-active-icon">
+                      
+                    </ChevronDown>
+                  )}
                 </Button>
-              ) : (
-                <div key={item.key}>
-                  <Button
-                    className={`sidebar-button ${isContractMenuOpen ? "active" : ""
-                      }`}
-                    onClick={() => setIsContractMenuOpen(!isContractMenuOpen)}
-                    startIcon={<item.icon className="mr-2 h-5 w-5" />}
-                  >
-                    {item.label}
-                    {!isContractMenuOpen ? (
-                      <ChevronRight
-                        className=".submenu-active-icon"
-                      ></ChevronRight>
-                    ) : (
-                      <ChevronDown className=".submenu-active-icon">
+                <Collapse in={isContractMenuOpen} timeout="auto" unmountOnExit>
+                  <div className="submenu">
+                    {contractOptions.map((option) => (
+                      <Button
+                        key={option.key}
+                        startIcon={<option.icon className="mr-2 h-5 w-5" />}
+                        className={`sidebar-button submenu-button ${
+                          activeTab === option.key ? "active" : ""
+                        }`}
+                        onClick={() => {
+                          setActiveTab(option.key);
+                          setIsContractMenuOpen(false);
+                        }}
+                      >
+                        {option.label}
+                      </Button>
+                    ))}
+                  </div>
+                </Collapse>
+              </div>
+            )
+          )}
+        </nav>
+      </aside>
 
-                      </ChevronDown>
-                    )}
-                  </Button>
-                  <Collapse in={isContractMenuOpen} timeout="auto" unmountOnExit>
-                    <div className="submenu">
-                      {contractOptions.map((option) => (
-                        <Button
-                          key={option.key}
-                          startIcon={<option.icon className="mr-2 h-5 w-5" />}
-                          className={`sidebar-button submenu-button ${activeTab === option.key ? "active" : ""
-                            }`}
-                          onClick={() => {
-                            setActiveTab(option.key);
-                            setIsContractMenuOpen(false);
-                          }}
-                        >
-                          {option.label}
-                        </Button>
-                      ))}
-                    </div>
-                  </Collapse>
-                </div>
-              )
-            )}
-          </nav>
-        </aside>
-
-        {/* Main content */}
-        <main className="main-content">
-
-          {activeTab === "animals" && <AnimalTable />}
-          {activeTab === "activities" && <ActivitiesTable />}
-          {activeTab === "adoption" && <AdopcionesTable />}
-          {activeTab === "donations" && <DonacionesTable />}
-          {activeTab === "contracts" && <ContractTable />}
-
-          {activeTab === "food-provider" && <ProveedorAlimentosTable />}
-          {activeTab === "complementary-services" && <ProveedorServiciosTable />}
-          {activeTab === "transport" && <TransporteTable />}
-          {activeTab === "logout" && router.back("/")}
-          {activeTab === "services" && <ServiceTypeTable />}
-          {activeTab === "vets" && <VeterinarianTable />}
-          {activeTab === "food" && <FoodTypeTable />}
-        </main>
-      </div>
+      {/* Main content */}
+      <main className="main-content">
+        {activeTab === "animals" && <AnimalTable />}
+        {activeTab === "activities" && <ActivitiesTable />}
+        {activeTab === "adoption" && <AdopcionesTable />}
+        {activeTab === "donations" && <DonacionesTable />}
+        {activeTab === "contracts" && <ContractTable />}
+        {activeTab === "food-provider" && <ProveedorAlimentosTable />}
+        {activeTab === "complementary-services" && <ProveedorServiciosTable />}
+        {activeTab === "transport" && <TransporteTable />}
+        {activeTab === "logout" && router.back("/")}
+        {activeTab === "services" && <ServiceTypeTable />}
+        {activeTab === "vets" && <VeterinarianTable />}
+        {activeTab === "food" && <FoodTypeTable />}
+      </main>
     </div>
   );
 }

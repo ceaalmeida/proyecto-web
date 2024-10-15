@@ -27,7 +27,7 @@ export default function App({onLogin}) {
         }
     }
     return (
-        <Container component={"main"} maxWidth={'sx'} styles={{ justify}}>
+        <Container component={"main"} maxWidth={'sx'} styles={{ }}>
             <CssBaseline/>
             <Paper
                 elevation={3}

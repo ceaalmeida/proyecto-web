@@ -227,7 +227,7 @@ export default function DonacionesTable() {
                     <DialogContentText>
                         Por favor, ingrese los detalles de la nueva donación.
                     </DialogContentText>
-                    {["nombreDonante", "monto", "fecha", "tipoDonacion"].map((field) => (
+                    {["nombreDonante", "monto", "tipoDonacion"].map((field) => (
                         <TextField
                             key={field}
                             margin="dense"
@@ -241,6 +241,21 @@ export default function DonacionesTable() {
                             }
                         />
                     ))}
+                    <TextField
+                            key="fecha"
+                            margin="dense"
+                            label="Fecha"
+                            type="date"
+                            fullWidth
+                            variant="outlined"
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            value={newDonacion.fecha}
+                            onChange={(e) =>
+                                setNewDonacion({ ...newDonacion, fecha: e.target.value })
+                            }
+                        />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenAddDialog(false)}>Cancelar</Button>

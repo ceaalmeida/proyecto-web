@@ -1,0 +1,9 @@
+.section {
+    display: flex;    
+    flex-wrap: wrap; /*  pa que se agrupen pa la siguiente fila    */
+    gap: 16px; /* Añade espacio entre los elementos */
+    
+}
+.card {
+    margin: 15px
+}

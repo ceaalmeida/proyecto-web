@@ -2,12 +2,14 @@
 
 import React, { useState } from "react";
 
+
 import {
   Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  Collapse,
   Collapse,
 } from "@mui/material";
 import {
@@ -42,6 +44,7 @@ import ContractTable from "./cargar/contratos/page";
 import ServiceTypeTable from "./cargar/tipo-servicios/page";
 import VeterinarianTable from "./cargar/veterinarios/page";
 import FoodTypeTable from "./cargar/tipos-alimentos/page";
+import { ResponsiveAppBar } from "./menuBar";
 
 export default function Component() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -76,9 +79,18 @@ export default function Component() {
       key: "complementary-services",
     },
   ];
+  const [opcion, setOpciones] = useState("");
+  const [element, setElements] = useState("");
+  const manejadorOpciones = (pages,element) => {
+    setOpciones(pages);
+    setElements(element);
+  };
 
   return (
-    <div className="container">
+    <div >
+      <div>
+        <ResponsiveAppBar onButtonClick={manejadorOpciones}></ResponsiveAppBar>
+      </div>
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-header">

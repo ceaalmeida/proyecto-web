@@ -19,7 +19,7 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import "./style.css";
 
-const pages = ["Animales", "Contratos", "Adopciones"];
+const pages = ["Animales","Adopciones","Donaciones"];
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
 export const ResponsiveAppBar = ({ onButtonClick }) => {

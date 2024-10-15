@@ -76,7 +76,7 @@ export default function homeUser() {
               <AnimalCard elements={initialAnimals} onButtonClick={manejadorOpciones} className="card"/>
             </section>
           )}
-          {opcion === "Adoptar" &&  <Adoptar element={element}></Adoptar> }
+          {opcion === "Adoptar" &&  <Adoptar element={element} onButtonClick={manejadorOpciones}></Adoptar> }
           {opcion === "MAS" &&  <h1>Perfil</h1>}
         </main>
       }

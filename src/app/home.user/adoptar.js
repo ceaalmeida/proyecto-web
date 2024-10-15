@@ -20,8 +20,10 @@ import {
   Menu,
   MenuItem,
 } from "@mui/material";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-export default function Adoptar({ element }) {
+export default function Adoptar({ element,onButtonClick}) {
+  const router = useRouter();
   const [adopcion, setAdopcion] = useState();
   //window.alert(element.Precio_Adopción);
   return (
@@ -29,8 +31,7 @@ export default function Adoptar({ element }) {
       <div>
         <h1>
           {element.Nombre}
-          <br />$
-          {element.Precio_Adopción}
+          <br />${element.Precio_Adopción}
         </h1>
       </div>
       <TextField
@@ -89,8 +90,8 @@ export default function Adoptar({ element }) {
           })
         }
       />
-      <Button>Aceptar</Button>
-      <Button>Salir</Button>
+      <Button onClick={()=>onButtonClick("Animales")}>Aceptar</Button>
+      <Button onClick={()=>onButtonClick("Animales")}>Salir</Button>
     </div>
   );
 }

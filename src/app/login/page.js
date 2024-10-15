@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { Link } from "lucide-react";
-import {Component} from "./home/page"
+
 import { useRouter } from "next/navigation";
 
 export default function Login({ onLogin }) {

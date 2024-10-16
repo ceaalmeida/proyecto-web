@@ -8,139 +8,61 @@ import {
   OutlinedInput,
   TextField,
   InputAdornment,
-  Link,
   IconButton,
+  Typography,
 } from "@mui/material";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { AppProvider, SignInPage } from "@toolpad/core";
 import { useTheme } from "@mui/material/styles";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+// Define the providers for authentication
 const providers = [{ id: "credentials", name: "Email and Password" }];
 
-function CustomEmailField() {
-  const [email, setEmail] = useState("");
-  const [emailError, setEmailError] = useState(null);
+// Sign in function to handle authentication
+const signIn = async (provider, formData) => {
+  const email = formData.get('email');
+  const password = formData.get('password');
 
-  const handleEmailChange = (event) => {
-    setEmail(event.target.value);
-    setEmailError(null);
-  };
+  // Simulate an API call for sign-in
+  if (email.trim() === "asd@gmail.com" && password.trim() === "asd") {
+    //alert(`Signed in successfully with ${provider.name}`);
+    return true; // Indicate success
+  } else if (email.trim() === "qwe@gmail.com" && password.trim() === "qwe") {
+    //alert(`Signed in successfully with ${provider.name}`);
+    return true; // Indicate success
+  } else {
+    alert("Invalid email or password");
+    return false; // Indicate failure
+  }
+};
 
-  return (
-    <TextField
-      id="input-with-icon-textfield"
-      label="Username"
-      name="email"
-      type="email"
-      size="small"
-      required
-      fullWidth
-      slotProps={{
-        input: {
-          startAdornment: (
-            <InputAdornment position="start">
-              <AccountCircle fontSize="inherit" />
-            </InputAdornment>
-          ),
-        },
-      }}
-      variant="outlined"
-      value={email}
-      onChange={handleEmailChange}
-      error={emailError !== null}
-      helperText={emailError}
-    />
-  );
-}
-
-function CustomPasswordField() {
-  const [password, setPassword] = useState("");
-  const [passwordError, setPasswordError] = useState(null);
-
-  const handlePasswordChange = (event) => {
-    setPassword(event.target.value);
-    setPasswordError(null);
-  };
-
-  return (
-    <FormControl sx={{ my: 2 }} fullWidth variant="outlined">
-      <InputLabel size="small" htmlFor="outlined-adornment-password">
-        Password
-      </InputLabel>
-      <OutlinedInput
-        id="outlined-adornment-password"
-        type="password"
-        name="password"
-        size="small"
-        endAdornment={
-          <InputAdornment position="end">
-            <IconButton
-              aria-label="toggle password visibility"
-              onClick={() => setPasswordError(null)}
-              onMouseDown={(event) => event.preventDefault()}
-              edge="end"
-              size="small"
-            >
-              {passwordError ? <VisibilityOff /> : <Visibility />}
-            </IconButton>
-          </InputAdornment>
-        }
-        value={password}
-        onChange={handlePasswordChange}
-        error={passwordError !== null}
-        helperText={passwordError}
-      />
-    </FormControl>
-  );
-}
-
-function SlotsSignIn() {
+export default function SlotsSignIn() {
   const theme = useTheme();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
   const router = useRouter();
-
-  useEffect(() => {
-    // Aquí puedes agregar la lógica para enviar los datos al servidor
-  }, [email, password]);
-
-  const handleSignIn = async (event) => {
-    event.preventDefault();
-    try {
-      // Aquí puedes agregar la lógica para enviar los datos al servidor
-      if (email.trim() === "asd@gmail.com" && password.trim() === "asd") {
-        setError(null);
-        router.replace("/home");
-      } else if (email.trim() === "qwe@gmail.com" && password.trim() === "qwe") {
-        setError(null);
-        router.replace("/home.user");
-      } else {
-        setError("Correo electrónico o contraseña incorrectos");
-      }
-    } catch (error) {
-      setError(error.message);
-    }
-  };
+  const [error, setError] = useState(null);
 
   return (
-    <AppProvider>
-      <SignInPage providers={providers}>
-        <CustomEmailField />
-        <CustomPasswordField />
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          fullWidth
-          onClick={handleSignIn}
-        >
-          Sign In
-        </Button>
+    <AppProvider theme={theme}>
+      <SignInPage
+        providers={providers}
+        signIn={async (provider, formData) => {
+          const success = await signIn(provider, formData);
+          if (success) {
+            // Redirect based on user
+            if (formData.get('email') === "asd@gmail.com") {
+              router.replace("/home");
+            } else if (formData.get('email') === "qwe@gmail.com") {
+              router.replace("/home.user");
+            }
+          } else {
+            setError("Invalid email or password");
+          }
+        }}
+      >
         {error && (
           <Typography variant="body2" color="error">
             {error}
@@ -150,5 +72,3 @@ function SlotsSignIn() {
     </AppProvider>
   );
 }
-
-export default SlotsSignIn;

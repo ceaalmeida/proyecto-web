@@ -3,25 +3,22 @@
 import * as React from "react";
 import { extendTheme } from "@mui/material/styles";
 import { styled } from "@mui/system";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import BarChartIcon from "@mui/icons-material/BarChart";
-import DescriptionIcon from "@mui/icons-material/Description";
-import LayersIcon from "@mui/icons-material/Layers";
 import { AppProvider } from "@toolpad/core/AppProvider";
 import { DashboardLayout } from "@toolpad/core/DashboardLayout";
 import { PageContainer } from "@toolpad/core/PageContainer";
-import Grid from "@mui/material/Grid2";
-import { ActivityTable } from "./cargar/actividades/page";
-import { AdopcionesTable } from "./cargar/adopciones/page";
-import { AnimalTable } from "./cargar/animales/page";
-import { DonacionesTable } from "./cargar/donaciones/page";
-import { ProveedoresServiciosTable } from "./cargar/proveedor-servicios-complementarios/page";
-import { ProveedorAlimentosTable } from "./cargar/proveedores-alimentos/page";
-import { ServiceTypeTable } from "./cargar/tipo-servicios/page";
-import { FoodTypeTable } from "./cargar/tipos-alimentos/page";
-import { TransporteTable } from "./cargar/transportes/page";
-import { VeterinarianTable } from "./cargar/veterinarios/page";
+
+import ActivityTable from "./cargar/actividades/page";
+import AdopcionesTable from "./cargar/adopciones/page";
+import AnimalTable from "./cargar/animales/page";
+import DonacionesTable from "./cargar/donaciones/page";
+import ContractTable from "./cargar/contratos/page";
+import ProveedoresServiciosTable from "./cargar/proveedor-servicios-complementarios/page";
+import ProveedorAlimentosTable from "./cargar/proveedores-alimentos/page";
+import ServiceTypeTable from "./cargar/tipo-servicios/page";
+import FoodTypeTable from "./cargar/tipos-alimentos/page";
+import TransporteTable from "./cargar/transportes/page";
+import VeterinarianTable from "./cargar/veterinarios/page";
+import SwipeableTemporaryDrawer from "./usuario-barra-lateral";
 
 import {
   PawPrint,
@@ -32,6 +29,7 @@ import {
   Stethoscope,
   ShoppingBag,
   Briefcase,
+  Store,
   Truck,
   List,
   BarChart2,
@@ -41,8 +39,9 @@ import {
   ChevronRight,
   ChevronLeft,
   ChevronDown,
-  ChefHat
+  ChefHat,
 } from "lucide-react";
+import { iconButtonClasses, SwipeableDrawer } from "@mui/material";
 
 const NAVIGATION = [
   {
@@ -107,10 +106,77 @@ const NAVIGATION = [
   },
   {
     segment: "foods",
-    title: "Aliemntos",
+    title: "Alimentos",
     icon: <ChefHat />,
   },
-  
+  {
+    segment: "services",
+    title: "Servicios",
+    icon: <Store />,
+  },
+  {
+    segment: "transport",
+    title: "Transporte",
+    icon: <Truck />,
+  },
+  {
+    kind: "divider",
+  },
+  {
+    kind: "header",
+    title: "Reportes",
+  },
+  {
+    segment: "lists",
+    title: "Listados",
+    icon: <List />,
+    children: [
+      {
+        segment: "list1",
+        title: "Listado 1",
+        icon: <ChevronRight />,
+      },
+      {
+        segment: "list2",
+        title: "Listado 2",
+        icon: <ChevronRight />,
+      },
+      {
+        segment: "list3",
+        title: "Listado 3",
+        icon: <ChevronRight />,
+      },
+      {
+        segment: "list4",
+        title: "Listado 4",
+        icon: <ChevronRight />,
+      },
+    ],
+  },
+  {
+    segment: "Programas",
+    title: "Servicios",
+    icon: <BarChart2 />,
+    children: [
+      {
+        segment: "animal-activity-program",
+        title: "Programa de Actividades del Animal",
+        icon: <ChevronRight />,
+      },
+    ],
+  },
+  {
+    segment: "revenues",
+    title: "Ingresos",
+    icon: <TrendingUp />,
+    children: [
+      {
+        segment: "adpotions/donations-revenues",
+        title: "Ingresos por Donaciones y Adopciones",
+        icon: <ChevronRight />,
+      },
+    ],
+  },
 ];
 
 const components = {
@@ -118,6 +184,7 @@ const components = {
   adoptions: <AdopcionesTable />,
   animals: <AnimalTable />,
   donaciones: <DonacionesTable />,
+  contracts: <ContractTable />,
   proveedoresServicios: <ProveedoresServiciosTable />,
   proveedorAlimentos: <ProveedorAlimentosTable />,
   serviceType: <ServiceTypeTable />,
@@ -164,11 +231,42 @@ const Skeleton = styled("div")(({ theme, height }) => ({
 export default function DashboardLayoutBasic(props) {
   const { window } = props;
 
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
+
+  const handleAvatarClick = () => {
+    setDrawerOpen(!drawerOpen);
+  };
+
+  const handleDrawerClose = () => {
+    setDrawerOpen(false);
+  };
+
   const router = useDemoRouter("/dashboard");
+
+  console.log("Router pathname:", router.pathname);
 
   const renderComponent = () => {
     switch (router.pathname) {
+      case "/animals":
+        return components.animals;
       case "/activities":
+        return components.activities;
+      case "/adoptions":
+        return components.adoptions;
+      case "/donations":
+        return components.donaciones;
+      case "/contracts/veterinarian":
+        return components.veterinarian;
+      case "/contracts/complementaryServicesProvider":
+        return components.proveedoresServicios;
+      case "/contracts/foodProvider":
+        return components.proveedorAlimentos;
+      case "/foods":
+        return components.foodType;
+      case "/services":
+        return components.serviceType;
+      case "/transport":
+        return components.transporte;
     }
   };
 
@@ -182,8 +280,22 @@ export default function DashboardLayoutBasic(props) {
       theme={demoTheme}
       window={demoWindow}
     >
+      <SwipeableTemporaryDrawer
+            anchor="right"
+            open={drawerOpen}
+            onClose={handleDrawerClose}
+            onOpen={() => setDrawerOpen(true)}
+          ></SwipeableTemporaryDrawer>
       <DashboardLayout>
-        <PageContainer></PageContainer>
+        <PageContainer>
+          {renderComponent()}
+          <SwipeableTemporaryDrawer
+            anchor="right"
+            open={drawerOpen}
+            onClose={handleDrawerClose}
+            onOpen={() => setDrawerOpen(true)}
+          ></SwipeableTemporaryDrawer>
+        </PageContainer>
       </DashboardLayout>
     </AppProvider>
   );

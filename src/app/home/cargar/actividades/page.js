@@ -40,7 +40,7 @@ const initialActivities = [
   },
 ];
 
-export default function ActivityTable() {
+ function ActivityTable() {
   const [activities, setActivities] = useState(initialActivities);
   const [sortOrder, setSortOrder] = useState("asc");
   const [searchTerm, setSearchTerm] = useState("");
@@ -247,3 +247,6 @@ export default function ActivityTable() {
     </Paper>
   );
 }
+
+export default  ActivityTable;
+

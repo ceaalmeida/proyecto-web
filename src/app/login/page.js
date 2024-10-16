@@ -1,154 +1,68 @@
 "use client";
 
 import * as React from "react";
-import {
-  Button,
-  FormControl,
-  InputLabel,
-  OutlinedInput,
-  TextField,
-  InputAdornment,
-  Link,
-  IconButton,
-} from "@mui/material";
+import { Typography, Snackbar, Alert } from "@mui/material";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { AppProvider, SignInPage } from "@toolpad/core";
 import { useTheme } from "@mui/material/styles";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+// Define the providers for authentication
 const providers = [{ id: "credentials", name: "Email and Password" }];
 
-function CustomEmailField() {
-  const [email, setEmail] = useState("");
-  const [emailError, setEmailError] = useState(null);
+// Sign in function to handle authentication
 
-  const handleEmailChange = (event) => {
-    setEmail(event.target.value);
-    setEmailError(null);
-  };
-
-  return (
-    <TextField
-      id="input-with-icon-textfield"
-      label="Username"
-      name="email"
-      type="email"
-      size="small"
-      required
-      fullWidth
-      slotProps={{
-        input: {
-          startAdornment: (
-            <InputAdornment position="start">
-              <AccountCircle fontSize="inherit" />
-            </InputAdornment>
-          ),
-        },
-      }}
-      variant="outlined"
-      value={email}
-      onChange={handleEmailChange}
-      error={emailError !== null}
-      helperText={emailError}
-    />
-  );
-}
-
-function CustomPasswordField() {
-  const [password, setPassword] = useState("");
-  const [passwordError, setPasswordError] = useState(null);
-
-  const handlePasswordChange = (event) => {
-    setPassword(event.target.value);
-    setPasswordError(null);
-  };
-
-  return (
-    <FormControl sx={{ my: 2 }} fullWidth variant="outlined">
-      <InputLabel size="small" htmlFor="outlined-adornment-password">
-        Password
-      </InputLabel>
-      <OutlinedInput
-        id="outlined-adornment-password"
-        type="password"
-        name="password"
-        size="small"
-        endAdornment={
-          <InputAdornment position="end">
-            <IconButton
-              aria-label="toggle password visibility"
-              onClick={() => setPasswordError(null)}
-              onMouseDown={(event) => event.preventDefault()}
-              edge="end"
-              size="small"
-            >
-              {passwordError ? <VisibilityOff /> : <Visibility />}
-            </IconButton>
-          </InputAdornment>
-        }
-        value={password}
-        onChange={handlePasswordChange}
-        error={passwordError !== null}
-        helperText={passwordError}
-      />
-    </FormControl>
-  );
-}
-
-function SlotsSignIn() {
+export default function SlotsSignIn() {
   const theme = useTheme();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
   const router = useRouter();
+  const [error, setError] = useState(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
-  useEffect(() => {
-    // Aquí puedes agregar la lógica para enviar los datos al servidor
-  }, [email, password]);
+  const signIn = async (provider, formData) => {
+    const email = formData.get("email");
+    const password = formData.get("password");
 
-  const handleSignIn = async (event) => {
-    event.preventDefault();
-    try {
-      // Aquí puedes agregar la lógica para enviar los datos al servidor
-      if (email.trim() === "asd@gmail.com" && password.trim() === "asd") {
-        setError(null);
-        router.replace("/home");
-      } else if (email.trim() === "qwe@gmail.com" && password.trim() === "qwe") {
-        setError(null);
-        router.replace("/home.user");
-      } else {
-        setError("Correo electrónico o contraseña incorrectos");
-      }
-    } catch (error) {
-      setError(error.message);
+    if (email.trim() === "asd@gmail.com" && password.trim() === "asd") {
+      router.replace("/home");
+    } else if (email.trim() === "qwe@gmail.com" && password.trim() === "qwe") {
+      router.replace("/home.user");
+    } else {
+      setOpenSnackbar(true);
     }
   };
 
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
+
   return (
-    <AppProvider>
-      <SignInPage providers={providers}>
-        <CustomEmailField />
-        <CustomPasswordField />
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          fullWidth
-          onClick={handleSignIn}
-        >
-          Sign In
-        </Button>
+    <AppProvider theme={theme}>
+      <SignInPage providers={providers} signIn={signIn}>
         {error && (
           <Typography variant="body2" color="error">
             {error}
           </Typography>
         )}
       </SignInPage>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        //sx={{ textAlign: "right" }}
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          Contraseña o usuario<br/>incorrectos
+        </Alert>
+      </Snackbar>
     </AppProvider>
   );
 }
-
-export default SlotsSignIn;

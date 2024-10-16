@@ -9,10 +9,12 @@ import {
   Avatar,
   CssBaseline,
 } from "@mui/material";
+import { useRouter } from "next/router";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 
 export default function Login({ onLogin }) {
   const [email, setEmail] = useState("");
+  const router = useRouter();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
@@ -21,8 +23,9 @@ export default function Login({ onLogin }) {
     // Aquí normalmente se haría una llamada a una API para autenticar
     // Por ahora, simularemos una autenticación básica
     if (email === "admin@example.com" && password === "password") {
-      setError("");
-      onLogin(email);
+      // setError("");
+      // onLogin(email);
+      router.push("/home");
     } else {
       setError("Correo electrónico o contraseña incorrectos");
     }
@@ -82,6 +85,7 @@ export default function Login({ onLogin }) {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
+            onClick={handleSubmit}
           >
             Iniciar Sesión
           </Button>

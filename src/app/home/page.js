@@ -274,27 +274,30 @@ export default function DashboardLayoutBasic(props) {
   const demoWindow = window ? window() : undefined;
 
   return (
+    
     <AppProvider
       navigation={NAVIGATION}
       router={router}
       theme={demoTheme}
       window={demoWindow}
     >
-      {/* <SwipeableTemporaryDrawer
-        anchor="right"
-        open={drawerOpen}
-        onClose={handleDrawerClose}
-        onOpen={() => setDrawerOpen(true)}
-      ></SwipeableTemporaryDrawer> */}
-      <DashboardLayout>
-        <PageContainer>
-          {renderComponent()}
-          <SwipeableTemporaryDrawer
+    <SwipeableTemporaryDrawer
             anchor="right"
             open={drawerOpen}
             onClose={handleDrawerClose}
             onOpen={() => setDrawerOpen(true)}
           ></SwipeableTemporaryDrawer>
+      <SwipeableTemporaryDrawer
+            anchor="right"
+            open={drawerOpen}
+            onClose={handleDrawerClose}
+            onOpen={() => setDrawerOpen(true)}
+          ></SwipeableTemporaryDrawer>
+      <DashboardLayout>
+      
+        <PageContainer>
+          {renderComponent()}
+          
         </PageContainer>
       </DashboardLayout>
     </AppProvider>

@@ -1,16 +1,8 @@
 "use client";
 
 import * as React from "react";
-import {
-  Button,
-  FormControl,
-  InputLabel,
-  OutlinedInput,
-  TextField,
-  InputAdornment,
-  IconButton,
-  Typography,
-} from "@mui/material";
+import { Typography, Snackbar, Alert } from "@mui/material";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -23,52 +15,54 @@ import { useRouter } from "next/navigation";
 const providers = [{ id: "credentials", name: "Email and Password" }];
 
 // Sign in function to handle authentication
-const signIn = async (provider, formData) => {
-  const email = formData.get('email');
-  const password = formData.get('password');
-
-  // Simulate an API call for sign-in
-  if (email.trim() === "asd@gmail.com" && password.trim() === "asd") {
-    //alert(`Signed in successfully with ${provider.name}`);
-    return true; // Indicate success
-  } else if (email.trim() === "qwe@gmail.com" && password.trim() === "qwe") {
-    //alert(`Signed in successfully with ${provider.name}`);
-    return true; // Indicate success
-  } else {
-    alert("Invalid email or password");
-    return false; // Indicate failure
-  }
-};
 
 export default function SlotsSignIn() {
   const theme = useTheme();
   const router = useRouter();
   const [error, setError] = useState(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+
+  const signIn = async (provider, formData) => {
+    const email = formData.get("email");
+    const password = formData.get("password");
+
+    if (email.trim() === "asd@gmail.com" && password.trim() === "asd") {
+      router.replace("/home");
+    } else if (email.trim() === "qwe@gmail.com" && password.trim() === "qwe") {
+      router.replace("/home.user");
+    } else {
+      setOpenSnackbar(true);
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
 
   return (
     <AppProvider theme={theme}>
-      <SignInPage
-        providers={providers}
-        signIn={async (provider, formData) => {
-          const success = await signIn(provider, formData);
-          if (success) {
-            // Redirect based on user
-            if (formData.get('email') === "asd@gmail.com") {
-              router.replace("/home");
-            } else if (formData.get('email') === "qwe@gmail.com") {
-              router.replace("/home.user");
-            }
-          } else {
-            setError("Invalid email or password");
-          }
-        }}
-      >
+      <SignInPage providers={providers} signIn={signIn}>
         {error && (
           <Typography variant="body2" color="error">
             {error}
           </Typography>
         )}
       </SignInPage>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        //sx={{ textAlign: "right" }}
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          Contraseña o usuario<br/>incorrectos
+        </Alert>
+      </Snackbar>
     </AppProvider>
   );
 }

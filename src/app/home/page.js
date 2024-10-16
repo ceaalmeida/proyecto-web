@@ -280,12 +280,12 @@ export default function DashboardLayoutBasic(props) {
       theme={demoTheme}
       window={demoWindow}
     >
-      <SwipeableTemporaryDrawer
-            anchor="right"
-            open={drawerOpen}
-            onClose={handleDrawerClose}
-            onOpen={() => setDrawerOpen(true)}
-          ></SwipeableTemporaryDrawer>
+      {/* <SwipeableTemporaryDrawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={handleDrawerClose}
+        onOpen={() => setDrawerOpen(true)}
+      ></SwipeableTemporaryDrawer> */}
       <DashboardLayout>
         <PageContainer>
           {renderComponent()}

@@ -1,17 +1,28 @@
 "use client";
 
-import React, { useState } from "react";
+import * as React from "react";
+import { extendTheme } from "@mui/material/styles";
+import { styled } from "@mui/system";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import DescriptionIcon from "@mui/icons-material/Description";
+import LayersIcon from "@mui/icons-material/Layers";
+import { AppProvider } from "@toolpad/core/AppProvider";
+import { DashboardLayout } from "@toolpad/core/DashboardLayout";
+import { PageContainer } from "@toolpad/core/PageContainer";
+import Grid from "@mui/material/Grid2";
+import { ActivityTable } from "./cargar/actividades/page";
+import { AdopcionesTable } from "./cargar/adopciones/page";
+import { AnimalTable } from "./cargar/animales/page";
+import { DonacionesTable } from "./cargar/donaciones/page";
+import { ProveedoresServiciosTable } from "./cargar/proveedor-servicios-complementarios/page";
+import { ProveedorAlimentosTable } from "./cargar/proveedores-alimentos/page";
+import { ServiceTypeTable } from "./cargar/tipo-servicios/page";
+import { FoodTypeTable } from "./cargar/tipos-alimentos/page";
+import { TransporteTable } from "./cargar/transportes/page";
+import { VeterinarianTable } from "./cargar/veterinarios/page";
 
-
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Collapse,
-  Collapse,
-} from "@mui/material";
 import {
   PawPrint,
   Activity,
@@ -30,145 +41,150 @@ import {
   ChevronRight,
   ChevronLeft,
   ChevronDown,
+  ChefHat
 } from "lucide-react";
-import "./styles.css"; // Importa tu archivo CSS
-import AnimalTable from "./cargar/animales/page";
-import { useRouter } from "next/navigation";
-import ActivitiesTable from "./cargar/actividades/page";
-import AdopcionesTable from "./cargar/adopciones/page";
-import ProveedorAlimentosTable from "./cargar/proveedores-alimentos/page";
-import ProveedorServiciosTable from "./cargar/proveedor-servicios-complementarios/page";
-import TransporteTable from "./cargar/transportes/page";
-import DonacionesTable from "./cargar/donaciones/page";
-import ContractTable from "./cargar/contratos/page";
-import ServiceTypeTable from "./cargar/tipo-servicios/page";
-import VeterinarianTable from "./cargar/veterinarios/page";
-import FoodTypeTable from "./cargar/tipos-alimentos/page";
-import { ResponsiveAppBar } from "./menuBar";
 
-export default function Component() {
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const [isContractMenuOpen, setIsContractMenuOpen] = useState(false);
-  const router = useRouter();
+const NAVIGATION = [
+  {
+    kind: "header",
+    title: "Gestión de Animales",
+  },
+  {
+    segment: "animals",
+    title: "Animales",
+    icon: <PawPrint />,
+  },
+  {
+    segment: "activities",
+    title: "Actividades",
+    icon: <Activity />,
+  },
+  {
+    segment: "adoptions",
+    title: "Adopciones",
+    icon: <Heart />,
+  },
+  {
+    segment: "donations",
+    title: "Donaciones",
+    icon: <DollarSign />,
+  },
+  {
+    kind: "divider",
+  },
+  {
+    kind: "header",
+    title: "Gestión de Contratos",
+  },
+  {
+    segment: "contracts",
+    title: "Contratos",
+    icon: <FileText />,
+    children: [
+      {
+        segment: "veterinarian",
+        title: "Veterinarios",
+        icon: <Stethoscope />,
+      },
+      {
+        segment: "complementaryServicesProvider",
+        title: "Proveedor Servicios Complementarios",
+        icon: <Briefcase />,
+      },
+      {
+        segment: "foodProvider",
+        title: "Proveedor Alimentos",
+        icon: <ShoppingBag />,
+      },
+    ],
+  },
+  {
+    kind: "divider",
+  },
+  {
+    kind: "header",
+    title: "Otros",
+  },
+  {
+    segment: "foods",
+    title: "Aliemntos",
+    icon: <ChefHat />,
+  },
+  
+];
 
-  const sidebarItems = [
-    { icon: PawPrint, label: "Animales", key: "animals" },
-    { icon: Activity, label: "Actividades", key: "activities" },
-    { icon: Heart, label: "Adopción", key: "adoption" },
-    { icon: DollarSign, label: "Donaciones", key: "donations" },
-    { icon: FileText, label: "Contratos", key: "contracts" },
-    { icon: ShoppingBag, label: "Alimentos", key: "food" },
-    { icon: Briefcase, label: "Servicios", key: "services" },
-    { icon: Truck, label: "Transporte", key: "transport" },
-    { icon: List, label: "Listados", key: "lists" },
-    { icon: BarChart2, label: "Programas", key: "programs" },
-    { icon: TrendingUp, label: "Ingresos", key: "income" },
-    { icon: LogOut, label: "LogOut", key: "logout" },
-  ];
+const components = {
+  activities: <ActivityTable />,
+  adoptions: <AdopcionesTable />,
+  animals: <AnimalTable />,
+  donaciones: <DonacionesTable />,
+  proveedoresServicios: <ProveedoresServiciosTable />,
+  proveedorAlimentos: <ProveedorAlimentosTable />,
+  serviceType: <ServiceTypeTable />,
+  foodType: <FoodTypeTable />,
+  transporte: <TransporteTable />,
+  veterinarian: <VeterinarianTable />,
+};
 
-  const contractOptions = [
-    { icon: Stethoscope, label: "Veterinarios", key: "vets" },
-    {
-      icon: ShoppingBag,
-      label: "Proveedor de Alimentos",
-      key: "food-provider",
+const demoTheme = extendTheme({
+  colorSchemes: { light: true, dark: true },
+  colorSchemeSelector: "class",
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 600,
+      lg: 1200,
+      xl: 1536,
     },
-    {
-      icon: Briefcase,
-      label: "Servicios Complementarios",
-      key: "complementary-services",
-    },
-  ];
-  const [opcion, setOpciones] = useState("");
-  const [element, setElements] = useState("");
-  const manejadorOpciones = (pages,element) => {
-    setOpciones(pages);
-    setElements(element);
+  },
+});
+
+function useDemoRouter(initialPath) {
+  const [pathname, setPathname] = React.useState(initialPath);
+
+  const router = React.useMemo(() => {
+    return {
+      pathname,
+      searchParams: new URLSearchParams(),
+      navigate: (path) => setPathname(String(path)),
+    };
+  }, [pathname]);
+
+  return router;
+}
+
+const Skeleton = styled("div")(({ theme, height }) => ({
+  backgroundColor: theme.palette.action.hover,
+  borderRadius: theme.shape.borderRadius,
+  height,
+  content: '" "',
+}));
+
+export default function DashboardLayoutBasic(props) {
+  const { window } = props;
+
+  const router = useDemoRouter("/dashboard");
+
+  const renderComponent = () => {
+    switch (router.pathname) {
+      case "/activities":
+    }
   };
 
-  return (
-    <div >
-      <div>
-        <ResponsiveAppBar onButtonClick={manejadorOpciones}></ResponsiveAppBar>
-      </div>
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <h1 className="text-2xl font-bold text-primary">Amigos de Patas</h1>
-        </div>
-        <nav className="sidebar-nav">
-          {sidebarItems.map((item) =>
-            item.key !== "contracts" ? (
-              <Button
-                key={item.key}
-                className={`sidebar-button ${
-                  activeTab === item.key ? "active" : ""
-                }`}
-                onClick={() => setActiveTab(item.key)}
-                startIcon={<item.icon className="mr-2 h-5 w-5" />}
-              >
-                {item.label}
-              </Button>
-            ) : (
-              <div key={item.key}>
-                <Button
-                  className={`sidebar-button ${
-                    isContractMenuOpen ? "active" : ""
-                  }`}
-                  onClick={() => setIsContractMenuOpen(!isContractMenuOpen)}
-                  startIcon={<item.icon className="mr-2 h-5 w-5" />}
-                >
-                  {item.label}
-                  {!isContractMenuOpen ? (
-                    <ChevronRight
-                      className=".submenu-active-icon" 
-                    ></ChevronRight>
-                  ):(
-                    <ChevronDown className=".submenu-active-icon">
-                      
-                    </ChevronDown>
-                  )}
-                </Button>
-                <Collapse in={isContractMenuOpen} timeout="auto" unmountOnExit>
-                  <div className="submenu">
-                    {contractOptions.map((option) => (
-                      <Button
-                        key={option.key}
-                        startIcon={<option.icon className="mr-2 h-5 w-5" />}
-                        className={`sidebar-button submenu-button ${
-                          activeTab === option.key ? "active" : ""
-                        }`}
-                        onClick={() => {
-                          setActiveTab(option.key);
-                          setIsContractMenuOpen(false);
-                        }}
-                      >
-                        {option.label}
-                      </Button>
-                    ))}
-                  </div>
-                </Collapse>
-              </div>
-            )
-          )}
-        </nav>
-      </aside>
+  // Remove this const when copying and pasting into your project.
+  const demoWindow = window ? window() : undefined;
 
-      {/* Main content */}
-      <main className="main-content">
-        {activeTab === "animals" && <AnimalTable />}
-        {activeTab === "activities" && <ActivitiesTable />}
-        {activeTab === "adoption" && <AdopcionesTable />}
-        {activeTab === "donations" && <DonacionesTable />}
-        {activeTab === "contracts" && <ContractTable />}
-        {activeTab === "food-provider" && <ProveedorAlimentosTable />}
-        {activeTab === "complementary-services" && <ProveedorServiciosTable />}
-        {activeTab === "transport" && <TransporteTable />}
-        {activeTab === "logout" && router.back("/")}
-        {activeTab === "services" && <ServiceTypeTable />}
-        {activeTab === "vets" && <VeterinarianTable />}
-        {activeTab === "food" && <FoodTypeTable />}
-      </main>
-    </div>
+  return (
+    <AppProvider
+      navigation={NAVIGATION}
+      router={router}
+      theme={demoTheme}
+      window={demoWindow}
+    >
+      <DashboardLayout>
+        <PageContainer></PageContainer>
+      </DashboardLayout>
+    </AppProvider>
   );
 }

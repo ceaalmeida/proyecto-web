@@ -44,13 +44,15 @@ export const ResponsiveAppBar = ({ onButtonClick }) => {
     setAnchorElUser(null);
   };
 
+
+
   return (
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <div>
             <Toolbar disableGutters>
-              <MenuIcon style={{ marginRight: '.5rem' }} onClick={handleMenuIcon} />
+              <MenuIcon style={{ marginRight: '.5rem' }}  />
               <Typography
                 variant="h6"
                 noWrap

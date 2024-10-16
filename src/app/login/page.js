@@ -1,108 +1,154 @@
 "use client";
-import React, { useState } from "react";
-import {
-    Box,
-    Button,
-    TextField,
-    Typography,
-    Container,
-    Paper,
-    Avatar,
-    CssBaseline,
-} from "@mui/material";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { Link } from "lucide-react";
 
+import * as React from "react";
+import {
+  Button,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  TextField,
+  InputAdornment,
+  Link,
+  IconButton,
+} from "@mui/material";
+import AccountCircle from "@mui/icons-material/AccountCircle";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { AppProvider, SignInPage } from "@toolpad/core";
+import { useTheme } from "@mui/material/styles";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-export default function Login({ onLogin }) {
-    const [user, setUser] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-    const router=useRouter();
+const providers = [{ id: "credentials", name: "Email and Password" }];
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        // Aquí normalmente se haría una llamada a una API para autenticar
-        // Por ahora, simularemos una autenticación básica
-        if (user === "qwe" && password === "qwe") {
-            setError("");
+function CustomEmailField() {
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState(null);
 
-            router.push('/home.user')
-            setUser("");
-            setPassword("")
+  const handleEmailChange = (event) => {
+    setEmail(event.target.value);
+    setEmailError(null);
+  };
 
-            // onLogin(user);
-        } else if(user === "asd" && password === "asd"){
-            router.push('/home')
-            setUser("");
-            setPassword("")
-
-        }else{
-            setError("Usuario o contraseña incorrectos");
-        }
-    };
-
-    return (
-        <Container component="main" maxWidth="xs">
-            <CssBaseline />
-            <Paper
-                elevation={3}
-                sx={{
-                    mt: 8,
-                    p: 4,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                }}
-            >
-                <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-                    <LockOutlinedIcon />
-                </Avatar>
-                <Typography component="h1" variant="h5">
-                    Iniciar Sesión
-                </Typography>
-                <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-                    <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        id="user"
-                        label="Usuario"
-                        name="user"
-                        autoComplete="user"
-                        autoFocus
-                        value={user}
-                        onChange={(e) => setUser(e.target.value)}
-                    />
-                    <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        name="password"
-                        label="Contraseña"
-                        type="password"
-                        id="password"
-                        autoComplete="current-password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                    {error && (
-                        <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-                            {error}
-                        </Typography>
-                    )}
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        sx={{ mt: 3, mb: 2 }}
-                    >
-                        Iniciar Sesión
-                    </Button>
-                    <h1>Crear cuenta</h1>
-                </Box>
-            </Paper>
-        </Container>
-    );
+  return (
+    <TextField
+      id="input-with-icon-textfield"
+      label="Username"
+      name="email"
+      type="email"
+      size="small"
+      required
+      fullWidth
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">
+              <AccountCircle fontSize="inherit" />
+            </InputAdornment>
+          ),
+        },
+      }}
+      variant="outlined"
+      value={email}
+      onChange={handleEmailChange}
+      error={emailError !== null}
+      helperText={emailError}
+    />
+  );
 }
+
+function CustomPasswordField() {
+  const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState(null);
+
+  const handlePasswordChange = (event) => {
+    setPassword(event.target.value);
+    setPasswordError(null);
+  };
+
+  return (
+    <FormControl sx={{ my: 2 }} fullWidth variant="outlined">
+      <InputLabel size="small" htmlFor="outlined-adornment-password">
+        Password
+      </InputLabel>
+      <OutlinedInput
+        id="outlined-adornment-password"
+        type="password"
+        name="password"
+        size="small"
+        endAdornment={
+          <InputAdornment position="end">
+            <IconButton
+              aria-label="toggle password visibility"
+              onClick={() => setPasswordError(null)}
+              onMouseDown={(event) => event.preventDefault()}
+              edge="end"
+              size="small"
+            >
+              {passwordError ? <VisibilityOff /> : <Visibility />}
+            </IconButton>
+          </InputAdornment>
+        }
+        value={password}
+        onChange={handlePasswordChange}
+        error={passwordError !== null}
+        helperText={passwordError}
+      />
+    </FormControl>
+  );
+}
+
+function SlotsSignIn() {
+  const theme = useTheme();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Aquí puedes agregar la lógica para enviar los datos al servidor
+  }, [email, password]);
+
+  const handleSignIn = async (event) => {
+    event.preventDefault();
+    try {
+      // Aquí puedes agregar la lógica para enviar los datos al servidor
+      if (email.trim() === "asd@gmail.com" && password.trim() === "asd") {
+        setError(null);
+        router.replace("/home");
+      } else if (email.trim() === "qwe@gmail.com" && password.trim() === "qwe") {
+        setError(null);
+        router.replace("/home.user");
+      } else {
+        setError("Correo electrónico o contraseña incorrectos");
+      }
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  return (
+    <AppProvider>
+      <SignInPage providers={providers}>
+        <CustomEmailField />
+        <CustomPasswordField />
+        <Button
+          variant="contained"
+          color="primary"
+          size="large"
+          fullWidth
+          onClick={handleSignIn}
+        >
+          Sign In
+        </Button>
+        {error && (
+          <Typography variant="body2" color="error">
+            {error}
+          </Typography>
+        )}
+      </SignInPage>
+    </AppProvider>
+  );
+}
+
+export default SlotsSignIn;

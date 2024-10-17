@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -22,7 +22,6 @@ import {
   MenuItem,
   CircularProgress,
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -30,17 +29,25 @@ import {
   ViewColumn as ViewColumnIcon,
 } from "@mui/icons-material";
 
+const initialServices = [
+  { ID_Servicio: 1, Nombre_Servicio: "Veterinario" },
+  { ID_Servicio: 2, Nombre_Servicio: "Paseo" },
+  { ID_Servicio: 3, Nombre_Servicio: "Alimentación" },
+];
+
 export default function ServiceTypeTable() {
   const [services, setServices] = useState([]);
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [visibleColumns, setVisibleColumns] = useState(["nombre"]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [editingService, setEditingService] = useState(null);
   const [newService, setNewService] = useState({
     ID_Servicio: "",
     Nombre_Servicio: "",
   });
-  const [serviceToDelete, setServiceToDelete] = useState(null);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
-  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
   const [creatingService, setCreatingService] = useState(false);
   const [alertUser, setAlertUser] = useState(false);
 
@@ -50,12 +57,27 @@ export default function ServiceTypeTable() {
     });
     const services = await response.json();
     console.log(services);
-    setServices(services);
+    setServices(services)
   };
 
-  useEffect(() => {
-    loadServices();
-  }, []);
+  const handleSort = () => {
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  };
+
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleDelete = (ID_Servicio) => {
+    setServices(
+      services.filter((service) => service.ID_Servicio !== ID_Servicio)
+    );
+  };
+
+  const handleEdit = (service) => {
+    setEditingService(service);
+    setOpenEditDialog(true);
+  };
 
   const handleSaveEdit = () => {
     setServices(
@@ -90,51 +112,93 @@ export default function ServiceTypeTable() {
     setAlertUser(false);
   };
 
-  const handleDelete = async () => {
-    await fetch(`http://localhost:3000/tipo-de-servicio/${serviceToDelete}`, {
-      method: "DELETE",
-    });
-    setServices(
-      services.filter((service) => service.ID_Servicio !== serviceToDelete)
+  const toggleColumn = (column) => {
+    setVisibleColumns((prev) =>
+      prev.includes(column)
+        ? prev.filter((col) => col !== column)
+        : [...prev, column]
     );
-    setOpenConfirmDialog(false);
   };
+
+  const filteredServices = services
+    .filter((service) =>
+      Object.values(service).some((value) =>
+        value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    )
+    .sort((a, b) => {
+      if (sortOrder === "asc") {
+        return a.Nombre_Servicio.localeCompare(b.Nombre_Servicio);
+      } else {
+        return b.Nombre_Servicio.localeCompare(a.Nombre_Servicio);
+      }
+    });
 
   return (
     <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
-      <TableContainer component={Paper} sx={{ mt: 2 }}>
-        <Table>
+      <TextField
+        label="Buscar tipos de servicio"
+        variant="outlined"
+        value={searchTerm}
+        onChange={handleSearch}
+        sx={{ mb: 2 }}
+      />
+      <IconButton
+        onClick={(event) => setAnchorEl(event.currentTarget)}
+        sx={{ mb: 2, ml: 2 }}
+      >
+        <ViewColumnIcon />
+      </IconButton>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={() => setAnchorEl(null)}
+      >
+        {["Nombre"].map((column) => (
+          <MenuItem key={column}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={visibleColumns.includes(column)}
+                  onChange={() => toggleColumn(column)}
+                />
+              }
+              label={column.charAt(0).toUpperCase() + column.slice(1)}
+            />
+          </MenuItem>
+        ))}
+      </Menu>
+      <TableContainer component={Paper}>
+        <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell>Nombre del Servicio</TableCell>
-              <TableCell align="right">Acciones</TableCell>
+              {visibleColumns.includes("nombre") && (
+                <TableCell onClick={handleSort} sx={{ cursor: "pointer" }}>
+                  Nombre {sortOrder === "asc" ? "↑" : "↓"}
+                </TableCell>
+              )}
+              <TableCell>Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {services.map((service) => (
               <TableRow key={service.ID_Servicio}>
-                <TableCell>{service.Nombre_Servicio}</TableCell>
-                <TableCell align="right">
-                  <Button
-                    variant="outlined"
-                    onClick={() => {
-                      setEditingService(service);
-                      setOpenEditDialog(true);
-                    }}
+                {visibleColumns.includes("nombre") && (
+                  <TableCell>{service.Nombre_Servicio}</TableCell>
+                )}
+                <TableCell>
+                  <IconButton
+                    onClick={() => handleEdit(service)}
+                    color="primary"
                   >
-                    Editar
-                  </Button>
-                  <Button
-                    variant="outlined"
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => handleDelete(service.ID_Servicio)}
                     color="error"
-                    onClick={() => {
-                      setServiceToDelete(service.ID_Servicio);
-                      setOpenConfirmDialog(true);
-                    }}
-                    sx={{ ml: 1 }}
                   >
-                    Eliminar
-                  </Button>
+                    <DeleteIcon />
+                  </IconButton>
                 </TableCell>
               </TableRow>
             ))}
@@ -219,25 +283,6 @@ export default function ServiceTypeTable() {
         <DialogActions>
           <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
           <Button onClick={handleSaveEdit}>Guardar Cambios</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Diálogo de confirmación para eliminar */}
-      <Dialog
-        open={openConfirmDialog}
-        onClose={() => setOpenConfirmDialog(false)}
-      >
-        <DialogTitle>Eliminar Tipo de Servicio</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            ¿Está seguro de que desea eliminar el tipo de servicio?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenConfirmDialog(false)}>Cancelar</Button>
-          <Button onClick={handleDelete} color="error">
-            Eliminar
-          </Button>
         </DialogActions>
       </Dialog>
     </Paper>

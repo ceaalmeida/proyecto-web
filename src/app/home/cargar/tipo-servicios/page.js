@@ -22,7 +22,7 @@ import {
   MenuItem,
   CircularProgress,
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
+
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -102,6 +102,14 @@ export default function ServiceTypeTable() {
 
   return (
     <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
+    <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={() => setOpenAddDialog(true)}
+        sx={{ mt: 2 }}
+      >
+        Agregar Tipo de Servicio
+      </Button>
       <TableContainer component={Paper} sx={{ mt: 2 }}>
         <Table>
           <TableHead>
@@ -141,14 +149,7 @@ export default function ServiceTypeTable() {
           </TableBody>
         </Table>
       </TableContainer>
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={() => setOpenAddDialog(true)}
-        sx={{ mt: 2 }}
-      >
-        Agregar Tipo de Servicio
-      </Button>
+      
 
       {/* Diálogo para agregar tipo de servicio */}
       <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>

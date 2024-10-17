@@ -20,7 +20,6 @@ import TransporteTable from "./cargar/transportes/page";
 import VeterinarianTable from "./cargar/veterinarios/page";
 import SwipeableTemporaryDrawer from "./usuario-barra-lateral";
 
-
 import {
   PawPrint,
   Activity,
@@ -43,7 +42,14 @@ import {
   ChefHat,
 } from "lucide-react";
 import { AppBar, iconButtonClasses, SwipeableDrawer } from "@mui/material";
-import{Avatar,Button,Typography ,MenuIcon,IconButton,Toolbar} from '@mui/material/Toolbar';
+import {
+  Avatar,
+  Button,
+  Typography,
+  MenuIcon,
+  IconButton,
+  Toolbar,
+} from "@mui/material/Toolbar";
 
 const NAVIGATION = [
   {
@@ -276,34 +282,29 @@ export default function DashboardLayoutBasic(props) {
   const demoWindow = window ? window() : undefined;
 
   return (
-    
     <AppProvider
       navigation={NAVIGATION}
       router={router}
       theme={demoTheme}
       window={demoWindow}
     >
-    <SwipeableTemporaryDrawer
-            anchor="right"
-            open={drawerOpen}
-            onClose={handleDrawerClose}
-            onOpen={() => setDrawerOpen(true)}
-            //values={""}
-          ></SwipeableTemporaryDrawer>
       <SwipeableTemporaryDrawer
-            anchor="right"
-            open={drawerOpen}
-            onClose={handleDrawerClose}
-            onOpen={() => setDrawerOpen(true)}
-            values={"Alejandro Almeida"}
-          ></SwipeableTemporaryDrawer>
-          
+        anchor="right"
+        open={drawerOpen}
+        onClose={handleDrawerClose}
+        onOpen={() => setDrawerOpen(true)}
+        //values={""}
+      ></SwipeableTemporaryDrawer>
+      <SwipeableTemporaryDrawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={handleDrawerClose}
+        onOpen={() => setDrawerOpen(true)}
+        values={"Alejandro Almeida"}
+      ></SwipeableTemporaryDrawer>
+
       <DashboardLayout>
-      
-        <PageContainer>
-          {renderComponent()}
-          
-        </PageContainer>
+        <PageContainer>{renderComponent()}</PageContainer>
       </DashboardLayout>
     </AppProvider>
   );

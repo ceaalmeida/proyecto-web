@@ -6,8 +6,9 @@ import CardMedia from "@mui/material/CardMedia";
 import "./style.css";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+
 const buttons = ["Adoptar", "Donar", "MAS"];
-export function AnimalCard({ elements,onButtonClick }) {
+export function AnimalCard({ elements, onButtonClick }) {
   console.log(elements);
 
   return (
@@ -33,11 +34,11 @@ export function AnimalCard({ elements,onButtonClick }) {
           <CardActions>
             {buttons.map((butt) => (
               <Button
-              variant="contained"
-              style={{color:"Black"}}
+                variant="contained"
+                style={{ color: "Black" }}
                 size="small"
                 key={butt}
-                onClick={() => onButtonClick(butt,element)}
+                onClick={() => onButtonClick(butt, element)}
               >
                 {butt}
               </Button>

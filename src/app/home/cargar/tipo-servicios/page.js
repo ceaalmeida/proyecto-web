@@ -38,6 +38,10 @@ export default function ServiceTypeTable() {
   const [alertUser, setAlertUser] = useState(false);
 
   const loadServices = async () => {
+    const response = await fetch("http://localhost:3000/tipo-de-servicio/", {
+      method: "GET",
+    });
+    const services = await response.json();
     
     console.log(services);
     setServices(services);

@@ -11,8 +11,11 @@ import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
+import { useRouter } from 'next/navigation';
 
-export default function SwipeableTemporaryDrawer() {
+
+export default function SwipeableTemporaryDrawer({ values }) {
+  const router=useRouter()
   const [state, setState] = React.useState({
     right: false,
   });
@@ -37,19 +40,39 @@ export default function SwipeableTemporaryDrawer() {
       onKeyDown={toggleDrawer(anchor, false)}
     >
       <List>
-        {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+        <ListItem key={""} disablePadding>
+          <ListItemButton>
+            <ListItemIcon>
+              {/* //{index % 2 === 0 ? <InboxIcon /> : <MailIcon />} */}
+            </ListItemIcon>
+            <ListItemText primary={""} />
+          </ListItemButton>
+        </ListItem>
+      </List>
+      <List>
+        <ListItem key={""} disablePadding>
+          <ListItemButton>
+            <ListItemIcon>
+              {/* //{index % 2 === 0 ? <InboxIcon /> : <MailIcon />} */}
+            </ListItemIcon>
+            <ListItemText primary={""} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem key={values} disablePadding>
+          <ListItemIcon>
+            {/* //{index % 2 === 0 ? <InboxIcon /> : <MailIcon />} */}
+          </ListItemIcon>
+          <ListItemText primary={values} />
+        </ListItem>
       </List>
       <Divider />
-      <List>
+      <ListItemButton onClick={()=>router.replace("/login")}>
+        <ListItemIcon>          
+          <InboxIcon />
+        </ListItemIcon>
+        <ListItemText primary={"Cerrar sesion"} />
+      </ListItemButton>
+      {/* <List>
         {["All mail", "Trash", "Spam"].map((text, index) => (
           <ListItem key={text} disablePadding>
             <ListItemButton>
@@ -60,13 +83,16 @@ export default function SwipeableTemporaryDrawer() {
             </ListItemButton>
           </ListItem>
         ))}
-      </List>
+      </List> */}
     </Box>
   );
-
+   
   return (
-    <div style={{display: 'flex',  justifyContent: "flex-end"}}>
-      <IconButton onClick={toggleDrawer("right", true)} style={{justifySelf: 'right'}}>
+    <div style={{ display: "flex", justifyContent: "flex-end" }}>
+      <IconButton
+        onClick={toggleDrawer("right", true)}
+        style={{ justifySelf: "right" }}
+      >
         <Avatar alt="User Avatar" src={"https://via.placeholder.com/50"} />
       </IconButton>
       <SwipeableDrawer

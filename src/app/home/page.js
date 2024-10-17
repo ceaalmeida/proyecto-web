@@ -20,6 +20,7 @@ import TransporteTable from "./cargar/transportes/page";
 import VeterinarianTable from "./cargar/veterinarios/page";
 import SwipeableTemporaryDrawer from "./usuario-barra-lateral";
 
+
 import {
   PawPrint,
   Activity,
@@ -41,7 +42,8 @@ import {
   ChevronDown,
   ChefHat,
 } from "lucide-react";
-import { iconButtonClasses, SwipeableDrawer } from "@mui/material";
+import { AppBar, iconButtonClasses, SwipeableDrawer } from "@mui/material";
+import{Avatar,Button,Typography ,MenuIcon,IconButton,Toolbar} from '@mui/material/Toolbar';
 
 const NAVIGATION = [
   {
@@ -286,13 +288,16 @@ export default function DashboardLayoutBasic(props) {
             open={drawerOpen}
             onClose={handleDrawerClose}
             onOpen={() => setDrawerOpen(true)}
+            //values={""}
           ></SwipeableTemporaryDrawer>
       <SwipeableTemporaryDrawer
             anchor="right"
             open={drawerOpen}
             onClose={handleDrawerClose}
             onOpen={() => setDrawerOpen(true)}
+            values={"Alejandro Almeida"}
           ></SwipeableTemporaryDrawer>
+          
       <DashboardLayout>
       
         <PageContainer>

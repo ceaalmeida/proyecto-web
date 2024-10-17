@@ -17,7 +17,7 @@ import {
   DialogTitle,
   CircularProgress
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
+
 import {
   Add as AddIcon,
 } from "@mui/icons-material";
@@ -92,7 +92,11 @@ export default function ServiceTypeTable() {
 
   return (
     <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
+<<<<<<< HEAD
       <Button
+=======
+    <Button
+>>>>>>> aeffff21776e7164070bb21bedb5bcd6d7e3dace
         variant="contained"
         startIcon={<AddIcon />}
         onClick={() => setOpenAddDialog(true)}
@@ -100,7 +104,10 @@ export default function ServiceTypeTable() {
       >
         Agregar Tipo de Servicio
       </Button>
+<<<<<<< HEAD
 
+=======
+>>>>>>> aeffff21776e7164070bb21bedb5bcd6d7e3dace
       <TableContainer component={Paper} sx={{ mt: 2 }}>
         <Table>
           <TableHead>
@@ -140,6 +147,10 @@ export default function ServiceTypeTable() {
           </TableBody>
         </Table>
       </TableContainer>
+<<<<<<< HEAD
+=======
+      
+>>>>>>> aeffff21776e7164070bb21bedb5bcd6d7e3dace
 
       {/* Diálogo para agregar tipo de servicio */}
       <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>

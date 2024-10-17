@@ -63,6 +63,7 @@ export default function AdopcionesTable() {
     ]);
     const [searchTerm, setSearchTerm] = useState("");
     const [editingAdopcion, setEditingAdopcion] = useState(null);
+    const [errors, setErrors] = useState({});
     const [newAdopcion, setNewAdopcion] = useState({
         idAdopcion: "",
         idAnimal: "",
@@ -87,34 +88,58 @@ export default function AdopcionesTable() {
     const handleDelete = (id) => {
         setAdopciones(adopciones.filter((adopcion) => adopcion.idAdopcion !== id));
     };
+    const validate = (adopcion) => {
+        let errors = {};
+
+        if (!adopcion.idAdopcion || !/^[a-zA-Z0-9]{6,}$/.test(adopcion.idAdopcion)) {
+            errors.idAdopcion = "El ID de adopción debe tener al menos 6 caracteres y contener solo letras o números.";
+        }
+        if (!adopcion.idAnimal || !/^[a-zA-Z0-9]{6,}$/.test(adopcion.idAnimal)) {
+            errors.idAnimal = "El ID de animal debe tener al menos 6 caracteres y contener solo letras o números.";
+        }
+        if (!adopcion.costoAdopcion || isNaN(adopcion.costoAdopcion)) {
+            errors.costoAdopcion = "El costo de adopción debe ser un número y no puede estar vacío.";
+        }
+        if (!adopcion.nombreAdoptante || !/^[a-zA-Z\s]+$/.test(adopcion.nombreAdoptante)) {
+            errors.nombreAdoptante = "El nombre no puede estar vacío y debe contener solo letras y espacios.";
+        }
+        if (!adopcion.emailAdoptante || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adopcion.emailAdoptante)) {
+            errors.emailAdoptante = "El email debe tener un formato válido (ej. correo@correo.com).";
+        }
+        if (!adopcion.telefonoAdoptante || !/^\d{8}$/.test(adopcion.telefonoAdoptante)) {
+            errors.telefonoAdoptante = "El teléfono debe contener solo números y tener 8 caracteres.";
+        }
+        if (!adopcion.fecha) {
+            errors.fecha = "La fecha no puede estar vacía.";
+        }
+
+        setErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
 
     const handleEdit = (adopcion) => {
         setEditingAdopcion(adopcion);
         setOpenEditDialog(true);
     };
 
-    const handleSaveEdit = () => {
-        setAdopciones(
-            adopciones.map((adopcion) =>
-                adopcion.idAdopcion === editingAdopcion.idAdopcion ? editingAdopcion : adopcion
-            )
-        );
-        setOpenEditDialog(false);
+    const handleAdd = () => {
+        if (validate(newAdopcion)) {
+            setAdopciones([...adopciones, { ...newAdopcion }]);
+            setNewAdopcion({
+                idAdopcion: "", idAnimal: "", fecha: "", costoAdopcion: "", nombreAdoptante: "", emailAdoptante: "", telefonoAdoptante: "",
+            });
+            setOpenAddDialog(false);
+        }
     };
 
-    const handleAdd = () => {
-        setAdopciones([...adopciones, { ...newAdopcion }]);
-        setNewAdopcion({
-            idAdopcion: "",
-            idAnimal: "",
-            fecha: "",
-            costoAdopcion: "",
-            nombreAdoptante: "",
-            emailAdoptante: "",
-            telefonoAdoptante: "",
-        });
-        setOpenAddDialog(false);
+    const handleSaveEdit = () => {
+        if (validate(editingAdopcion)) {
+            setAdopciones(adopciones.map((adopcion) => (adopcion.idAdopcion === editingAdopcion.idAdopcion ? editingAdopcion : adopcion)));
+            setOpenEditDialog(false);
+        }
     };
+
 
     const toggleColumn = (column) => {
         setVisibleColumns((prev) =>
@@ -257,9 +282,9 @@ export default function AdopcionesTable() {
                         fullWidth
                         variant="outlined"
                         value={newAdopcion.idAdopcion}
-                        onChange={(e) =>
-                            setNewAdopcion({ ...newAdopcion, idAdopcion: e.target.value })
-                        }
+                        onChange={(e) => setNewAdopcion({ ...newAdopcion, idAdopcion: e.target.value })}
+                        error={!!errors.idAdopcion}
+                        helperText={errors.idAdopcion}
                     />
                     <TextField
                         margin="dense"
@@ -267,9 +292,9 @@ export default function AdopcionesTable() {
                         fullWidth
                         variant="outlined"
                         value={newAdopcion.idAnimal}
-                        onChange={(e) =>
-                            setNewAdopcion({ ...newAdopcion, idAnimal: e.target.value })
-                        }
+                        onChange={(e) => setNewAdopcion({ ...newAdopcion, idAnimal: e.target.value })}
+                        error={!!errors.idAnimal}
+                        helperText={errors.idAnimal}
                     />
                     <TextField
                         margin="dense"
@@ -277,13 +302,11 @@ export default function AdopcionesTable() {
                         type="date"
                         fullWidth
                         variant="outlined"
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
+                        InputLabelProps={{ shrink: true }}
                         value={newAdopcion.fecha}
-                        onChange={(e) =>
-                            setNewAdopcion({ ...newAdopcion, fecha: e.target.value })
-                        }
+                        onChange={(e) => setNewAdopcion({ ...newAdopcion, fecha: e.target.value })}
+                        error={!!errors.fecha}
+                        helperText={errors.fecha}
                     />
                     <TextField
                         margin="dense"
@@ -291,9 +314,9 @@ export default function AdopcionesTable() {
                         fullWidth
                         variant="outlined"
                         value={newAdopcion.costoAdopcion}
-                        onChange={(e) =>
-                            setNewAdopcion({ ...newAdopcion, costoAdopcion: e.target.value })
-                        }
+                        onChange={(e) => setNewAdopcion({ ...newAdopcion, costoAdopcion: e.target.value })}
+                        error={!!errors.costoAdopcion}
+                        helperText={errors.costoAdopcion}
                     />
                     <TextField
                         margin="dense"
@@ -301,9 +324,9 @@ export default function AdopcionesTable() {
                         fullWidth
                         variant="outlined"
                         value={newAdopcion.nombreAdoptante}
-                        onChange={(e) =>
-                            setNewAdopcion({ ...newAdopcion, nombreAdoptante: e.target.value })
-                        }
+                        onChange={(e) => setNewAdopcion({ ...newAdopcion, nombreAdoptante: e.target.value })}
+                        error={!!errors.nombreAdoptante}
+                        helperText={errors.nombreAdoptante}
                     />
                     <TextField
                         margin="dense"
@@ -311,9 +334,9 @@ export default function AdopcionesTable() {
                         fullWidth
                         variant="outlined"
                         value={newAdopcion.emailAdoptante}
-                        onChange={(e) =>
-                            setNewAdopcion({ ...newAdopcion, emailAdoptante: e.target.value })
-                        }
+                        onChange={(e) => setNewAdopcion({ ...newAdopcion, emailAdoptante: e.target.value })}
+                        error={!!errors.emailAdoptante}
+                        helperText={errors.emailAdoptante}
                     />
                     <TextField
                         margin="dense"
@@ -321,17 +344,17 @@ export default function AdopcionesTable() {
                         fullWidth
                         variant="outlined"
                         value={newAdopcion.telefonoAdoptante}
-                        onChange={(e) =>
-                            setNewAdopcion({ ...newAdopcion, telefonoAdoptante: e.target.value })
-                        }
+                        onChange={(e) => setNewAdopcion({ ...newAdopcion, telefonoAdoptante: e.target.value })}
+                        error={!!errors.telefonoAdoptante}
+                        helperText={errors.telefonoAdoptante}
                     />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenAddDialog(false)}>Cancelar</Button>
                     <Button onClick={handleAdd}>Agregar</Button>
                 </DialogActions>
-            </Dialog>
 
+            </Dialog>
             <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
                 <DialogTitle>Editar Adopción</DialogTitle>
                 <DialogContent>
@@ -346,12 +369,7 @@ export default function AdopcionesTable() {
                                 fullWidth
                                 variant="outlined"
                                 value={editingAdopcion.idAdopcion}
-                                onChange={(e) =>
-                                    setEditingAdopcion({
-                                        ...editingAdopcion,
-                                        idAdopcion: e.target.value,
-                                    })
-                                }
+                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, idAdopcion: e.target.value })}
                                 disabled
                             />
                             <TextField
@@ -360,12 +378,9 @@ export default function AdopcionesTable() {
                                 fullWidth
                                 variant="outlined"
                                 value={editingAdopcion.idAnimal}
-                                onChange={(e) =>
-                                    setEditingAdopcion({
-                                        ...editingAdopcion,
-                                        idAnimal: e.target.value,
-                                    })
-                                }
+                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, idAnimal: e.target.value })}
+                                error={!!errors.idAnimal}
+                                helperText={errors.idAnimal}
                             />
                             <TextField
                                 margin="dense"
@@ -373,16 +388,9 @@ export default function AdopcionesTable() {
                                 type="date"
                                 fullWidth
                                 variant="outlined"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
+                                InputLabelProps={{ shrink: true }}
                                 value={editingAdopcion.fecha}
-                                onChange={(e) =>
-                                    setEditingAdopcion({
-                                        ...editingAdopcion,
-                                        fecha: e.target.value,
-                                    })
-                                }
+                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, fecha: e.target.value })}
                             />
                             <TextField
                                 margin="dense"
@@ -390,12 +398,9 @@ export default function AdopcionesTable() {
                                 fullWidth
                                 variant="outlined"
                                 value={editingAdopcion.costoAdopcion}
-                                onChange={(e) =>
-                                    setEditingAdopcion({
-                                        ...editingAdopcion,
-                                        costoAdopcion: e.target.value,
-                                    })
-                                }
+                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, costoAdopcion: e.target.value })}
+                                error={!!errors.costoAdopcion}
+                                helperText={errors.costoAdopcion}
                             />
                             <TextField
                                 margin="dense"
@@ -403,12 +408,9 @@ export default function AdopcionesTable() {
                                 fullWidth
                                 variant="outlined"
                                 value={editingAdopcion.nombreAdoptante}
-                                onChange={(e) =>
-                                    setEditingAdopcion({
-                                        ...editingAdopcion,
-                                        nombreAdoptante: e.target.value,
-                                    })
-                                }
+                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, nombreAdoptante: e.target.value })}
+                                error={!!errors.nombreAdoptante}
+                                helperText={errors.nombreAdoptante}
                             />
                             <TextField
                                 margin="dense"
@@ -416,12 +418,9 @@ export default function AdopcionesTable() {
                                 fullWidth
                                 variant="outlined"
                                 value={editingAdopcion.emailAdoptante}
-                                onChange={(e) =>
-                                    setEditingAdopcion({
-                                        ...editingAdopcion,
-                                        emailAdoptante: e.target.value,
-                                    })
-                                }
+                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, emailAdoptante: e.target.value })}
+                                error={!!errors.emailAdoptante}
+                                helperText={errors.emailAdoptante}
                             />
                             <TextField
                                 margin="dense"
@@ -429,12 +428,9 @@ export default function AdopcionesTable() {
                                 fullWidth
                                 variant="outlined"
                                 value={editingAdopcion.telefonoAdoptante}
-                                onChange={(e) =>
-                                    setEditingAdopcion({
-                                        ...editingAdopcion,
-                                        telefonoAdoptante: e.target.value,
-                                    })
-                                }
+                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, telefonoAdoptante: e.target.value })}
+                                error={!!errors.telefonoAdoptante}
+                                helperText={errors.telefonoAdoptante}
                             />
                         </>
                     )}
@@ -444,6 +440,7 @@ export default function AdopcionesTable() {
                     <Button onClick={handleSaveEdit}>Guardar</Button>
                 </DialogActions>
             </Dialog>
+
         </Paper>
     );
 }

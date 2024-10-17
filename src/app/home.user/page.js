@@ -6,6 +6,7 @@ import ContractTable from "../home/cargar/contratos/page";
 import AdopcionesTable from "../home/cargar/adopciones/page";
 import Adoptar from "./adoptar"
 import "./style.css";
+import { TextField } from "@mui/material";
 
 export default function homeUser() {
   
@@ -61,26 +62,38 @@ export default function homeUser() {
   ];
   const [opcion, setOpciones] = useState("");
   const [element, setElements] = useState("");
+  const [busqueda,setBusqueda]= useState("")
   
   const manejadorOpciones = (pages,element) => {
     setOpciones(pages);
     setElements(element);
   };
+   const filtrado= initialAnimals.filter((adopcion) =>
+    Object.values(adopcion).some((value) =>
+        value.toString().toLowerCase().includes(busqueda.toLowerCase())
+    )
+)
   return (
     <div>
       <ResponsiveAppBar onButtonClick={manejadorOpciones}></ResponsiveAppBar>
-      <h1>{opcion}</h1>
+      <h1>Animales</h1>
+      <div>
+      <TextField
+                label="Buscar animales"
+                variant="outlined"
+                value={busqueda}
+                onChange={(e)=>setBusqueda(e.target.value)}
+                sx={{ mb: 2 }}
+            />
       {
-        <main>
-          {opcion === "Animales" && (
+        
+          
             <section className="section">
-              <AnimalCard elements={initialAnimals} onButtonClick={manejadorOpciones} className="card"/>
+              <AnimalCard elements={filtrado} onButtonClick={manejadorOpciones} className="card"/>
             </section>
-          )}
-          {opcion === "Adoptar" &&  <Adoptar element={element} onButtonClick={manejadorOpciones}></Adoptar> }
-          {opcion === "MAS" &&  <h1>Perfil</h1>}
-        </main>
+         
       }
+      </div>
     </div>
   );
 }

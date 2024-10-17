@@ -33,6 +33,8 @@ export function AnimalCard({ elements,onButtonClick }) {
           <CardActions>
             {buttons.map((butt) => (
               <Button
+              variant="contained"
+              style={{color:"Black"}}
                 size="small"
                 key={butt}
                 onClick={() => onButtonClick(butt,element)}

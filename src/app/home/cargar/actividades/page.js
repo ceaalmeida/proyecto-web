@@ -56,6 +56,7 @@ function ActivityTable() {
         }
     };
 
+
     const handleSort = () => { setSortOrder(sortOrder === "asc" ? "desc" : "asc"); };
     const handleSearch = (event) => { setSearchTerm(event.target.value); };
     const handleDelete = (id) => { setActivities(activities.filter((activity) => activity.ID_Actividad !== id)); };

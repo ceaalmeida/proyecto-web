@@ -60,7 +60,7 @@ export default function homeUser() {
       Precio_Adopción: 270,
     },
   ];
-  const [opcion, setOpciones] = useState("");
+  const [opcion, setOpciones] = useState("Animales");
   const [element, setElements] = useState("");
   const [busqueda,setBusqueda]= useState("")
   
@@ -76,7 +76,7 @@ export default function homeUser() {
   return (
     <div>
       <ResponsiveAppBar onButtonClick={manejadorOpciones}></ResponsiveAppBar>
-      <h1>Animales</h1>
+      <h1 style={{marginTop: "20px"}}>Animales</h1>
       <div>
       <TextField
                 label="Buscar animales"
@@ -84,15 +84,17 @@ export default function homeUser() {
                 value={busqueda}
                 onChange={(e)=>setBusqueda(e.target.value)}
                 sx={{ mb: 2 }}
-            />
-      {
-        
+                style={{marginTop: "20px"}}
+            />    
           
             <section className="section">
-              <AnimalCard elements={filtrado} onButtonClick={manejadorOpciones} className="card"/>
-            </section>
-         
-      }
+              {opcion ==="Animales" && <AnimalCard elements={filtrado} onButtonClick={manejadorOpciones} className="card"/>}
+          
+          {opcion === "Adoptar" &&  <Adoptar element={element} onButtonClick={manejadorOpciones}></Adoptar> }
+          {opcion === "MAS" &&  <h1>Perfil</h1>}  
+            </section>           
+           
+      
       </div>
     </div>
   );

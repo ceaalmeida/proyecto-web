@@ -7,3 +7,7 @@
 .card {
     margin: 15px
 }
+.card:hover{
+    background-color:#004ba0;
+    transition:background-color 1s ease;
+}

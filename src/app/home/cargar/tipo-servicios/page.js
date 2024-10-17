@@ -15,20 +15,13 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Checkbox,
-  FormControlLabel,
-  IconButton,
-  Menu,
-  MenuItem,
-  CircularProgress,
+  CircularProgress
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import {
   Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  ViewColumn as ViewColumnIcon,
 } from "@mui/icons-material";
+import {loadAllTask} from ''
 
 export default function ServiceTypeTable() {
   const [services, setServices] = useState([]);
@@ -45,10 +38,7 @@ export default function ServiceTypeTable() {
   const [alertUser, setAlertUser] = useState(false);
 
   const loadServices = async () => {
-    const response = await fetch("http://localhost:3000/tipo-de-servicio/", {
-      method: "GET",
-    });
-    const services = await response.json();
+    
     console.log(services);
     setServices(services);
   };
@@ -102,6 +92,15 @@ export default function ServiceTypeTable() {
 
   return (
     <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={() => setOpenAddDialog(true)}
+        sx={{ mt: 2 }}
+      >
+        Agregar Tipo de Servicio
+      </Button>
+
       <TableContainer component={Paper} sx={{ mt: 2 }}>
         <Table>
           <TableHead>
@@ -141,14 +140,6 @@ export default function ServiceTypeTable() {
           </TableBody>
         </Table>
       </TableContainer>
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={() => setOpenAddDialog(true)}
-        sx={{ mt: 2 }}
-      >
-        Agregar Tipo de Servicio
-      </Button>
 
       {/* Diálogo para agregar tipo de servicio */}
       <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>

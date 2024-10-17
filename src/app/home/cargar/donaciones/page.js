@@ -56,6 +56,7 @@ export default function DonacionesTable() {
     ]);
     const [searchTerm, setSearchTerm] = useState("");
     const [editingDonacion, setEditingDonacion] = useState(null);
+    const [errors, setErrors] = useState({});
     const [newDonacion, setNewDonacion] = useState({
         nombreDonante: "",
         monto: "",
@@ -83,26 +84,44 @@ export default function DonacionesTable() {
         setOpenEditDialog(true);
     };
 
-    const handleSaveEdit = () => {
-        setDonaciones(
-            donaciones.map((donacion) =>
-                donacion.id === editingDonacion.id ? editingDonacion : donacion
-            )
-        );
-        setOpenEditDialog(false);
+    const handleAdd = () => {
+        if (validate(newDonacion)) {
+            const id = (donaciones.length + 1).toString();
+            setDonaciones([...donaciones, { ...newDonacion, id }]);
+            setNewDonacion({
+                nombreDonante: "", monto: "", fecha: "", tipoDonacion: "",
+            });
+            setOpenAddDialog(false);
+        }
     };
 
-    const handleAdd = () => {
-        const id = (donaciones.length + 1).toString();
-        setDonaciones([...donaciones, { ...newDonacion, id }]);
-        setNewDonacion({
-            nombreDonante: "",
-            monto: "",
-            fecha: "",
-            tipoDonacion: "",
-        });
-        setOpenAddDialog(false);
+    const handleSaveEdit = () => {
+        if (validate(editingDonacion)) {
+            setDonaciones(donaciones.map((donacion) => (donacion.id === editingDonacion.id ? editingDonacion : donacion)));
+            setOpenEditDialog(false);
+        }
     };
+
+    const validate = (donacion) => {
+        let errors = {};
+
+        if (!donacion.nombreDonante || !/^[a-zA-Z\s]+$/.test(donacion.nombreDonante)) {
+            errors.nombreDonante = "El nombre del donante no puede estar vacío y debe contener solo letras y espacios.";
+        }
+        if (!donacion.monto || isNaN(donacion.monto)) {
+            errors.monto = "El monto debe ser un número y no puede estar vacío.";
+        }
+        if (!donacion.fecha) {
+            errors.fecha = "La fecha no puede estar vacía.";
+        }
+        if (!donacion.tipoDonacion || !/^[a-zA-Z\s]+$/.test(donacion.tipoDonacion)) {
+            errors.tipoDonacion = "El tipo de donación no puede estar vacío y debe contener solo letras.";
+        }
+
+        setErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
 
     const toggleColumn = (column) => {
         setVisibleColumns((prev) =>
@@ -227,35 +246,52 @@ export default function DonacionesTable() {
                     <DialogContentText>
                         Por favor, ingrese los detalles de la nueva donación.
                     </DialogContentText>
-                    {["nombreDonante", "monto", "tipoDonacion"].map((field) => (
-                        <TextField
-                            key={field}
-                            margin="dense"
-                            label={field.charAt(0).toUpperCase() + field.slice(1)}
-                            type="text"
-                            fullWidth
-                            variant="standard"
-                            value={newDonacion[field]}
-                            onChange={(e) =>
-                                setNewDonacion({ ...newDonacion, [field]: e.target.value })
-                            }
-                        />
-                    ))}
                     <TextField
-                            key="fecha"
-                            margin="dense"
-                            label="Fecha"
-                            type="date"
-                            fullWidth
-                            variant="outlined"
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            value={newDonacion.fecha}
-                            onChange={(e) =>
-                                setNewDonacion({ ...newDonacion, fecha: e.target.value })
-                            }
-                        />
+                        margin="dense"
+                        label="Nombre Donante"
+                        type="text"
+                        fullWidth
+                        variant="standard"
+                        value={newDonacion.nombreDonante}
+                        onChange={(e) => setNewDonacion({ ...newDonacion, nombreDonante: e.target.value })}
+                        error={!!errors.nombreDonante}
+                        helperText={errors.nombreDonante}
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Monto"
+                        type="text"
+                        fullWidth
+                        variant="standard"
+                        value={newDonacion.monto}
+                        onChange={(e) => setNewDonacion({ ...newDonacion, monto: e.target.value })}
+                        error={!!errors.monto}
+                        helperText={errors.monto}
+                    />
+                    <TextField
+                        key="fecha"
+                        margin="dense"
+                        label="Fecha"
+                        type="date"
+                        fullWidth
+                        variant="outlined"
+                        InputLabelProps={{ shrink: true }}
+                        value={newDonacion.fecha}
+                        onChange={(e) => setNewDonacion({ ...newDonacion, fecha: e.target.value })}
+                        error={!!errors.fecha}
+                        helperText={errors.fecha}
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Tipo Donación"
+                        type="text"
+                        fullWidth
+                        variant="standard"
+                        value={newDonacion.tipoDonacion}
+                        onChange={(e) => setNewDonacion({ ...newDonacion, tipoDonacion: e.target.value })}
+                        error={!!errors.tipoDonacion}
+                        helperText={errors.tipoDonacion}
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenAddDialog(false)}>Cancelar</Button>
@@ -270,25 +306,55 @@ export default function DonacionesTable() {
                     <DialogContentText>
                         Por favor, modifique los detalles de la donación.
                     </DialogContentText>
-                    {editingDonacion &&
-                        ["nombreDonante", "monto", "fecha", "tipoDonacion"].map((field) => (
+                    {editingDonacion && (
+                        <>
                             <TextField
-                                key={field}
                                 margin="dense"
-                                label={field.charAt(0).toUpperCase() + field.slice(1)}
+                                label="Nombre Donante"
                                 type="text"
                                 fullWidth
                                 variant="standard"
-                                value={editingDonacion[field]}
-                                onChange={(e) =>
-                                    setEditingDonacion({
-                                        ...editingDonacion,
-                                        [field]: e.target.value,
-                                    })
-                                }
+                                value={editingDonacion.nombreDonante}
+                                onChange={(e) => setEditingDonacion({ ...editingDonacion, nombreDonante: e.target.value })}
+                                error={!!errors.nombreDonante}
+                                helperText={errors.nombreDonante}
                             />
-                        ))}
-                </DialogContent>
+                            <TextField
+                                margin="dense"
+                                label="Monto"
+                                type="text"
+                                fullWidth
+                                variant="standard"
+                                value={editingDonacion.monto}
+                                onChange={(e) => setEditingDonacion({ ...editingDonacion, monto: e.target.value })}
+                                error={!!errors.monto}
+                                helperText={errors.monto}
+                            />
+                            <TextField
+                                key="fecha"
+                                margin="dense"
+                                label="Fecha"
+                                type="date"
+                                fullWidth
+                                variant="outlined"
+                                InputLabelProps={{ shrink: true }}
+                                value={editingDonacion.fecha}
+                                onChange={(e) => setEditingDonacion({ ...editingDonacion, fecha: e.target.value })}
+                            />
+                            <TextField
+                                margin="dense"
+                                label="Tipo Donación"
+                                type="text"
+                                fullWidth
+                                variant="standard"
+                                value={editingDonacion.tipoDonacion}
+                                onChange={(e) => setEditingDonacion({ ...editingDonacion, tipoDonacion: e.target.value })}
+                                error={!!errors.tipoDonacion}
+                                helperText={errors.tipoDonacion}
+                            />
+                        </>
+                    )}
+        </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
                     <Button onClick={handleSaveEdit}>Guardar</Button>

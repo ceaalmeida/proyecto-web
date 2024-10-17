@@ -109,6 +109,9 @@ export default function AdopcionesTable() {
         if (!adopcion.telefonoAdoptante || !/^\d{8}$/.test(adopcion.telefonoAdoptante)) {
             errors.telefonoAdoptante = "El teléfono debe contener solo números y tener 8 caracteres.";
         }
+        if (!adopcion.fecha) {
+            errors.fecha = "La fecha no puede estar vacía.";
+        }
 
         setErrors(errors);
         return Object.keys(errors).length === 0;
@@ -302,6 +305,8 @@ export default function AdopcionesTable() {
                         InputLabelProps={{ shrink: true }}
                         value={newAdopcion.fecha}
                         onChange={(e) => setNewAdopcion({ ...newAdopcion, fecha: e.target.value })}
+                        error={!!errors.fecha}
+                        helperText={errors.fecha}
                     />
                     <TextField
                         margin="dense"
@@ -347,6 +352,92 @@ export default function AdopcionesTable() {
                 <DialogActions>
                     <Button onClick={() => setOpenAddDialog(false)}>Cancelar</Button>
                     <Button onClick={handleAdd}>Agregar</Button>
+                </DialogActions>
+
+            </Dialog>
+            <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
+                <DialogTitle>Editar Adopción</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Modificar los detalles de la adopción.
+                    </DialogContentText>
+                    {editingAdopcion && (
+                        <>
+                            <TextField
+                                margin="dense"
+                                label="ID Adopción"
+                                fullWidth
+                                variant="outlined"
+                                value={editingAdopcion.idAdopcion}
+                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, idAdopcion: e.target.value })}
+                                disabled
+                            />
+                            <TextField
+                                margin="dense"
+                                label="ID Animal"
+                                fullWidth
+                                variant="outlined"
+                                value={editingAdopcion.idAnimal}
+                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, idAnimal: e.target.value })}
+                                error={!!errors.idAnimal}
+                                helperText={errors.idAnimal}
+                            />
+                            <TextField
+                                margin="dense"
+                                label="Fecha"
+                                type="date"
+                                fullWidth
+                                variant="outlined"
+                                InputLabelProps={{ shrink: true }}
+                                value={editingAdopcion.fecha}
+                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, fecha: e.target.value })}
+                            />
+                            <TextField
+                                margin="dense"
+                                label="Costo Adopción"
+                                fullWidth
+                                variant="outlined"
+                                value={editingAdopcion.costoAdopcion}
+                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, costoAdopcion: e.target.value })}
+                                error={!!errors.costoAdopcion}
+                                helperText={errors.costoAdopcion}
+                            />
+                            <TextField
+                                margin="dense"
+                                label="Nombre Adoptante"
+                                fullWidth
+                                variant="outlined"
+                                value={editingAdopcion.nombreAdoptante}
+                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, nombreAdoptante: e.target.value })}
+                                error={!!errors.nombreAdoptante}
+                                helperText={errors.nombreAdoptante}
+                            />
+                            <TextField
+                                margin="dense"
+                                label="Email Adoptante"
+                                fullWidth
+                                variant="outlined"
+                                value={editingAdopcion.emailAdoptante}
+                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, emailAdoptante: e.target.value })}
+                                error={!!errors.emailAdoptante}
+                                helperText={errors.emailAdoptante}
+                            />
+                            <TextField
+                                margin="dense"
+                                label="Teléfono Adoptante"
+                                fullWidth
+                                variant="outlined"
+                                value={editingAdopcion.telefonoAdoptante}
+                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, telefonoAdoptante: e.target.value })}
+                                error={!!errors.telefonoAdoptante}
+                                helperText={errors.telefonoAdoptante}
+                            />
+                        </>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
+                    <Button onClick={handleSaveEdit}>Guardar</Button>
                 </DialogActions>
             </Dialog>
 

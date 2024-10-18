@@ -14,7 +14,7 @@ export function AnimalCard({ elements, onButtonClick }) {
   return (
     <>
       {elements.map((element) => (
-        <Card sx={{ maxWidth: 345 }} className="card">
+        <Card key={element.nombre} sx={{ maxWidth: 345 }} className="card">
           <CardMedia
             className="cont"
             component="img"

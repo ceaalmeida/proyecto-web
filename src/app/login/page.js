@@ -38,7 +38,7 @@ export default function SlotsSignIn() {
     if (email.trim() === "asd@gmail.com" && password.trim() === "asd") {
       router.replace("/home");
     } else if (email.trim() === "qwe@gmail.com" && password.trim() === "qwe") {
-      router.replace("/home.user");
+      router.replace("/homeUser");
     } else {
       setOpenSnackbar(true);
     }

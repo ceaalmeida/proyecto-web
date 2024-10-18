@@ -76,16 +76,16 @@ export default function homeUser() {
     <div>
       <ResponsiveAppBar onButtonClick={manejadorOpciones}></ResponsiveAppBar>
       <h1 style={{ marginTop: "20px" }}>Animales</h1>
-      <div>
+      <div style={{justifyContent: "center"}}>
         {opcion ===
           "Animales" && (
-            <TextField
+            <TextField            
               label="Buscar animales"
               variant="outlined"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               sx={{ mb: 2 }}
-              style={{ marginTop: "20px" }}
+              style={{ marginTop: "20px"}}
             />
           )}       
 

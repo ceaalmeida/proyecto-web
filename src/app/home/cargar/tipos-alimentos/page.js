@@ -1,193 +1,234 @@
-"use client"
-import React, { useState } from "react";
+"use client";
+import React, { useState, useEffect } from "react";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
-    Button,
-    TextField,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle, IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  CircularProgress,
 } from "@mui/material";
 import {
-    Add as AddIcon,
-    Edit as EditIcon,
-    Delete as DeleteIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
 } from "@mui/icons-material";
-
-const initialFoodTypes = [
-    { id: 1, tipo: "Seco", descripcion: "Alimento seco para perros y gatos" },
-    { id: 2, tipo: "Húmedo", descripcion: "Alimento húmedo para perros y gatos" },
-    { id: 3, tipo: "Snacks", descripcion: "Snacks y golosinas para mascotas" },
-];
+import {
+  loadAllFoods,
+  createFood,
+  deleteFood,
+  readFood,
+  updateFood,
+} from "../../../api/tipo-de-alimento/tipo-de-alimento.service";
 
 export default function FoodTypeTable() {
-    const [foodTypes, setFoodTypes] = useState(initialFoodTypes);
-    const [editingType, setEditingType] = useState(null);
-    const [newType, setNewType] = useState({
-        tipo: "",
-        descripcion: "",
-    });
-    const [openAddDialog, setOpenAddDialog] = useState(false);
-    const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [foodTypes, setFoodTypes] = useState([]);
+  const [editingType, setEditingType] = useState(null);
+  const [creatingFood, setCreatingFodd] = useState(false);
+  const [foodToDelete, setFoodToDelete] = useState(null);
+  const [deletingFood,  setDeletingFood] = useState(false);
 
-    const handleDelete = (id) => {
-        setFoodTypes(foodTypes.filter((type) => type.id !== id));
-    };
+  const [newType, setNewType] = useState({
+    ID_Alimento: "",
+    Nombre_Alimento: "",
+  });
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [editType, setEditType] = useState(false);
 
-    const handleEdit = (type) => {
-        setEditingType(type);
-        setOpenEditDialog(true);
-    };
+  const loadFoods = async () => {
+    const foods = await loadAllFoods();
+    setFoodTypes(foods);
+  };
 
-    const handleSaveEdit = () => {
-        setFoodTypes(
-            foodTypes.map((type) =>
-                type.id === editingType.id ? editingType : type
-            )
-        );
-        setOpenEditDialog(false);
-    };
+  useEffect(() => {
+    loadFoods();
+  }, []);
 
-    const handleAdd = () => {
-        const id = Math.max(...foodTypes.map((t) => t.id)) + 1;
-        setFoodTypes([...foodTypes, { ...newType, id }]);
-        setNewType({ tipo: "", descripcion: "" });
-        setOpenAddDialog(false);
-    };
+  const handleAdd = async () => {
+    setCreatingFodd(true);
+    const id = Math.max(...foodTypes.map((t) => t.id)) + 1;
+    try {
+      await createFood(newType);
+    } catch (error) {
+      alert(error.message);
+    }
 
-    return (
-        <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
-            <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Tipo</TableCell>
-                            <TableCell>Descripción</TableCell>
-                            <TableCell>Acciones</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {foodTypes.map((type) => (
-                            <TableRow key={type.id}>
-                                <TableCell>{type.tipo}</TableCell>
-                                <TableCell>{type.descripcion}</TableCell>
-                                <TableCell>
-                                    <IconButton
-                                        onClick={() => handleEdit(type)}
-                                        color="primary"
-                                    >
-                                        <EditIcon />
-                                    </IconButton>
-                                    <IconButton
-                                        onClick={() => handleDelete(type.id)}
-                                        color="error"
-                                    >
-                                        <DeleteIcon />
-                                    </IconButton>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-            <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => setOpenAddDialog(true)}
-                sx={{  mt:2 }}
-            >
-                Agregar Tipo de Alimento
-            </Button>
+    setFoodTypes([...foodTypes, { ...newType, id }]);
+    setNewType({ tipo: "", descripcion: "" });
+    setOpenAddDialog(false);
+    setCreatingFodd(false)
+  };
 
-            {/* Diálogo para agregar tipo de alimento */}
-            <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
-                <DialogTitle>Agregar Nuevo Tipo de Alimento</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Por favor, ingrese los detalles del nuevo tipo de alimento.
-                    </DialogContentText>
-                    <TextField
-                        margin="dense"
-                        label="Tipo"
-                        type="text"
-                        fullWidth
-                        variant="standard"
-                        value={newType.tipo}
-                        onChange={(e) =>
-                            setNewType({ ...newType, tipo: e.target.value })
-                        }
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Descripción"
-                        type="text"
-                        fullWidth
-                        variant="standard"
-                        value={newType.descripcion}
-                        onChange={(e) =>
-                            setNewType({ ...newType, descripcion: e.target.value })
-                        }
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenAddDialog(false)}>Cancelar</Button>
-                    <Button onClick={handleAdd}>Agregar</Button>
-                </DialogActions>
-            </Dialog>
+  const handleDelete = async () => {
+    setDeletingFood(true)
+    await deleteFood(foodToDelete)
 
-            {/* Diálogo para editar tipo de alimento */}
-            <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
-                <DialogTitle>Editar Tipo de Alimento</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Por favor, modifique los detalles del tipo de alimento.
-                    </DialogContentText>
-                    {editingType && (
-                        <>
-                            <TextField
-                                margin="dense"
-                                label="Tipo"
-                                type="text"
-                                fullWidth
-                                variant="standard"
-                                value={editingType.tipo}
-                                onChange={(e) =>
-                                    setEditingType({
-                                        ...editingType,
-                                        tipo: e.target.value,
-                                    })
-                                }
-                            />
-                            <TextField
-                                margin="dense"
-                                label="Descripción"
-                                type="text"
-                                fullWidth
-                                variant="standard"
-                                value={editingType.descripcion}
-                                onChange={(e) =>
-                                    setEditingType({
-                                        ...editingType,
-                                        descripcion: e.target.value,
-                                    })
-                                }
-                            />
-                        </>
-                    )}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
-                    <Button onClick={handleSaveEdit}>Guardar Cambios</Button>
-                </DialogActions>
-            </Dialog>
-        </Paper>
+    setFoodTypes(foodTypes.filter((food) => food.ID_Alimento !== foodToDelete));
+    setOpenConfirmDialog(false)
+    setDeletingFood(false)
+  };
+
+  const handleSaveEdit = async () => {
+    setEditType(true);
+
+    try {
+      await updateFood(editingType.ID_Alimento, editingType);
+    } catch (error) {
+      console.log(error.message);
+    }
+
+    setFoodTypes(
+      foodTypes.map((type) => (type.ID_Alimento === editingType.ID_Alimento ? editingType : type))
     );
+    setOpenEditDialog(false);
+    setEditType(false);
+
+  };
+
+  return (
+    <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={() => setOpenAddDialog(true)}
+        sx={{ mt: 2 }}
+      >
+        Agregar Tipo de Alimento
+      </Button>
+
+      <TableContainer component={Paper} sx={{ mt: 2 }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Nombre del Alimento</TableCell>
+              <TableCell align="right">Acciones</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {foodTypes.map((food) => (
+              <TableRow key={food.ID_Alimento}>
+                <TableCell>{food.Nombre_Alimento}</TableCell>
+                <TableCell align="right">
+                  <Button
+                    variant="outlined"
+                    onClick={() => {
+                      setEditingType(food);
+                      setOpenEditDialog(true);
+                    }}
+                  >
+                    Editar
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={() => {
+                      setFoodToDelete(food.ID_Alimento);
+                      setOpenConfirmDialog(true);
+                    }}
+                  >
+                    Eliminar
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Diálogo para agregar tipo de alimento */}
+      <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
+        <DialogTitle>Agregar Nuevo Tipo de Alimento</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Por favor, ingrese los detalles del nuevo tipo de alimento.
+          </DialogContentText>
+          <TextField
+            margin="dense"
+            label="Nombre"
+            type="text"
+            fullWidth
+            variant="standard"
+            value={newType.descripcion}
+            onChange={(e) =>
+              setNewType({
+                ...newType,
+                Nombre_Alimento: e.target.value,
+                ID_Alimento: Math.floor(100000 + Math.random() * 900000),
+              })
+            }
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenAddDialog(false)}>Cancelar</Button>
+          <Button onClick={creatingFood ? null : handleAdd}>
+            {creatingFood ? <CircularProgress /> : "Agregar"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Diálogo para editar tipo de alimento */}
+      <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
+        <DialogTitle>Editar Tipo de Alimento</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Por favor, modifique los detalles del tipo de alimento.
+          </DialogContentText>
+          {editingType && (
+            <>
+              <TextField
+                margin="dense"
+                label="Nombre"
+                type="text"
+                fullWidth
+                variant="standard"
+                value={editingType.Nombre_Alimento}
+                onChange={(e) =>
+                  setEditingType({
+                    ...editingType,
+                    Nombre_Alimento: e.target.value,
+                  })
+                }
+              />
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
+          <Button onClick={editType ? null : handleSaveEdit}>
+            {editType ? <CircularProgress /> : "Guardar Cambios"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialogo de Confirmacion para Eliminar */}
+      <Dialog
+        open={openConfirmDialog}
+        onClose={() => setOpenConfirmDialog(false)}
+      >
+        <DialogTitle>Eliminar Tipo de Alimento</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            ¿Está seguro de que desea eliminar el Tipo de Alimento?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenConfirmDialog(false)}>Cancelar</Button>
+          <Button onClick={deletingFood? null:handleDelete} color="error">
+            {deletingFood? <CircularProgress/>:"Eliminar"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Paper>
+  );
 }

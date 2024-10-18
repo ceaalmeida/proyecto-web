@@ -15,13 +15,16 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  CircularProgress
+  CircularProgress,
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
+import { Add as AddIcon } from "@mui/icons-material";
 import {
-  Add as AddIcon,
-} from "@mui/icons-material";
-import {loadAllTask} from ''
+  loadAllServices,
+  createService,
+  readService,
+  deleteService,
+  updateService,
+} from "../../../api/tipo-de-servicio/tipo-de-servicio.service";
 
 export default function ServiceTypeTable() {
   const [services, setServices] = useState([]);
@@ -35,16 +38,14 @@ export default function ServiceTypeTable() {
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [creatingService, setCreatingService] = useState(false);
+  const [editService, setEditService] = useState(false);
+  const [deletingService, setDeletingService] = useState(false);
+
   const [alertUser, setAlertUser] = useState(false);
 
   const loadServices = async () => {
-    const response = await fetch("http://localhost:3000/tipo-de-servicio/", {
-      method: "GET",
-    });
-    const services = await response.json();
-    
-    console.log(services);
-    setServices(services);
+    const data = await loadAllServices();
+    setServices(data);
   };
 
   useEffect(() => {
@@ -52,6 +53,9 @@ export default function ServiceTypeTable() {
   }, []);
 
   const handleSaveEdit = () => {
+    setEditService(true);
+    console.log(editingService)
+
     setServices(
       services.map((service) =>
         service.ID_Servicio === editingService.ID_Servicio
@@ -60,19 +64,13 @@ export default function ServiceTypeTable() {
       )
     );
     setOpenEditDialog(false);
+    setEditService(false)
   };
 
   const handleAdd = async () => {
     setCreatingService(true);
     const ID_Servicio = Math.max(...services.map((s) => s.ID_Servicio)) + 1;
-    const response = await fetch("http://localhost:3000/tipo-de-servicio", {
-      method: "POST",
-      body: JSON.stringify(newService),
-      headers: { "Content-Type": "application/json" },
-    });
-    const data = await response.json();
-
-    console.log(data);
+    await createService(newService);
 
     setServices([...services, { ...newService, ID_Servicio }]);
     setNewService({
@@ -85,13 +83,13 @@ export default function ServiceTypeTable() {
   };
 
   const handleDelete = async () => {
-    await fetch(`http://localhost:3000/tipo-de-servicio/${serviceToDelete}`, {
-      method: "DELETE",
-    });
+    setDeletingService(true);
+    await deleteService(serviceToDelete);
     setServices(
       services.filter((service) => service.ID_Servicio !== serviceToDelete)
     );
     setOpenConfirmDialog(false);
+    setDeletingService(false);
   };
 
   return (
@@ -213,7 +211,9 @@ export default function ServiceTypeTable() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
-          <Button onClick={handleSaveEdit}>Guardar Cambios</Button>
+          <Button onClick={handleSaveEdit}>
+            {editService ? <CircularProgress /> : "Guardar Cambios"}
+          </Button>
         </DialogActions>
       </Dialog>
 
@@ -230,8 +230,8 @@ export default function ServiceTypeTable() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenConfirmDialog(false)}>Cancelar</Button>
-          <Button onClick={handleDelete} color="error">
-            Eliminar
+          <Button onClick={deletingService? null: handleDelete} color="error">
+            {deletingService ? <CircularProgress color="error" /> : "Eliminar"}
           </Button>
         </DialogActions>
       </Dialog>

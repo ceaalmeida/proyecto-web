@@ -41,15 +41,6 @@ import {
   ChevronDown,
   ChefHat,
 } from "lucide-react";
-import { AppBar, iconButtonClasses, SwipeableDrawer } from "@mui/material";
-import {
-  Avatar,
-  Button,
-  Typography,
-  MenuIcon,
-  IconButton,
-  Toolbar,
-} from "@mui/material/Toolbar";
 
 const NAVIGATION = [
   {
@@ -304,7 +295,8 @@ export default function DashboardLayoutBasic(props) {
       ></SwipeableTemporaryDrawer>
 
       <DashboardLayout>
-        <PageContainer>{renderComponent()}</PageContainer>
+        {renderComponent()}
+        {/* <PageContainer>{}</PageContainer> */}
       </DashboardLayout>
     </AppProvider>
   );

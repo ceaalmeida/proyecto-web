@@ -30,21 +30,21 @@ export default function CreateAccount({ onLogin }) {
   const [token, setToken] = useState("");
 
   const [errorNombre, setErrorNombre] = useState("");
-  const [estadoErrorNombre, setEstadoErrorNombre] = useState(false)
+  const [estadoErrorNombre, setEstadoErrorNombre] = useState(false);
   const [errorApellido, setErrorApellido] = useState("");
-  const [estadoErrorApellido, setEstadoErrorApellido] = useState(false)
+  const [estadoErrorApellido, setEstadoErrorApellido] = useState(false);
   const [errorUser, setErrorUser] = useState("");
   const [estadoErrorUser, setEstadoErrorUser] = useState(false);
   const [errorPassword, setErrorPassword] = useState("");
   const [estadoErrorPassword, setEstadoErrorPassword] = useState(false);
   const [errorConfirmPassword, setErrorConfirmPassword] = useState("");
-  const [estadoErrorConfirmPassword, setEstadoErrorConfirmPassword] = useState(false);
+  const [estadoErrorConfirmPassword, setEstadoErrorConfirmPassword] =
+    useState(false);
   const [errorEmail, setErrorEmail] = useState("");
   const [estadoErrorEmail, setEstadoErrorEmail] = useState(false);
-  const [error,  setError] = useState("");
+  const [error, setError] = useState("");
 
   const [estadoError, setEstadoError] = useState(false);
-
 
   const router = useRouter();
 
@@ -82,37 +82,37 @@ export default function CreateAccount({ onLogin }) {
   const validateToken = () => {};
 
   const validarNombre = () => {
-  setEstadoErrorNombre(false); // Resetea el estado de error
-  if (nombre.trim() === "") {
-    setEstadoErrorNombre(true); // Si el nombre está vacío, marca el estado de error
-    setErrorNombre("El nombre es requerido")
-    setEstadoError(true);
-    return false;
-  } else if (/[0-9]/.test(nombre)) {
-    setErrorNombre("El nombre no puede contener números");
-    setError("El nombre no puede contener números");
-    setEstadoError(true);
-    return false;
-  }
-  return true;
-};
+    setEstadoErrorNombre(false); // Resetea el estado de error
+    if (nombre.trim() === "") {
+      setEstadoErrorNombre(true); // Si el nombre está vacío, marca el estado de error
+      setErrorNombre("El nombre es requerido");
+      setEstadoError(true);
+      return false;
+    } else if (/[0-9]/.test(nombre)) {
+      setErrorNombre("El nombre no puede contener números");
+      setError("El nombre no puede contener números");
+      setEstadoError(true);
+      return false;
+    }
+    return true;
+  };
 
-const validarApellido = () => {
-  setEstadoErrorApellido(false); // Resetea el estado de error
-  if (apellido.trim() === "") {
-    setEstadoErrorApellido(true); // Si el apellido está vacío, marca el estado de error
-    setErrorApellido("El apellido es requerido");
-    setEstadoError(true);
-    return false;
-  }
-  if (/[0-9]/.test(apellido)) {
-    setErrorApellido(true);
-    setError("El apellido no puede contener números");
-    setEstadoError(true);
-    return false;
-  }
-  return true;
-};
+  const validarApellido = () => {
+    setEstadoErrorApellido(false); // Resetea el estado de error
+    if (apellido.trim() === "") {
+      setEstadoErrorApellido(true); // Si el apellido está vacío, marca el estado de error
+      setErrorApellido("El apellido es requerido");
+      setEstadoError(true);
+      return false;
+    }
+    if (/[0-9]/.test(apellido)) {
+      setErrorApellido(true);
+      setError("El apellido no puede contener números");
+      setEstadoError(true);
+      return false;
+    }
+    return true;
+  };
 
   const validarUsuario = () => {
     if (user.trim() === "") {
@@ -319,6 +319,14 @@ const validarApellido = () => {
             sx={{ mt: 3, mb: 2 }}
           >
             Crear Cuenta
+          </Button>
+          <Button
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+            onClick={router.refresh("/login")}
+          >
+            Iniciar Sesión
           </Button>
         </Box>
         <Dialog open={sendingToken}>

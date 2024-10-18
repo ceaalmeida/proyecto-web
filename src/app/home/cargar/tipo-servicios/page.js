@@ -19,12 +19,9 @@ import {
 } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
 import {
-  loadAllServices,
-  createService,
-  readService,
-  deleteService,
-  updateService,
-} from "../../../api/tipo-de-servicio/tipo-de-servicio.service";
+  Add as AddIcon,
+} from "@mui/icons-material";
+import {loadAllTask} from ''
 
 export default function ServiceTypeTable() {
   const [services, setServices] = useState([]);

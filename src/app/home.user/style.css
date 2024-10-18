@@ -1,18 +1,26 @@
 .section {
     display: flex;    
     flex-wrap: wrap; /*  pa que se agrupen pa la siguiente fila    */
-    gap: 16px; /* Añade espacio entre los elementos */
-    flex: auto;
-    margin-top: 5rem;
-    margin-right: 5rem;
-    margin-left: 5rem;
-    margin-bottom: 5rem;
-    
+    gap: 11px; /* Añade espacio entre los elementos */
+    justify-content: center;
+    transition:background 0.5s ease,opacity 0.5s ease;
 }
-.card {
-    margin: 15px
+.card{
+    background:white;
+    margin: 15px;     
+    width: 250px;
+    transition:background 0.5s ease;
 }
-.card:hover{
-    background-color:#004ba0;
-    transition:background-color .5s ease;
+.card:hover  {    
+    background: #1976d2;    
+    transition:background 0.5s ease;
+}
+.card:hover .cont{
+    opacity: 200;
+    filter: blur(1px);    
+    transition:opacity 0.5s ease;
+}
+.cont{
+    opacity: 1;    
+    transition:opacity 1s ease;
 }

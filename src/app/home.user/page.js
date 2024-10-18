@@ -35,10 +35,10 @@ export default function homeUser() {
       Precio_Adopción: 270,
     },
     {
-      Nombre: "Milo",
-      Especie: "Gato",
-      Raza: "Persa",
-      Precio_Adopción: 270,
+      Nombre: "Max",
+      Especie: "Perro",
+      Raza: "Labrador",
+      Precio_Adopción: 300,
     },
     {
       Nombre: "Milo",
@@ -57,9 +57,33 @@ export default function homeUser() {
       Especie: "Gato",
       Raza: "Persa",
       Precio_Adopción: 270,
+    },
+    {
+      Nombre: "Milo",
+      Especie: "Gato",
+      Raza: "Persa",
+      Precio_Adopción: 270,
+    },
+    {
+      Nombre: "Max",
+      Especie: "Perro",
+      Raza: "Labrador",
+      Precio_Adopción: 300,
+    },
+    {
+      Nombre: "Milo",
+      Especie: "Gato",
+      Raza: "Persa",
+      Precio_Adopción: 270,
+    },
+    {
+      Nombre: "Rocky",
+      Especie: "Perro",
+      Raza: "Pastor Alemán",
+      Precio_Adopción: 350,
     },
   ];
-  const [opcion, setOpciones] = useState("");
+  const [opcion, setOpciones] = useState("Animales");
   const [element, setElements] = useState("");
   const [busqueda, setBusqueda] = useState("");
 
@@ -71,28 +95,27 @@ export default function homeUser() {
     Object.values(adopcion).some((value) =>
       value.toString().toLowerCase().includes(busqueda.toLowerCase())
     )
-  );
+)
   return (
     <div>
       <ResponsiveAppBar onButtonClick={manejadorOpciones}></ResponsiveAppBar>
       <h1>Animales</h1>
       <div>
-        <TextField
-          label="Buscar animales"
-          variant="outlined"
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          sx={{ mb: 2 }}
-        />
-        {
-          <section className="section">
-            <AnimalCard
-              elements={filtrado}
-              onButtonClick={manejadorOpciones}
-              className="card"
+      <TextField
+                label="Buscar animales"
+                variant="outlined"
+                value={busqueda}
+                onChange={(e)=>setBusqueda(e.target.value)}
+                sx={{ mb: 2 }}
             />
-          </section>
-        }
+      {
+        
+          
+            <section className="section">
+              <AnimalCard elements={filtrado} onButtonClick={manejadorOpciones} className="card"/>
+            </section>
+         
+      }
       </div>
     </div>
   );

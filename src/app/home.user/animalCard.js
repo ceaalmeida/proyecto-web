@@ -16,12 +16,13 @@ export function AnimalCard({ elements, onButtonClick }) {
       {elements.map((element) => (
         <Card sx={{ maxWidth: 345 }} className="card">
           <CardMedia
+            className="cont"
             component="img"
             alt={element.Especie}
             height="140"
-            image="./animal.jpg"
+            image="/animal.jpg"
           />
-          <CardContent>
+          <CardContent >
             <Typography gutterBottom variant="h5" component="div">
               {element.Nombre}
             </Typography>
@@ -31,7 +32,7 @@ export function AnimalCard({ elements, onButtonClick }) {
               Precio adopcion: {element.Precio_Adopción}
             </Typography>
           </CardContent>
-          <CardActions>
+          {/* <CardActions >
             {buttons.map((butt) => (
               <Button
                 variant="contained"
@@ -42,10 +43,10 @@ export function AnimalCard({ elements, onButtonClick }) {
               >
                 {butt}
               </Button>
-            ))}
+            ))} */}
             {/* <Button size="small">Donar</Button>
                 <Button size="small">Mas..</Button> */}
-          </CardActions>
+          {/* </CardActions> */}
         </Card>
       ))}
     </>

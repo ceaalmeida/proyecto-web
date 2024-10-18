@@ -1,15 +1,14 @@
 "use client";
 import { useState } from "react";
-import {ResponsiveAppBar } from "./menuBar";
-import  {AnimalCard} from "./animalCard"
+import { ResponsiveAppBar } from "./menuBar";
+import { AnimalCard } from "./animalCard";
 import ContractTable from "../home/cargar/contratos/page";
 import AdopcionesTable from "../home/cargar/adopciones/page";
-import Adoptar from "./adoptar"
+import Adoptar from "./adoptar";
 import "./style.css";
 import { TextField } from "@mui/material";
 
 export default function homeUser() {
-  
   const initialAnimals = [
     {
       Nombre: "Max",
@@ -62,39 +61,51 @@ export default function homeUser() {
   ];
   const [opcion, setOpciones] = useState("Animales");
   const [element, setElements] = useState("");
-  const [busqueda,setBusqueda]= useState("")
-  
-  const manejadorOpciones = (pages,element) => {
+  const [busqueda, setBusqueda] = useState("");
+
+  const manejadorOpciones = (pages, element) => {
     setOpciones(pages);
     setElements(element);
   };
-   const filtrado= initialAnimals.filter((adopcion) =>
+  const filtrado = initialAnimals.filter((adopcion) =>
     Object.values(adopcion).some((value) =>
-        value.toString().toLowerCase().includes(busqueda.toLowerCase())
+      value.toString().toLowerCase().includes(busqueda.toLowerCase())
     )
-)
+  );
   return (
     <div>
       <ResponsiveAppBar onButtonClick={manejadorOpciones}></ResponsiveAppBar>
-      <h1 style={{marginTop: "20px"}}>Animales</h1>
+      <h1 style={{ marginTop: "20px" }}>Animales</h1>
       <div>
-      <TextField
-                label="Buscar animales"
-                variant="outlined"
-                value={busqueda}
-                onChange={(e)=>setBusqueda(e.target.value)}
-                sx={{ mb: 2 }}
-                style={{marginTop: "20px"}}
-            />    
-          
-            <section className="section">
-              {opcion ==="Animales" && <AnimalCard elements={filtrado} onButtonClick={manejadorOpciones} className="card"/>}
-          
-          {opcion === "Adoptar" &&  <Adoptar element={element} onButtonClick={manejadorOpciones}></Adoptar> }
-          {opcion === "MAS" &&  <h1>Perfil</h1>}  
-            </section>           
-           
-      
+        {opcion ===
+          "Animales" && (
+            <TextField
+              label="Buscar animales"
+              variant="outlined"
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              sx={{ mb: 2 }}
+              style={{ marginTop: "20px" }}
+            />
+          )}       
+
+        <section className="section">
+          {opcion === "Animales" && (
+            <AnimalCard
+              elements={filtrado}
+              onButtonClick={manejadorOpciones}
+              className="card"
+            />
+          )}
+
+          {opcion === "Adoptar" && (
+            <Adoptar
+              element={element}
+              onButtonClick={manejadorOpciones}
+            ></Adoptar>
+          )}
+          {opcion === "MAS" && <h1>Perfil</h1>}
+        </section>
       </div>
     </div>
   );

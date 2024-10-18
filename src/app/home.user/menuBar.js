@@ -27,7 +27,7 @@ export const ResponsiveAppBar = ({ value, Changes }) => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const [activeButton, setActiveButton] = React.useState("");
-  const [inicio,setInicio]=React.useState("");
+  const [inicio, setInicio] = React.useState("");
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -44,11 +44,10 @@ export const ResponsiveAppBar = ({ value, Changes }) => {
     setAnchorElUser(null);
   };
 
-  
-  const manejarBusqueda=(e)=>{
-       setInicio(e.target.value);
-       Changes(inicio)
-  }
+  const manejarBusqueda = (e) => {
+    setInicio(e.target.value);
+    Changes(inicio);
+  };
   return (
     <AppBar position="static">
       <Container maxWidth="xl">
@@ -71,9 +70,6 @@ export const ResponsiveAppBar = ({ value, Changes }) => {
           >
             Amigos de Patas
           </Typography>
-          
-            
-          
 
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
             <IconButton
@@ -128,30 +124,41 @@ export const ResponsiveAppBar = ({ value, Changes }) => {
           >
             LOGO
           </Typography>
-          
+
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}></Box>
-          <Box>
-          {value === "Animales" && (            
+          <Box sx={{ flexGrow: 1 ,display: 'flex', justifyContent: 'flex-start'}}>
+            {value === "Animales" && (
               <MenuItem>
                 <TextField
                   classname="busqueda"
                   label="Buscar animales"
                   variant="outlined"
                   value={inicio}
-                  onChange={manejarBusqueda}                  
-                  sx={{ mb: 2, p: 0 }}
-                  style={{ marginTop: "10px"}}
+                  onChange={manejarBusqueda}
+                  sx={{
+                    mb: 2,
+                    p: 0,
+                    mt: 2,
+                    width: "300px",
+                    "& .MuiInputBase-input": {
+                      color: "black", // Cambia el color del texto
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "black", // Cambia el color del label
+                      
+                    },
+                  }}
                 />
               </MenuItem>
             )}
-            </Box>
+          </Box>
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
               </IconButton>
             </Tooltip>
-            
+
             <Menu
               sx={{ mt: "45px" }}
               id="menu-appbar"
@@ -176,7 +183,6 @@ export const ResponsiveAppBar = ({ value, Changes }) => {
                 </MenuItem>
               ))}
             </Menu>
-            
           </Box>
         </Toolbar>
       </Container>

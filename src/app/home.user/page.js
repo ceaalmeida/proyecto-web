@@ -35,10 +35,10 @@ export default function homeUser() {
       Precio_Adopción: 270,
     },
     {
-      Nombre: "Milo",
-      Especie: "Gato",
-      Raza: "Persa",
-      Precio_Adopción: 270,
+      Nombre: "Max",
+      Especie: "Perro",
+      Raza: "Labrador",
+      Precio_Adopción: 300,
     },
     {
       Nombre: "Milo",
@@ -57,6 +57,30 @@ export default function homeUser() {
       Especie: "Gato",
       Raza: "Persa",
       Precio_Adopción: 270,
+    },
+    {
+      Nombre: "Milo",
+      Especie: "Gato",
+      Raza: "Persa",
+      Precio_Adopción: 270,
+    },
+    {
+      Nombre: "Max",
+      Especie: "Perro",
+      Raza: "Labrador",
+      Precio_Adopción: 300,
+    },
+    {
+      Nombre: "Milo",
+      Especie: "Gato",
+      Raza: "Persa",
+      Precio_Adopción: 270,
+    },
+    {
+      Nombre: "Rocky",
+      Especie: "Perro",
+      Raza: "Pastor Alemán",
+      Precio_Adopción: 350,
     },
   ];
   const [opcion, setOpciones] = useState("Animales");
@@ -72,12 +96,13 @@ export default function homeUser() {
       value.toString().toLowerCase().includes(busqueda.toLowerCase())
     )
   );
+  const manejarBusqueda=(element)=>{
+        setBusqueda(element)
+  }
   return (
-    <div>
-      <ResponsiveAppBar onButtonClick={manejadorOpciones}></ResponsiveAppBar>
-      <h1 style={{ marginTop: "20px" }}>Animales</h1>
-      <div style={{justifyContent: "center"}}>
-        {opcion ===
+    <div >
+      <ResponsiveAppBar value={opcion} Changes={manejarBusqueda}>
+      {opcion ===
           "Animales" && (
             <TextField            
               label="Buscar animales"
@@ -87,7 +112,20 @@ export default function homeUser() {
               sx={{ mb: 2 }}
               style={{ marginTop: "20px"}}
             />
-          )}       
+          )} 
+      </ResponsiveAppBar>      
+      <div style={{ justifyContent: "center"}} >
+        {/* {opcion ===
+          "Animales" && (
+            <TextField            
+              label="Buscar animales"
+              variant="outlined"
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              sx={{ mb: 2 }}
+              style={{ marginTop: "20px"}}
+            />
+          )}        */}
 
         <section className="section">
           {opcion === "Animales" && (

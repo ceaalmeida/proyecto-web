@@ -17,15 +17,17 @@ import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
+import { TextField } from "@mui/material";
 // import "./style.css";
 
-const pages = ["Animales","Adopciones","Donaciones"];
+const pages = ["Animales", "Adopciones", "Donaciones"];
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
-export const ResponsiveAppBar = ({ onButtonClick }) => {
+export const ResponsiveAppBar = ({ value, Changes }) => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const [activeButton, setActiveButton] = React.useState("");
+  const [inicio,setInicio]=React.useState("");
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -42,6 +44,11 @@ export const ResponsiveAppBar = ({ onButtonClick }) => {
     setAnchorElUser(null);
   };
 
+  
+  const manejarBusqueda=(e)=>{
+       setInicio(e.target.value);
+       Changes(inicio)
+  }
   return (
     <AppBar position="static">
       <Container maxWidth="xl">
@@ -51,7 +58,7 @@ export const ResponsiveAppBar = ({ onButtonClick }) => {
             variant="h6"
             noWrap
             component="a"
-            href="#app-bar-with-responsive-menu"
+            //href="#app-bar-with-responsive-menu"
             sx={{
               mr: 2,
               display: { xs: "none", md: "flex" },
@@ -62,8 +69,11 @@ export const ResponsiveAppBar = ({ onButtonClick }) => {
               textDecoration: "none",
             }}
           >
-            LOGO
+            Amigos de Patas
           </Typography>
+          
+            
+          
 
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
             <IconButton
@@ -118,14 +128,30 @@ export const ResponsiveAppBar = ({ onButtonClick }) => {
           >
             LOGO
           </Typography>
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-          </Box>
+          
+          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}></Box>
+          <Box>
+          {value === "Animales" && (            
+              <MenuItem>
+                <TextField
+                  classname="busqueda"
+                  label="Buscar animales"
+                  variant="outlined"
+                  value={inicio}
+                  onChange={manejarBusqueda}                  
+                  sx={{ mb: 2, p: 0 }}
+                  style={{ marginTop: "10px"}}
+                />
+              </MenuItem>
+            )}
+            </Box>
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
               </IconButton>
             </Tooltip>
+            
             <Menu
               sx={{ mt: "45px" }}
               id="menu-appbar"
@@ -150,6 +176,7 @@ export const ResponsiveAppBar = ({ onButtonClick }) => {
                 </MenuItem>
               ))}
             </Menu>
+            
           </Box>
         </Toolbar>
       </Container>

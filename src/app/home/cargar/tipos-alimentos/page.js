@@ -35,7 +35,7 @@ export default function FoodTypeTable() {
   const [editingType, setEditingType] = useState(null);
   const [creatingFood, setCreatingFodd] = useState(false);
   const [foodToDelete, setFoodToDelete] = useState(null);
-  const [deletingFood,  setDeletingFood] = useState(false);
+  const [deletingFood, setDeletingFood] = useState(false);
 
   const [newType, setNewType] = useState({
     ID_Alimento: "",
@@ -65,18 +65,18 @@ export default function FoodTypeTable() {
     }
 
     setFoodTypes([...foodTypes, { ...newType, id }]);
-    setNewType({ tipo: "", descripcion: "" });
+    setNewType({ ID_Alimento: "", Nombre_Alimento: "" });
     setOpenAddDialog(false);
-    setCreatingFodd(false)
+    setCreatingFodd(false);
   };
 
   const handleDelete = async () => {
-    setDeletingFood(true)
-    await deleteFood(foodToDelete)
+    setDeletingFood(true);
+    await deleteFood(foodToDelete);
 
     setFoodTypes(foodTypes.filter((food) => food.ID_Alimento !== foodToDelete));
-    setOpenConfirmDialog(false)
-    setDeletingFood(false)
+    setOpenConfirmDialog(false);
+    setDeletingFood(false);
   };
 
   const handleSaveEdit = async () => {
@@ -89,11 +89,12 @@ export default function FoodTypeTable() {
     }
 
     setFoodTypes(
-      foodTypes.map((type) => (type.ID_Alimento === editingType.ID_Alimento ? editingType : type))
+      foodTypes.map((type) =>
+        type.ID_Alimento === editingType.ID_Alimento ? editingType : type
+      )
     );
     setOpenEditDialog(false);
     setEditType(false);
-
   };
 
   return (
@@ -111,7 +112,7 @@ export default function FoodTypeTable() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Nombre del Alimento</TableCell>
+              <TableCell>N ombre del Alimento</TableCell>
               <TableCell align="right">Acciones</TableCell>
             </TableRow>
           </TableHead>
@@ -224,8 +225,8 @@ export default function FoodTypeTable() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenConfirmDialog(false)}>Cancelar</Button>
-          <Button onClick={deletingFood? null:handleDelete} color="error">
-            {deletingFood? <CircularProgress/>:"Eliminar"}
+          <Button onClick={deletingFood ? null : handleDelete} color="error">
+            {deletingFood ? <CircularProgress /> : "Eliminar"}
           </Button>
         </DialogActions>
       </Dialog>

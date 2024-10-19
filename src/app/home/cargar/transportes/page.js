@@ -34,6 +34,7 @@ import {
 export default function TransporteTable() {
   const [transportes, setTransportes] = useState([]);
   const [editingTransporte, setEditingTransporte] = useState(null);
+  const [editTransport, setEditTransport] = useState(false);
   const [newTransporte, setNewTransporte] = useState({
     ID_Transporte: "",
     Vehículo: "",
@@ -43,13 +44,14 @@ export default function TransporteTable() {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [transporteToDelete, setTransporteToDelete] = useState(null);
+  const [deletingTransport, setDeletingTransport] = useState(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [creatingTransport, setCreatingTransport] = useState(false);
 
   const loadAll = async () => {
     try {
       const data = await loadAllTransports();
-      
+
       setTransportes(data);
     } catch (error) {
       console.log(error.message);
@@ -60,37 +62,64 @@ export default function TransporteTable() {
     loadAll();
   }, []);
 
-  const handleDelete = (id) => {
-    setTransportes(transportes.filter((transporte) => transporte.id !== id));
+  const handleDelete = async () => {
+    setDeletingTransport(true);
+
+    try {
+      await deleteTransport(transporteToDelete);
+    } catch (error) {
+      console.log(error);
+    }
+
+    setTransportes(
+      transportes.filter(
+        (transporte) => transporte.ID_Transporte !== transporteToDelete
+      )
+    );
+
+    setOpenConfirmDialog(false);
+    setDeletingTransport(false);
   };
 
-  const handleEdit = (transporte) => {
-    setEditingTransporte(transporte);
-    setOpenEditDialog(true);
-  };
+  const handleEdit = () => {};
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
+    setEditTransport(true);
+    try {
+      await updateTransport(editingTransporte.ID_Transporte, editingTransporte);
+    } catch (error) {
+      console.log(error);
+    }
+
     setTransportes(
       transportes.map((transporte) =>
-        transporte.id === editingTransporte.id ? editingTransporte : transporte
+        transporte.ID_Transporte === editingTransporte.ID_Transporte
+          ? editingTransporte
+          : transporte
       )
     );
     setOpenEditDialog(false);
+    setEditTransport(true);
   };
 
   const handleAdd = async () => {
-    setCreatingTransport(true)
+    setCreatingTransport(true);
     const id = Math.max(...transportes.map((t) => t.id)) + 1;
     try {
-        await createTransport(newTransporte)
+      await createTransport(newTransporte);
     } catch (error) {
-        console.log(error.message)
+      console.log(error.message);
     }
     console.log(newTransporte);
     setTransportes([...transportes, { ...newTransporte, id }]);
-    setNewTransporte({ ID_Transporte: "", Vehículo: "", Modalidad: "", Precio:"" });
+    setNewTransporte({
+      ID_Transporte: "",
+      Vehículo: "",
+      Modalidad: "",
+      Precio: "",
+    });
     setOpenAddDialog(false);
-    setCreatingTransport(false)
+    setCreatingTransport(false);
   };
 
   return (
@@ -207,7 +236,7 @@ export default function TransporteTable() {
         <DialogActions>
           <Button onClick={() => setOpenAddDialog(false)}>Cancelar</Button>
           <Button onClick={creatingTransport ? null : handleAdd}>
-            {creatingTransport? <CircularProgress/> : "Agregar"}
+            {creatingTransport ? <CircularProgress /> : "Agregar"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -217,30 +246,84 @@ export default function TransporteTable() {
         <DialogTitle>Editar Transporte</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Por favor, modifique los detalles del transporte.
+            Por favor, modifique los detalles del Transporte
           </DialogContentText>
-          {editingTransporte &&
-            ["nombre", "capacidad", "tipoVehiculo"].map((field) => (
+          {editingTransporte && (
+            <>
               <TextField
-                key={field}
+                key={"vehiculo"}
                 margin="dense"
-                label={field.charAt(0).toUpperCase() + field.slice(1)}
+                label={"Vehículo"}
                 type="text"
                 fullWidth
                 variant="standard"
-                value={editingTransporte[field]}
+                value={editingTransporte.Vehículo}
                 onChange={(e) =>
                   setEditingTransporte({
                     ...editingTransporte,
-                    [field]: e.target.value,
+                    Vehículo: e.target.value,
                   })
                 }
               />
-            ))}
+              <TextField
+                key={"modalidad"}
+                margin="dense"
+                label={"Modalidad"}
+                type="text"
+                fullWidth
+                variant="standard"
+                value={editingTransporte.Modalidad}
+                onChange={(e) =>
+                  setEditingTransporte({
+                    ...editingTransporte,
+                    Modalidad: e.target.value,
+                  })
+                }
+              />
+              <TextField
+                key={"precio"}
+                margin="dense"
+                label={"Precio"}
+                type="text"
+                fullWidth
+                variant="standard"
+                value={editingTransporte.Precio}
+                onChange={(e) =>
+                  setEditingTransporte({
+                    ...editingTransporte,
+                    Precio: e.target.value,
+                  })
+                }
+              />
+            </>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
-          <Button onClick={handleSaveEdit}>Guardar Cambios</Button>
+          <Button onClick={editTransport ? null : handleSaveEdit}>
+            {editTransport ? <CircularProgress /> : "Guardar Cambios"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Dialogo de confirmacion para borrar */}
+      <Dialog
+        open={openConfirmDialog}
+        onClose={() => setOpenConfirmDialog(false)}
+      >
+        <DialogTitle>Eliminar Transporte</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            ¿Está seguro de que desea eliminar el Transporte?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenConfirmDialog(false)}>Cancelar</Button>
+          <Button
+            onClick={deletingTransport ? null : handleDelete}
+            color="error"
+          >
+            {deletingTransport ? <CircularProgress /> : "Eliminar"}
+          </Button>
         </DialogActions>
       </Dialog>
     </Paper>

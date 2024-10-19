@@ -18,10 +18,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
-import {
-  Add as AddIcon,
-} from "@mui/icons-material";
-import {loadAllTask} from ''
+import {createService, deleteService, loadAllServices, readService, updateService} from '../../../api/tipo-de-servicio/tipo-de-servicio.service'
 
 export default function ServiceTypeTable() {
   const [services, setServices] = useState([]);

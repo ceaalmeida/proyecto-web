@@ -192,6 +192,21 @@ export default function CreateAccount({ onLogin }) {
     } else alert("Formulario inválido");
   };
 
+  const ejecutarPrueba = async () => {
+    try {
+      const res = await fetch("/api/send/routes", {
+        method: "POST",
+      });
+      if (!res.ok) {
+        throw new Error(`Error: ${res.status}`);
+      }
+      const data = await res.json();
+      console.log(data);
+    } catch (error) {
+      console.error("Error al ejecutar la prueba:", error);
+    }
+  };
+
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -313,10 +328,11 @@ export default function CreateAccount({ onLogin }) {
             </Typography>
           )}
           <Button
-            type="submit"
+            type="button"
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
+            onClick={ejecutarPrueba}
           >
             Crear Cuenta
           </Button>

@@ -18,27 +18,28 @@ import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import { TextField } from "@mui/material";
+import { useRouter } from "next/router";
 // import "./style.css";
 
 const pages = ["Animales", "Adopciones", "Donaciones"];
-const settings = ["Profile", "Account", "Dashboard", "Logout"];
+const settings = ["Profile", "Account", "Dashboard", "Cerrar sesion"];
 
-export const ResponsiveAppBar = ({ value, Changes }) => {
+
+export const ResponsiveAppBar = ({ value, Changes ,Log}) => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const [activeButton, setActiveButton] = React.useState("");
   const [inicio, setInicio] = React.useState("");
-
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
   };
-
-  const handleCloseNavMenu = () => {
+  //const router=useRouter();
+  function handleCloseNavMenu() {
     setAnchorElNav(null);
-  };
+  }
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
@@ -49,7 +50,7 @@ export const ResponsiveAppBar = ({ value, Changes }) => {
     Changes(inicio);
   };
   return (
-    <AppBar position="static">
+    <AppBar position="fixed">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
@@ -82,6 +83,7 @@ export const ResponsiveAppBar = ({ value, Changes }) => {
             >
               <MenuIcon />
             </IconButton>
+            
             <Menu
               id="menu-appbar"
               anchorEl={anchorElNav}
@@ -126,7 +128,7 @@ export const ResponsiveAppBar = ({ value, Changes }) => {
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}></Box>
-          <Box sx={{ flexGrow: 1 ,display: 'flex', justifyContent: 'flex-start'}}>
+          <Box sx={{ flexGrow: 0.3 ,display: 'flex', justifyContent: 'flex-start'}}>
             {value === "Animales" && (
               <MenuItem>
                 <TextField
@@ -176,11 +178,16 @@ export const ResponsiveAppBar = ({ value, Changes }) => {
               onClose={handleCloseUserMenu}
             >
               {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                <MenuItem key={setting} onClick={()=>{
+                handleCloseUserMenu;
+                if(setting==="Cerrar sesion"){
+                Log(false)}
+              }
+                }>
                   <Typography sx={{ textAlign: "center" }}>
                     {setting}
                   </Typography>
-                </MenuItem>
+                </MenuItem>                
               ))}
             </Menu>
           </Box>

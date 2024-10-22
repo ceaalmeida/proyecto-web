@@ -10,12 +10,23 @@ import Button from "@mui/material/Button";
 const buttons = ["Adoptar", "Donar", "MAS"];
 export function AnimalCard({ elements, onButtonClick }) {
   console.log(elements);
-
+  if (!elements) {
+    return (
+      <Card
+        sx={{ maxWidth: 600, margin: "auto", mt: 4, p: 4, textAlign: "center" }}
+      >
+        <CircularProgress />
+        <Typography variant="h6" sx={{ mt: 2 }}>
+          Cargando animales...
+        </Typography>
+      </Card>
+    );
+  }
   return (
     <>
       {elements.map((element) => (
         <Card 
-        onClick={()=>onButtonClick("Adopcion",element)}
+        onClick={()=>onButtonClick("Perfil",element)}
         key={element.nombre} sx={{ maxWidth: 345 }} 
         className="card">
           <CardMedia

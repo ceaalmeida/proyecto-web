@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { ResponsiveAppBar } from "./menuBar";
 import { AnimalCard } from "./animalCard";
+import {AnimalProfile} from "./perfilAnimal"
 import "./style.css";
 import { useRouter } from "next/navigation";
 import AnimalService from "../api/animal/animal.service"
@@ -70,6 +71,7 @@ export default function HomeUser () {
         <section className="section">
         {opcion==="Animales" && <AnimalCard elements={filtrado} onButtonClick={manejadorOpciones} className="card" />}
         {opcion==="Adopcion" && <Adoptar element={element} onButtonClick={manejadorOpciones}/>}
+        {opcion==="Perfil" && <AnimalProfile animal={element} onButtonClick={manejadorOpciones}/>}
         </section>
        
       </div>

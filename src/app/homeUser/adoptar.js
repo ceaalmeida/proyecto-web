@@ -24,8 +24,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 export default function Adoptar({ element,onButtonClick}) {
   const router = useRouter();
-  const [adopcion, setAdopcion] = useState();
-  //window.alert(element.Precio_Adopción);
+  const [adopcion, setAdopcion] = useState();  
   return (
     <div>
       <div>

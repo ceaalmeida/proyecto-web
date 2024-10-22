@@ -5,6 +5,7 @@ import { AnimalCard } from "./animalCard";
 import "./style.css";
 import { useRouter } from "next/navigation";
 import AnimalService from "../api/animal/animal.service"
+import Adoptar from "./adoptar"
 export default function HomeUser () {
   const router = useRouter();
   const initialAnimals = [
@@ -38,6 +39,7 @@ export default function HomeUser () {
 },[])
 
   const manejadorOpciones = (pages, element) => {
+   // window.alert(pages)
     setOpciones(pages);
     setElements(element);
   };
@@ -66,8 +68,11 @@ export default function HomeUser () {
       <ResponsiveAppBar value={opcion} Changes={manejadorBusqueda} Log={manejarLogin} />
       <div>
         <section className="section">
-          <AnimalCard elements={filtrado} onButtonClick={manejadorOpciones} className="card" />
+
+        {opcion==="Animales" && <AnimalCard elements={filtrado} onButtonClick={manejadorOpciones} className="card" />}
+        {opcion==="Adopcion" && <Adoptar element={element} onButtonClick={manejadorOpciones}/>}
         </section>
+       
       </div>
     </div>
   );

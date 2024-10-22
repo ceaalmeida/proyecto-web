@@ -65,10 +65,9 @@ export default function HomeUser () {
 
   return (
     <div>
-      <ResponsiveAppBar value={opcion} Changes={manejadorBusqueda} Log={manejarLogin} />
+      <ResponsiveAppBar value={opcion} Changes={manejadorBusqueda} Log={manejarLogin}/>
       <div>
         <section className="section">
-
         {opcion==="Animales" && <AnimalCard elements={filtrado} onButtonClick={manejadorOpciones} className="card" />}
         {opcion==="Adopcion" && <Adoptar element={element} onButtonClick={manejadorOpciones}/>}
         </section>

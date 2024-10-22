@@ -16,9 +16,17 @@ import {
   DialogContentText,
   DialogTitle,
   CircularProgress,
+  Stack,
 } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
-import {createService, deleteService, loadAllServices, readService, updateService} from '../../../api/tipo-de-servicio/tipo-de-servicio.service'
+import {
+  createService,
+  deleteService,
+  loadAllServices,
+  readService,
+  updateService,
+} from "../../../api/tipo-de-servicio/tipo-de-servicio.service";
+import { useSession } from "next-auth/react";
 
 export default function ServiceTypeTable() {
   const [services, setServices] = useState([]);
@@ -37,8 +45,10 @@ export default function ServiceTypeTable() {
 
   const [alertUser, setAlertUser] = useState(false);
 
+  const {data: session, status} = useSession()
+
   const loadServices = async () => {
-    const data = await loadAllServices();
+    const data = await loadAllServices(session?.user?.token);
     setServices(data);
   };
 
@@ -46,9 +56,10 @@ export default function ServiceTypeTable() {
     loadServices();
   }, []);
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async() => {
     setEditService(true);
-    console.log(editingService)
+    console.log(editingService);
+    await updateService(editingService.ID_Servicio, editingService,session?.user?.token)
 
     setServices(
       services.map((service) =>
@@ -58,13 +69,13 @@ export default function ServiceTypeTable() {
       )
     );
     setOpenEditDialog(false);
-    setEditService(false)
+    setEditService(false);
   };
 
   const handleAdd = async () => {
     setCreatingService(true);
     const ID_Servicio = Math.max(...services.map((s) => s.ID_Servicio)) + 1;
-    await createService(newService);
+    await createService(newService, session?.user?.token);
 
     setServices([...services, { ...newService, ID_Servicio }]);
     setNewService({
@@ -78,7 +89,7 @@ export default function ServiceTypeTable() {
 
   const handleDelete = async () => {
     setDeletingService(true);
-    await deleteService(serviceToDelete);
+    await deleteService(serviceToDelete, session?.user?.token);
     setServices(
       services.filter((service) => service.ID_Servicio !== serviceToDelete)
     );
@@ -88,14 +99,30 @@ export default function ServiceTypeTable() {
 
   return (
     <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={() => setOpenAddDialog(true)}
-        sx={{ mt: 2 }}
+      <Stack
+        direction={"row"}
+        justifyContent={"space-between"}
+        alignItems={"center"}
+        sx={{ width: "100%", mt: 2, mb: 2 }}
       >
-        Agregar Tipo de Servicio
-      </Button>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setOpenAddDialog(true)}
+          sx={{ mt: 2 }}
+        >
+          Agregar Tipo de Servicio
+        </Button>
+
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setOpenAddDialog(true)}
+          sx={{ mt: 2 }}
+        >
+          Agregar Tipo de Servicio
+        </Button>
+      </Stack>
 
       <TableContainer component={Paper} sx={{ mt: 2 }}>
         <Table>
@@ -224,7 +251,7 @@ export default function ServiceTypeTable() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenConfirmDialog(false)}>Cancelar</Button>
-          <Button onClick={deletingService? null: handleDelete} color="error">
+          <Button onClick={deletingService ? null : handleDelete} color="error">
             {deletingService ? <CircularProgress color="error" /> : "Eliminar"}
           </Button>
         </DialogActions>

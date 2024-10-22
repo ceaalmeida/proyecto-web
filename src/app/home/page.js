@@ -6,6 +6,8 @@ import { styled } from "@mui/system";
 import { AppProvider } from "@toolpad/core/AppProvider";
 import { DashboardLayout } from "@toolpad/core/DashboardLayout";
 import { PageContainer } from "@toolpad/core/PageContainer";
+import { useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
 
 import ActivityTable from "./cargar/actividades/page";
 import AdopcionesTable from "./cargar/adopciones/page";
@@ -41,6 +43,7 @@ import {
   ChevronDown,
   ChefHat,
 } from "lucide-react";
+import { CircularProgress } from "@mui/material";
 
 const NAVIGATION = [
   {
@@ -269,35 +272,54 @@ export default function DashboardLayoutBasic(props) {
     }
   };
 
+  const { data: session, status } = useSession();
+  if (status === "loading") {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh", // Esto hace que ocupe toda la altura de la ventana
+        }}
+      >
+        <CircularProgress color="primary" size={60} />{" "}
+        {/* Cambia el tamaño aquí */}
+      </div>
+    );
+  }
+
   // Remove this const when copying and pasting into your project.
   const demoWindow = window ? window() : undefined;
 
   return (
-    <AppProvider
-      navigation={NAVIGATION}
-      router={router}
-      theme={demoTheme}
-      window={demoWindow}
-    >
-      <SwipeableTemporaryDrawer
-        anchor="right"
-        open={drawerOpen}
-        onClose={handleDrawerClose}
-        onOpen={() => setDrawerOpen(true)}
-        //values={""}
-      ></SwipeableTemporaryDrawer>
-      <SwipeableTemporaryDrawer
-        anchor="right"
-        open={drawerOpen}
-        onClose={handleDrawerClose}
-        onOpen={() => setDrawerOpen(true)}
-        values={"Alejandro Almeida"}
-      ></SwipeableTemporaryDrawer>
+    <>
+      <AppProvider
+        navigation={NAVIGATION}
+        router={router}
+        theme={demoTheme}
+        window={demoWindow}
+      >
+        <SwipeableTemporaryDrawer
+          anchor="right"
+          open={drawerOpen}
+          onClose={handleDrawerClose}
+          onOpen={() => setDrawerOpen(true)}
+          //values={""}
+        ></SwipeableTemporaryDrawer>
+        <SwipeableTemporaryDrawer
+          anchor="right"
+          open={drawerOpen}
+          onClose={handleDrawerClose}
+          onOpen={() => setDrawerOpen(true)}
+          values={session?.user?.email}
+        ></SwipeableTemporaryDrawer>
 
-      <DashboardLayout>
-        {renderComponent()}
-        {/* <PageContainer>{}</PageContainer> */}
-      </DashboardLayout>
-    </AppProvider>
+        <DashboardLayout>
+          {renderComponent()}
+          {/* <PageContainer>{}</PageContainer> */}
+        </DashboardLayout>
+      </AppProvider>
+    </>
   );
 }

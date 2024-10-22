@@ -13,220 +13,175 @@ import {
   DialogTitle,
   DialogContent,
   DialogContentText,
+  CircularProgress,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { Link } from "lucide-react";
-
 import { useRouter } from "next/navigation";
 
 export default function CreateAccount({ onLogin }) {
-  const [nombre, setNombre] = useState("");
-  const [apellido, setApellido] = useState("");
-  const [user, setUser] = useState("");
+  const [name, setNombre] = useState("");
+  const [lastName, setApellido] = useState("");
+  const [username, setUser] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassoword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [email, setEmail] = useState("");
   const [sendingToken, setSendingToken] = useState(false);
   const [token, setToken] = useState("");
 
-  const [errorNombre, setErrorNombre] = useState("");
-  const [estadoErrorNombre, setEstadoErrorNombre] = useState(false);
-  const [errorApellido, setErrorApellido] = useState("");
-  const [estadoErrorApellido, setEstadoErrorApellido] = useState(false);
-  const [errorUser, setErrorUser] = useState("");
-  const [estadoErrorUser, setEstadoErrorUser] = useState(false);
-  const [errorPassword, setErrorPassword] = useState("");
-  const [estadoErrorPassword, setEstadoErrorPassword] = useState(false);
-  const [errorConfirmPassword, setErrorConfirmPassword] = useState("");
-  const [estadoErrorConfirmPassword, setEstadoErrorConfirmPassword] =
-    useState(false);
-  const [errorEmail, setErrorEmail] = useState("");
-  const [estadoErrorEmail, setEstadoErrorEmail] = useState(false);
-  const [error, setError] = useState("");
+  const [creating, setCreating] = useState(false);
 
-  const [estadoError, setEstadoError] = useState(false);
+  const [errorNombre, setErrorNombre] = useState("");
+  const [errorApellido, setErrorApellido] = useState("");
+  const [errorUser, setErrorUser] = useState("");
+  const [errorPassword, setErrorPassword] = useState("");
+  const [errorConfirmPassword, setErrorConfirmPassword] = useState("");
+  const [errorEmail, setErrorEmail] = useState("");
+  const [error, setError] = useState("");
 
   const router = useRouter();
 
   const generarYEnviarToken = async (email) => {
-    // Generar un número aleatorio como token
-    const token = Math.floor(100000 + Math.random() * 900000); // Genera un número entre 100000 y 999999
-
-    // Aquí deberías hacer una llamada a tu API para enviar el correo
-    try {
-      const response = await fetch("./create-account.js", {
-        // Asegúrate de tener esta API
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, token }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al enviar el token");
-      }
-
-      // Puedes mostrar un mensaje al usuario indicando que se ha enviado el token
-      alert(
-        "Se ha enviado un token a tu correo para autorizar la creación de la cuenta."
-      );
-      setSendingToken(true);
-      setToken(token);
-    } catch (error) {
-      console.error("Error:", error);
-      setError("No se pudo enviar el token. Intenta nuevamente.");
-    }
-  };
-
-  const validateToken = () => {};
-
-  const validarNombre = () => {
-    setEstadoErrorNombre(false); // Resetea el estado de error
-    if (nombre.trim() === "") {
-      setEstadoErrorNombre(true); // Si el nombre está vacío, marca el estado de error
-      setErrorNombre("El nombre es requerido");
-      setEstadoError(true);
-      return false;
-    } else if (/[0-9]/.test(nombre)) {
-      setErrorNombre("El nombre no puede contener números");
-      setError("El nombre no puede contener números");
-      setEstadoError(true);
-      return false;
-    }
-    return true;
-  };
-
-  const validarApellido = () => {
-    setEstadoErrorApellido(false); // Resetea el estado de error
-    if (apellido.trim() === "") {
-      setEstadoErrorApellido(true); // Si el apellido está vacío, marca el estado de error
-      setErrorApellido("El apellido es requerido");
-      setEstadoError(true);
-      return false;
-    }
-    if (/[0-9]/.test(apellido)) {
-      setErrorApellido(true);
-      setError("El apellido no puede contener números");
-      setEstadoError(true);
-      return false;
-    }
-    return true;
-  };
-
-  const validarUsuario = () => {
-    if (user.trim() === "") {
-      setError("El usuario es requerido");
-      setErrorUser(true);
-      setEstadoError(true);
-      return false;
-    }
-    if (/[0-9]/.test(user)) {
-      setError("El usuario no puede contener números");
-      setErrorUser(true);
-      setEstadoError(true);
-      return false;
-    }
-    return true;
-  };
-
-  const validarCorreo = () => {
-    if (email.trim() === "") {
-      setErrorEmail("El correo electrónico es requerido");
-      setErrorEmail(true);
-      setEstadoError(true);
-      return false;
-    }
-    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!regex.test(email)) {
-      setError("El correo no es válido");
-      setErrorEmail(true);
-      setEstadoError(true);
-      return false;
-    }
-    return true;
-  };
-  const validarPassword = () => {
-    if (password.trim() === "") {
-      setError("La contraseña es requerida");
-      setErrorPassword(true);
-      setEstadoError(true);
-      return false;
-    }
-    if (password.length < 8) {
-      setError("La contraseña debe tener al menos 8 caracteres");
-      setErrorPassword(true);
-      setEstadoError(true);
-      return false;
-    }
-    return true;
-  };
-  const validarConfirmPassword = () => {
-    if (confirmPassword.trim() === "") {
-      setError("La contraseña de confirmación es requerida");
-      setErrorConfirmPassword(true);
-      setEstadoError(true);
-      return false;
-    }
-    if (confirmPassword !== password) {
-      setError("Las contraseñas no coinciden");
-      setErrorConfirmPassword(true);
-      setEstadoError(true);
-      return false;
-    }
-    return true;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    validarNombre() &&
+    // Validar antes de enviar el token
+    setCreating(true);
+    const validaciones =
+      validarNombre() &&
       validarApellido() &&
       validarUsuario() &&
       validarCorreo() &&
       validarPassword() &&
       validarConfirmPassword();
 
-    if (!estadoError) {
-      alert("formulario valido");
-    } else alert("Formulario inválido");
+    console.log({
+      name,
+      lastName,
+      username,
+      email,
+      password,
+    });
+
+    if (validaciones) {
+      const token = Math.floor(100000 + Math.random() * 900000); // Genera un número entre 100000 y 999999
+      await register();
+      setCreating(false);
+    }
   };
 
-  const ejecutarPrueba = async () => {
-    try {
-      const res = await fetch("/api/send/routes", {
+  const register = async () => {
+    const id = Math.floor(100000 + Math.random() * 900000);
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`,
+      {
         method: "POST",
-      });
-      if (!res.ok) {
-        throw new Error(`Error: ${res.status}`);
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id,
+          name,
+          lastName,
+          username,
+          email,
+          age: 20,
+          password,
+          permiso: "user",
+        }),
       }
-      const data = await res.json();
-      console.log(data);
-    } catch (error) {
-      console.error("Error al ejecutar la prueba:", error);
+    );
+  };
+
+  const validarNombre = () => {
+    setErrorNombre(""); // Resetea el error
+    if (name.trim() === "") {
+      setErrorNombre("El nombre es requerido");
+      return false;
+    } else if (/[0-9]/.test(name)) {
+      setErrorNombre("El nombre no puede contener números");
+      return false;
     }
+    return true;
+  };
+
+  const validarApellido = () => {
+    setErrorApellido(""); // Resetea el error
+    if (lastName.trim() === "") {
+      setErrorApellido("El apellido es requerido");
+      return false;
+    }
+    if (/[0-9]/.test(lastName)) {
+      setErrorApellido("El apellido no puede contener números");
+      return false;
+    }
+    return true;
+  };
+
+  const validarUsuario = () => {
+    setErrorUser(""); // Resetea el error
+    if (username.trim() === "") {
+      setErrorUser("El usuario es requerido");
+      return false;
+    }
+    if (/[0-9]/.test(username)) {
+      setErrorUser("El usuario no puede contener números");
+      return false;
+    }
+    return true;
+  };
+
+  const validarCorreo = () => {
+    setErrorEmail(""); // Resetea el error
+    if (email.trim() === "") {
+      setErrorEmail("El correo electrónico es requerido");
+      return false;
+    }
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!regex.test(email)) {
+      setErrorEmail("El correo no es válido");
+      return false;
+    }
+    return true;
+  };
+
+  const validarPassword = () => {
+    setErrorPassword(""); // Resetea el error
+    if (password.trim() === "") {
+      setErrorPassword("La contraseña es requerida");
+      return false;
+    }
+    if (password.length < 8) {
+      setErrorPassword("La contraseña debe tener al menos 8 caracteres");
+      return false;
+    }
+    return true;
+  };
+
+  const validarConfirmPassword = () => {
+    setErrorConfirmPassword(""); // Resetea el error
+    if (confirmPassword.trim() === "") {
+      setErrorConfirmPassword("La confirmación de contraseña es requerida");
+      return false;
+    }
+    if (password !== confirmPassword) {
+      setErrorConfirmPassword("Las contraseñas no coinciden");
+      return false;
+    }
+    return true;
   };
 
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <Paper
-        elevation={3}
-        sx={{
-          mt: 8,
-          p: 4,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
+      <Paper elevation={3}>
         <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
           <LockOutlinedIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
-          Crear Cuenta
+          Crear cuenta
         </Typography>
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+        <Box
+          sx={{
+            mt: 1,
+          }}
+        >
           <TextField
             margin="normal"
             required
@@ -236,14 +191,11 @@ export default function CreateAccount({ onLogin }) {
             name="nombre"
             autoComplete="nombre"
             autoFocus
-            value={nombre}
+            value={name}
             onChange={(e) => setNombre(e.target.value)}
+            error={errorNombre !== ""}
+            helperText={errorNombre}
           />
-          {estadoErrorNombre && (
-            <Typography color="error" variant="body2">
-              {errorNombre}
-            </Typography>
-          )}
           <TextField
             margin="normal"
             required
@@ -252,15 +204,11 @@ export default function CreateAccount({ onLogin }) {
             label="Apellido"
             name="apellido"
             autoComplete="apellido"
-            autoFocus
-            value={apellido}
+            value={lastName}
             onChange={(e) => setApellido(e.target.value)}
+            error={errorApellido !== ""}
+            helperText={errorApellido}
           />
-          {estadoErrorApellido && (
-            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-              {errorApellido}
-            </Typography>
-          )}
           <TextField
             margin="normal"
             required
@@ -269,32 +217,24 @@ export default function CreateAccount({ onLogin }) {
             label="Usuario"
             name="user"
             autoComplete="user"
-            autoFocus
-            value={user}
+            value={username}
             onChange={(e) => setUser(e.target.value)}
+            error={errorUser !== ""}
+            helperText={errorUser}
           />
-          {errorUser && (
-            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-              {error}
-            </Typography>
-          )}
           <TextField
             margin="normal"
             required
             fullWidth
             id="email"
-            label="Email"
+            label="Correo electrónico"
             name="email"
             autoComplete="email"
-            autoFocus
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            error={errorEmail !== ""}
+            helperText={errorEmail}
           />
-          {errorEmail && (
-            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-              {error}
-            </Typography>
-          )}
           <TextField
             margin="normal"
             required
@@ -303,78 +243,45 @@ export default function CreateAccount({ onLogin }) {
             label="Contraseña"
             type="password"
             id="password"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            error={errorPassword !== ""}
+            helperText={errorPassword}
           />
-          {errorPassword && (
-            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-              {error}
-            </Typography>
-          )}
           <TextField
             margin="normal"
             required
             fullWidth
             name="confirmPassword"
-            label="Confirmar Contraseña"
+            label="Confirmar contraseña"
             type="password"
             id="confirmPassword"
+            autoComplete="current-password"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassoword(e.target.value)}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            error={errorConfirmPassword !== ""}
+            helperText={errorConfirmPassword}
           />
-          {errorConfirmPassword && (
-            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-              {error}
-            </Typography>
-          )}
           <Button
-            type="button"
+            type="submit"
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
-            onClick={ejecutarPrueba}
+            onClick={() => (creating ? null : generarYEnviarToken(email))}
           >
-            Crear Cuenta
+            {creating ? <CircularProgress /> : "Crear cuenta"}
           </Button>
           <Button
+            type="submit"
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
-            onClick={router.refresh("/login")}
+            onClick={() => (creating ? null : router.replace("/"))}
           >
-            Iniciar Sesión
+            {creating ? <CircularProgress /> : "Iniciar Sesión"}
           </Button>
         </Box>
-        <Dialog open={sendingToken}>
-          <DialogTitle>Validar Correo</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Se ha enviado un correo electrónico a tu dirección de correo
-              electrónico con un enlace de validación
-              <br />
-              Por favor introduzca el código en el siguiente cuadro de texto
-            </DialogContentText>
-            <TextField
-              margin="dense"
-              id="token"
-              label="Código de validación"
-              type="text"
-              fullWidth
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              onClick={validateToken}
-            >
-              Validar
-            </Button>
-            <Button onClick={() => setSendingToken(false)}>Cancelar</Button>
-          </DialogContent>
-        </Dialog>
       </Paper>
     </Container>
   );

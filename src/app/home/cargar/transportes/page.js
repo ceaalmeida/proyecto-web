@@ -30,6 +30,7 @@ import {
   readTransport,
   updateTransport,
 } from "../../../api/transporte/transporte.service";
+import { useSession } from "next-auth/react";
 
 export default function TransporteTable() {
   const [transportes, setTransportes] = useState([]);
@@ -47,11 +48,11 @@ export default function TransporteTable() {
   const [deletingTransport, setDeletingTransport] = useState(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [creatingTransport, setCreatingTransport] = useState(false);
+  const { data: session, status } = useSession();
 
   const loadAll = async () => {
     try {
-      const data = await loadAllTransports();
-
+      const data = await loadAllTransports(session?.user?.token);
       setTransportes(data);
     } catch (error) {
       console.log(error.message);
@@ -66,7 +67,7 @@ export default function TransporteTable() {
     setDeletingTransport(true);
 
     try {
-      await deleteTransport(transporteToDelete);
+      await deleteTransport(transporteToDelete, session?.user?.token);
     } catch (error) {
       console.log(error);
     }
@@ -86,7 +87,7 @@ export default function TransporteTable() {
   const handleSaveEdit = async () => {
     setEditTransport(true);
     try {
-      await updateTransport(editingTransporte.ID_Transporte, editingTransporte);
+      await updateTransport(editingTransporte.ID_Transporte, editingTransporte, session?.user?.token);
     } catch (error) {
       console.log(error);
     }
@@ -106,7 +107,7 @@ export default function TransporteTable() {
     setCreatingTransport(true);
     const id = Math.max(...transportes.map((t) => t.id)) + 1;
     try {
-      await createTransport(newTransporte);
+      await createTransport(newTransporte, session?.user?.token);
     } catch (error) {
       console.log(error.message);
     }
@@ -144,7 +145,7 @@ export default function TransporteTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {transportes.map((transporte) => (
+            {transportes?.map((transporte) => (
               <TableRow key={transporte.ID_Transporte}>
                 <TableCell>{transporte.Vehículo}</TableCell>
                 <TableCell>{transporte.Modalidad}</TableCell>

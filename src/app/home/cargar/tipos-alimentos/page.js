@@ -29,6 +29,7 @@ import {
   readFood,
   updateFood,
 } from "../../../api/tipo-de-alimento/tipo-de-alimento.service";
+import { useSession } from "next-auth/react";
 
 export default function FoodTypeTable() {
   const [foodTypes, setFoodTypes] = useState([]);
@@ -45,9 +46,10 @@ export default function FoodTypeTable() {
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [editType, setEditType] = useState(false);
+  const {data: session, status} = useSession()
 
   const loadFoods = async () => {
-    const foods = await loadAllFoods();
+    const foods = await loadAllFoods(session?.user?.token);
     setFoodTypes(foods);
   };
 
@@ -59,7 +61,7 @@ export default function FoodTypeTable() {
     setCreatingFodd(true);
     const id = Math.max(...foodTypes.map((t) => t.id)) + 1;
     try {
-      await createFood(newType);
+      await createFood(newType, session?.user?.token);
     } catch (error) {
       alert(error.message);
     }
@@ -72,7 +74,7 @@ export default function FoodTypeTable() {
 
   const handleDelete = async () => {
     setDeletingFood(true);
-    await deleteFood(foodToDelete);
+    await deleteFood(foodToDelete, session?.user?.token);
 
     setFoodTypes(foodTypes.filter((food) => food.ID_Alimento !== foodToDelete));
     setOpenConfirmDialog(false);
@@ -83,7 +85,7 @@ export default function FoodTypeTable() {
     setEditType(true);
 
     try {
-      await updateFood(editingType.ID_Alimento, editingType);
+      await updateFood(editingType.ID_Alimento, editingType, session?.user?.token);
     } catch (error) {
       console.log(error.message);
     }

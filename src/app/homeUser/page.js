@@ -47,7 +47,7 @@ export default function HomeUser () {
   const manejarLogin = (logueo) => {
     setLogIn(logueo);
     if(logIn==false){
-        router.replace("/login")
+        router.replace("/") //Esto hay que cambiarlo por el nuevo logout
     }
   };
   

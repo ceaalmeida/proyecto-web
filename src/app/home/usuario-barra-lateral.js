@@ -11,11 +11,11 @@ import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
-import { useRouter } from 'next/navigation';
-
+import { useRouter } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
 
 export default function SwipeableTemporaryDrawer({ values }) {
-  const router=useRouter()
+  const router = useRouter();
   const [state, setState] = React.useState({
     right: false,
   });
@@ -66,8 +66,16 @@ export default function SwipeableTemporaryDrawer({ values }) {
         </ListItem>
       </List>
       <Divider />
-      <ListItemButton onClick={()=>router.replace("/login")}>
-        <ListItemIcon>          
+      <ListItemButton
+        onClick={() => {
+          signOut({
+            callbackUrl: "http://localhost:3001",
+            redirect: false,
+          });
+          router.replace("/")
+        }}
+      >
+        <ListItemIcon>
           <InboxIcon />
         </ListItemIcon>
         <ListItemText primary={"Cerrar sesion"} />
@@ -86,7 +94,7 @@ export default function SwipeableTemporaryDrawer({ values }) {
       </List> */}
     </Box>
   );
-   
+
   return (
     <div style={{ display: "flex", justifyContent: "flex-end" }}>
       <IconButton

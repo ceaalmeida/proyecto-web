@@ -4,7 +4,7 @@ import { ResponsiveAppBar } from "./menuBar";
 import { AnimalCard } from "./animalCard";
 import "./style.css";
 import { useRouter } from "next/navigation";
-
+import AnimalService from "../api/animal/animal.service"
 export default function HomeUser () {
   const router = useRouter();
   const initialAnimals = [
@@ -26,14 +26,23 @@ export default function HomeUser () {
   const [opcion, setOpciones] = useState("Animales");
   const [element, setElements] = useState("");
   const [busqueda, setBusqueda] = useState("");
+  const [list,setList]=useState([])
   const [logIn, setLogIn] = useState();
+  useEffect(()=>{
+    const getAnimales=async()=>{
+    const listAnimales= await AnimalService.getAllAnimal()
+    setList(listAnimales)
+    console.log(listAnimales)
+    }
+    getAnimales()
+},[])
 
   const manejadorOpciones = (pages, element) => {
     setOpciones(pages);
     setElements(element);
   };
-
-  const filtrado = initialAnimals.filter((adopcion) =>
+  
+  const filtrado = list.filter((adopcion) =>
     Object.values(adopcion).some((value) =>
       value.toString().toLowerCase().includes(busqueda.toLowerCase())
     )

@@ -45,9 +45,10 @@ export const ResponsiveAppBar = ({ value, Changes ,Log}) => {
     setAnchorElUser(null);
   };
 
-  const manejarBusqueda = (e) => {
-    setInicio(e.target.value);
-    Changes(inicio);
+    const manejarBusqueda = async (e) => {
+    const valor=e.target.value;
+    setInicio(valor);
+    Changes(valor);
   };
   return (
     <AppBar position="fixed">

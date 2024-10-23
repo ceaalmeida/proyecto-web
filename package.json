@@ -11,6 +11,7 @@
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
+    "@knocklabs/node": "^0.6.13",
     "@mui/icons-material": "^6.1.3",
     "@mui/lab": "^6.0.0-beta.12",
     "@mui/material": "^6.1.3",

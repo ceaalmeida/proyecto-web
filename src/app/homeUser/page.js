@@ -72,6 +72,7 @@ export default function HomeUser () {
         {opcion==="Animales" && <AnimalCard elements={filtrado} onButtonClick={manejadorOpciones} className="card" />}
         {opcion==="Adopcion" && <Adoptar element={element} onButtonClick={manejadorOpciones}/>}
         {opcion==="Perfil" && <AnimalProfile animal={element} onButtonClick={manejadorOpciones}/>}
+        {opcion==="Donacion" && <AnimalProfile animal={element} onButtonClick={manejadorOpciones}/>}
         </section>
        
       </div>

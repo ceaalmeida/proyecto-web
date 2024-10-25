@@ -14,19 +14,24 @@ import {
   DialogContent,
   DialogContentText,
   CircularProgress,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useRouter } from "next/navigation";
 
 export default function CreateAccount({ onLogin }) {
   const [name, setNombre] = useState("");
-  const [lastName, setApellido] = useState("");
+  const [lastname, setApellido] = useState("");
   const [username, setUser] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [email, setEmail] = useState("");
   const [sendingToken, setSendingToken] = useState(false);
   const [token, setToken] = useState("");
+  const [tokenGenerado, setTokenGenerado] = useState("");
+  const [countdown, setCountdown] = useState(60); // Estado para el contador
+  const [isCounting, setIsCounting] = useState(false); // Estado para saber si el contador está activo
 
   const [creating, setCreating] = useState(false);
 
@@ -37,57 +42,10 @@ export default function CreateAccount({ onLogin }) {
   const [errorConfirmPassword, setErrorConfirmPassword] = useState("");
   const [errorEmail, setErrorEmail] = useState("");
   const [error, setError] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [i, setI] = useState(0);
 
   const router = useRouter();
-
-  const generarYEnviarToken = async (email) => {
-    // Validar antes de enviar el token
-    setCreating(true);
-    const validaciones =
-      validarNombre() &&
-      validarApellido() &&
-      validarUsuario() &&
-      validarCorreo() &&
-      validarPassword() &&
-      validarConfirmPassword();
-
-    console.log({
-      name,
-      lastName,
-      username,
-      email,
-      password,
-    });
-
-    if (validaciones) {
-      const token = Math.floor(100000 + Math.random() * 900000); // Genera un número entre 100000 y 999999
-      await register();
-      setCreating(false);
-    }
-  };
-
-  const register = async () => {
-    const id = Math.floor(100000 + Math.random() * 900000);
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id,
-          name,
-          lastName,
-          username,
-          email,
-          age: 20,
-          password,
-          permiso: "user",
-        }),
-      }
-    );
-  };
 
   const validarNombre = () => {
     setErrorNombre(""); // Resetea el error
@@ -103,11 +61,11 @@ export default function CreateAccount({ onLogin }) {
 
   const validarApellido = () => {
     setErrorApellido(""); // Resetea el error
-    if (lastName.trim() === "") {
+    if (lastname.trim() === "") {
       setErrorApellido("El apellido es requerido");
       return false;
     }
-    if (/[0-9]/.test(lastName)) {
+    if (/[0-9]/.test(lastname)) {
       setErrorApellido("El apellido no puede contener números");
       return false;
     }
@@ -167,6 +125,123 @@ export default function CreateAccount({ onLogin }) {
     return true;
   };
 
+  const generarYEnviarToken = async () => {
+    // Validar antes de enviar el token
+    setCreating(true);
+    const validaciones =
+      validarNombre() &&
+      validarApellido() &&
+      validarUsuario() &&
+      validarCorreo() &&
+      validarPassword() &&
+      validarConfirmPassword();
+
+    console.log({
+      name,
+      lastname,
+      username,
+      email,
+      password,
+    });
+
+    if (validaciones) {
+      setTokenGenerado(Math.floor(100000 + Math.random() * 900000));
+      console.log(tokenGenerado);
+      // await enviarCorreo();
+      setSendingToken(true);
+    } else {
+      setCreating(false);
+    }
+  };
+
+  const enviarCorreo = async () => {
+    try {
+      const html = `
+      <div>
+        <h1>
+          Welcome, ${name}. This is your token: ${tokenGenerado} !
+        </h1>
+      </div>
+    `;
+      const response = await fetch("/api/send/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: process.env.EMAIL_USER,
+          to: email,
+          subject: "Token para Validar Correo",
+          html,
+        }),
+      });
+      console.log("PINGAAAA");
+      console.log(await response.json());
+    } catch (error) {
+      console.error("Error sending email:", error);
+    }
+  };
+
+  const register = async () => {
+    const id = Math.floor(100000 + Math.random() * 900000);
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id,
+          name,
+          lastname,
+          username,
+          email,
+          age: 20,
+          password,
+          permiso: "user",
+        }),
+      }
+    );
+  };
+
+  const validateToken = async () => {
+    if (tokenGenerado.toString() === token) {
+      await register();
+      setSendingToken(false);
+      setCreating(false);
+      setToken("");
+      setTokenGenerado("");
+      router.replace("/");
+    } else {
+      console.log("PINGA");
+      setError("El token no es correcto");
+      setOpenSnackbar(true);
+    }
+  };
+
+  React.useEffect(() => {
+    let timer;
+    if (isCounting && countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+    } else if (countdown === 0) {
+      setIsCounting(false);
+      clearInterval(timer);
+      setToken("");
+      setTokenGenerado("");
+    }
+
+    return () => clearInterval(timer); // Limpiar el intervalo al desmontar
+  }, [isCounting, countdown]);
+
+  const handleResendCode = () => {
+    setCountdown(60);
+    setIsCounting(true);
+    generarYEnviarToken();
+  };
+
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -204,7 +279,7 @@ export default function CreateAccount({ onLogin }) {
             label="Apellido"
             name="apellido"
             autoComplete="apellido"
-            value={lastName}
+            value={lastname}
             onChange={(e) => setApellido(e.target.value)}
             error={errorApellido !== ""}
             helperText={errorApellido}
@@ -268,9 +343,9 @@ export default function CreateAccount({ onLogin }) {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
-            onClick={() => (creating ? null : generarYEnviarToken(email))}
+            onClick={() => (creating ? null : setSendingToken(true))}
           >
-            {creating ? <CircularProgress /> : "Crear cuenta"}
+            {creating ? <CircularProgress color="inherit" /> : "Crear cuenta"}
           </Button>
           <Button
             type="submit"
@@ -279,9 +354,98 @@ export default function CreateAccount({ onLogin }) {
             sx={{ mt: 3, mb: 2 }}
             onClick={() => (creating ? null : router.replace("/"))}
           >
-            {creating ? <CircularProgress /> : "Iniciar Sesión"}
+            {creating ? <CircularProgress color="inherit" /> : "Iniciar Sesión"}
           </Button>
         </Box>
+        {/* Enviar Correo */}
+        <Dialog open={sendingToken}>
+          <DialogTitle>Validar Correo</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              {isCounting
+                ? "  Se ha enviado un correo electrónico a tu dirección de correoelectrónico con un enlace de validación. Por favor introduzca el código en el siguiente cuadro de texto"
+                : "Toque enviar para enviar"}
+            </DialogContentText>
+            <TextField
+              margin="dense"
+              id="token"
+              label="Código de validación"
+              type="text"
+              fullWidth
+              value={token}
+              onChange={(e) => {
+                setToken(e.target.value);
+                console.log(tokenGenerado);
+              }}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              disabled={!isCounting}
+              sx={{ mt: 3, mb: 2 }}
+              onClick={validateToken}
+            >
+              Validar
+            </Button>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginTop: "16px",
+              }}
+            >
+              <Button
+                variant="contained"
+                onClick={() => {
+                  setSendingToken(false);
+                  setCreating(false);
+                  setTokenGenerado("");
+                  setToken("");
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handleResendCode}
+                disabled={isCounting}
+                style={{ margin: "0 10px" }} // Margen para separación
+              >
+                {isCounting ? `Reenviar en ${countdown}s` : "Enviar Código"}
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => {
+                  setSendingToken(false);
+                  setToken("");
+                  setTokenGenerado(false);
+                }}
+              >
+                Cambiar de Correo
+              </Button>
+            </div>
+          </DialogContent>
+          <Snackbar
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            //sx={{ textAlign: "right" }}
+            open={openSnackbar}
+            autoHideDuration={6000}
+            onClose={() => {
+              setOpenSnackbar(false);
+            }}
+          >
+            <Alert
+              onClose={() => {
+                setOpenSnackbar(false);
+              }}
+              severity="error"
+              sx={{ width: "100%" }}
+            >
+              {error}
+            </Alert>
+          </Snackbar>
+        </Dialog>
       </Paper>
     </Container>
   );

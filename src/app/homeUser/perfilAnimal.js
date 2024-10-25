@@ -180,6 +180,8 @@ export function AnimalProfile({ animal,onButtonClick }) {
           </Grid>
         </Grid>
         <Button onClick={()=>(onButtonClick("Animales"))}>Atras</Button>
+        <Button onClick={()=>(onButtonClick("Adopcion",animal))}>Adoptar</Button>
+        <Button onClick={()=>(onButtonClick("Donacion",animal))}>Donar</Button>
       </CardContent>
     </Card>
     </div>

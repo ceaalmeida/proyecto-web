@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -27,7 +27,7 @@ import {
   Delete as DeleteIcon,
   ViewColumn as ViewColumnIcon,
 } from "@mui/icons-material";
-
+import AnimalService from "../../../api/animal/animal.service";
 const initialAnimals = [
   {
     ID_Animal: "A001",
@@ -76,7 +76,7 @@ const initialAnimals = [
 ];
 
 export default function AnimalTable() {
-  const [animals, setAnimals] = useState(initialAnimals);
+  const [animals, setAnimals] = useState([]);
   const [sortOrder, setSortOrder] = useState("asc");
   const [visibleColumns, setVisibleColumns] = useState([
     "Nombre",
@@ -88,6 +88,7 @@ export default function AnimalTable() {
   ]);
   const [searchTerm, setSearchTerm] = useState("");
   const [editingAnimal, setEditingAnimal] = useState(null);
+  const [editado, setEditado] = useState();
   const [newAnimal, setNewAnimal] = useState({
     ID_Animal: "",
     Nombre: "",
@@ -99,9 +100,38 @@ export default function AnimalTable() {
     Precio_Mantenimiento: "",
     Precio_Adopción: "",
   });
+  const [addAnimal, setaddAnimal] = useState(null);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+
+  useEffect(() => {
+    const animales = async () => {
+      const lista = await AnimalService.getAllAnimal();
+      setAnimals(lista);
+    };
+    animales();
+  }, [editado]);
+
+  useEffect(() => {
+    const update = async () => {
+      if (editado) {        
+        const a = await AnimalService.updateAnimal(editado.ID_Animal, editado);
+      }
+    };
+    update();
+    setEditado(null);
+  }, [editado]);
+
+  useEffect(() => {
+    const add = async () => {
+      if (addAnimal) {        
+        const ani = await AnimalService.createAnimal(addAnimal);
+      }
+    };
+    add();
+    setaddAnimal(null);    
+  }, [addAnimal]);
 
   const handleSort = () => {
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -113,6 +143,7 @@ export default function AnimalTable() {
 
   const handleDelete = (id) => {
     setAnimals(animals.filter((animal) => animal.ID_Animal !== id));
+    AnimalService.deleteAnimal(id);
   };
 
   const handleEdit = (animal) => {
@@ -121,16 +152,21 @@ export default function AnimalTable() {
   };
 
   const handleSaveEdit = () => {
-    setAnimals(
-        animals.map((animal) =>
-            animal.ID_Animal === editingAnimal.ID_Animal ? editingAnimal : animal
-        )
-    );                                                                                
+    // setAnimals(
+    //   animals.map((animal) =>
+    //     animal.ID_Animal === editingAnimal.ID_Animal ? editingAnimal : animal
+    //   )
+    // );
+    
+    setEditado(editingAnimal);
     setOpenEditDialog(false);
   };
 
   const handleAdd = () => {
-    setAnimals([...animals, { ...newAnimal }]);
+    newAnimal.ID_Animal=Math.floor(100000 + Math.random() * 900000);
+    window.alert(newAnimal.ID_Animal)
+    setAnimals([...animals, { ...newAnimal }]);    
+    setaddAnimal(newAnimal);
     setNewAnimal({
       ID_Animal: "",
       Nombre: "",
@@ -142,210 +178,215 @@ export default function AnimalTable() {
       Precio_Mantenimiento: "",
       Precio_Adopción: "",
     });
+
     setOpenAddDialog(false);
   };
 
   const toggleColumn = (column) => {
     setVisibleColumns((prev) =>
-        prev.includes(column)
-            ? prev.filter((col) => col !== column)
-            : [...prev, column]
+      prev.includes(column)
+        ? prev.filter((col) => col !== column)
+        : [...prev, column]
     );
   };
 
   const filteredAnimals = animals
-      .filter((animal) =>
-          Object.values(animal).some((value) =>
-              value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-          )
+    .filter((animal) =>
+      Object.values(animal).some((value) =>
+        value.toString().toLowerCase().includes(searchTerm.toLowerCase())
       )
-      .sort((a, b) => {
-        if (sortOrder === "asc") {
-          return a.Nombre.localeCompare(b.Nombre);
-        } else {
-          return b.Nombre.localeCompare(a.Nombre);
-        }
-      });
+    )
+    .sort((a, b) => {
+      if (sortOrder === "asc") {
+        return a.Nombre.localeCompare(b.Nombre);
+      } else {
+        return b.Nombre.localeCompare(a.Nombre);
+      }
+    });
 
   return (
-      <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
-        <TextField
-            label="Buscar animales"
-            variant="outlined"
-            value={searchTerm}
-            onChange={handleSearch}
-            sx={{ mb: 2 }}
-        />
-        <IconButton
-            onClick={(event) => setAnchorEl(event.currentTarget)}
-            sx={{ mb: 2, ml: 2 }}
-        >
-          <ViewColumnIcon />
-        </IconButton>
-        <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={() => setAnchorEl(null)}
-        >
-          {["Nombre", "Especie", "Raza", "Edad", "Peso", "Precio_Adopción"].map((column) => (
-              <MenuItem key={column}>
-                <FormControlLabel
-                    control={
-                      <Checkbox
-                          checked={visibleColumns.includes(column)}
-                          onChange={() => toggleColumn(column)}
-                      />
-                    }
-                    label={column}
-                />
-              </MenuItem>
-          ))}
-        </Menu>
-        <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 650 }} aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                {visibleColumns.includes("Nombre") && (
-                    <TableCell onClick={handleSort} sx={{ cursor: "pointer" }}>
-                      Nombre {sortOrder === "asc" ? "↑" : "↓"}
-                    </TableCell>
-                )}
-                {visibleColumns.includes("Especie") && <TableCell>Especie</TableCell>}
-                {visibleColumns.includes("Raza") && <TableCell>Raza</TableCell>}
-                {visibleColumns.includes("Edad") && <TableCell>Edad</TableCell>}
-                {visibleColumns.includes("Peso") && <TableCell>Peso</TableCell>}
-                {visibleColumns.includes("Precio_Adopción") && <TableCell>Precio de Adopción</TableCell>}
-                <TableCell>Acciones</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredAnimals.map((animal) => (
-                  <TableRow key={animal.ID_Animal}>
-                    {visibleColumns.includes("Nombre") && (
-                        <TableCell>{animal.Nombre}</TableCell>
-                    )}
-                    {visibleColumns.includes("Especie") && (
-                        <TableCell>{animal.Especie}</TableCell>
-                    )}
-                    {visibleColumns.includes("Raza") && (
-                        <TableCell>{animal.Raza}</TableCell>
-                    )}
-                    {visibleColumns.includes("Edad") && (
-                        <TableCell>{animal.Edad}</TableCell>
-                    )}
-                    {visibleColumns.includes("Peso") && (
-                        <TableCell>{animal.Peso}</TableCell>
-                    )}
-                    {visibleColumns.includes("Precio_Adopción") && (
-                        <TableCell>{animal.Precio_Adopción}</TableCell>
-                    )}
-                    <TableCell>
-                      <IconButton
-                          onClick={() => handleEdit(animal)}
-                          color="primary"
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                          onClick={() => handleDelete(animal.ID_Animal)}
-                          color="error"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+    <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
+      <TextField
+        label="Buscar animales"
+        variant="outlined"
+        value={searchTerm}
+        onChange={handleSearch}
+        sx={{ mb: 2 }}
+      />
+      <IconButton
+        onClick={(event) => setAnchorEl(event.currentTarget)}
+        sx={{ mb: 2, ml: 2 }}
+      >
+        <ViewColumnIcon />
+      </IconButton>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={() => setAnchorEl(null)}
+      >
+        {["Nombre", "Especie", "Raza", "Edad", "Peso", "Precio_Adopción"].map(
+          (column) => (
+            <MenuItem key={column}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={visibleColumns.includes(column)}
+                    onChange={() => toggleColumn(column)}
+                  />
+                }
+                label={column}
+              />
+            </MenuItem>
+          )
+        )}
+      </Menu>
+
+      <TableContainer component={Paper}>
         <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setOpenAddDialog(true)}
-            sx={{ mt: 2 }}
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setOpenAddDialog(true)}
+          sx={{ mt: 2 }}
         >
           Agregar Animal
         </Button>
-
-        {/* Diálogo para agregar animal */}
-        <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
-          <DialogTitle>Agregar Nuevo Animal</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Por favor, ingrese los detalles del nuevo animal.
-            </DialogContentText>
-            {[              
-              "Nombre",
-              "Especie",
-              "Raza",
-              "Edad",
-              "Peso",
-              "Dias Refugio",
-              "Precio Mantenimiento",
-              "Precio Adopción",
-            ].map((field) => (
-                <TextField
-                    key={field}
-                    label={field}
-                    fullWidth
-                    variant="outlined"
-                    value={newAnimal[field]}
-                    onChange={(e) =>
-                        setNewAnimal({ ...newAnimal, [field]: e.target.value })
-                    }
-                    sx={{ mb: 2 }}
-                />
+        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+          <TableHead>
+            <TableRow>
+              {visibleColumns.includes("Nombre") && (
+                <TableCell onClick={handleSort} sx={{ cursor: "pointer" }}>
+                  Nombre {sortOrder === "asc" ? "↑" : "↓"}
+                </TableCell>
+              )}
+              {visibleColumns.includes("Especie") && (
+                <TableCell>Especie</TableCell>
+              )}
+              {visibleColumns.includes("Raza") && <TableCell>Raza</TableCell>}
+              {visibleColumns.includes("Edad") && <TableCell>Edad</TableCell>}
+              {visibleColumns.includes("Peso") && <TableCell>Peso</TableCell>}
+              {visibleColumns.includes("Precio_Adopción") && <TableCell>Precio de Adopción</TableCell>}
+              <TableCell>Acciones</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredAnimals.map((animal) => (
+              <TableRow key={animal.ID_Animal}>
+                {visibleColumns.includes("Nombre") && (
+                  <TableCell>{animal.Nombre}</TableCell>
+                )}
+                {visibleColumns.includes("Especie") && (
+                  <TableCell>{animal.Especie}</TableCell>
+                )}
+                {visibleColumns.includes("Raza") && (
+                  <TableCell>{animal.Raza}</TableCell>
+                )}
+                {visibleColumns.includes("Edad") && (
+                  <TableCell>{animal.Edad}</TableCell>
+                )}
+                {visibleColumns.includes("Peso") && (
+                  <TableCell>{animal.Peso}</TableCell>
+                )}
+                {visibleColumns.includes("Precio_Adopción") && (
+                  <TableCell>{animal.Precio_Adopción}</TableCell>
+                )}
+                <TableCell>
+                  <IconButton
+                    onClick={() => handleEdit(animal)}
+                    color="primary"
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => handleDelete(animal.ID_Animal)}
+                    color="error"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
             ))}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setOpenAddDialog(false)}>Cancelar</Button>
-            <Button onClick={handleAdd}>Agregar</Button>
-          </DialogActions>
-        </Dialog>
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-        {/* Diálogo para editar animal */}
-        <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
-          <DialogTitle>Editar Animal</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Por favor, edite los detalles del animal.
-            </DialogContentText>
-            {editingAnimal && (
-                <>
-                  {[
-                    
-                    "Nombre",
-                    "Especie",
-                    "Raza",
-                    "Edad",
-                    "Peso",
-                    "Dias_Refugio",
-                    "Precio_Mantenimiento",
-                    "Precio_Adopción",
-                  ].map((field) => (
-                      <TextField
-                          key={field}
-                          label={field}
-                          fullWidth
-                          variant="outlined"
-                          value={editingAnimal[field]}
-                          onChange={(e) =>
-                              setEditingAnimal({
-                                ...editingAnimal,
-                                [field]: e.target.value,
-                              })
-                          }
-                          sx={{ mb: 2 }}
-                      />
-                  ))}
-                </>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
-            <Button onClick={handleSaveEdit}>Guardar</Button>
-          </DialogActions>
-        </Dialog>
-      </Paper>
+      {/* Diálogo para agregar animal */}
+      <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
+        <DialogTitle>Agregar Nuevo Animal</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Por favor, ingrese los detalles del nuevo animal.
+          </DialogContentText>
+          {[
+            "Nombre",
+            "Especie",
+            "Raza",
+            "Edad",
+            "Peso",
+            "Dias_Refugio",
+            "Precio_Mantenimiento",
+            "Precio_Adopción",
+          ].map((field) => (
+            <TextField
+              key={field}
+              label={field}
+              fullWidth
+              variant="outlined"
+              value={newAnimal[field]}
+              onChange={(e) =>
+                setNewAnimal({ ...newAnimal, [field]: e.target.value })
+              }
+              sx={{ mb: 2 }}
+            />
+          ))}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenAddDialog(false)}>Cancelar</Button>
+          <Button onClick={handleAdd}>Agregar</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Diálogo para editar animal */}
+      <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
+        <DialogTitle>Editar Animal</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Por favor, edite los detalles del animal.
+          </DialogContentText>
+          {editingAnimal && (
+            <>
+              {[
+                "Nombre",
+                "Especie",
+                "Raza",
+                "Edad",
+                "Peso",
+                "Dias_Refugio",
+                "Precio_Mantenimiento",
+                "Precio_Adopción",
+              ].map((field) => (
+                <TextField
+                  key={field}
+                  label={field}
+                  fullWidth
+                  variant="outlined"
+                  value={editingAnimal[field]}
+                  onChange={(e) =>
+                    setEditingAnimal({
+                      ...editingAnimal,
+                      [field]: e.target.value,
+                    })
+                  }
+                  sx={{ mb: 2 }}
+                />
+              ))}
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
+          <Button onClick={handleSaveEdit}>Guardar</Button>
+        </DialogActions>
+      </Dialog>
+    </Paper>
   );
 }

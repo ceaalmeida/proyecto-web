@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useRouter } from "next/navigation";
-import { signIn, useSession } from "next-auth/react";
+import { signIn, useSession, signOut } from "next-auth/react";
 
 export default function CreateAccount({ onLogin }) {
   const [name, setNombre] = useState("");
@@ -95,9 +95,9 @@ export default function CreateAccount({ onLogin }) {
 
   const existeUsuario = async () => {
     let existe = false;
-    
+
     try {
-      sign()
+      sign();
       if (session?.user?.token) {
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`,
@@ -112,10 +112,12 @@ export default function CreateAccount({ onLogin }) {
         const data = await response.json();
         data.filter((e) => {
           if (e.username === username) {
+            signOut();
             existe = true;
           }
         });
       }
+      signOut();
       return existe;
     } catch (error) {
       console.log(error);
@@ -175,10 +177,12 @@ export default function CreateAccount({ onLogin }) {
         const data = response.json();
         data.filter((e) => {
           if (e.email === email) {
+            signOut();
             return true;
           }
         });
       }
+      signOut();
       return existe;
     } catch (error) {
       console.log(error);

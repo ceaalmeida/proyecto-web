@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useRouter } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
 
 export default function CreateAccount({ onLogin }) {
   const [name, setNombre] = useState("");
@@ -34,6 +35,8 @@ export default function CreateAccount({ onLogin }) {
   const [isCounting, setIsCounting] = useState(false); // Estado para saber si el contador está activo
 
   const [creating, setCreating] = useState(false);
+
+  const { data: session, status } = useSession();
 
   const [errorNombre, setErrorNombre] = useState("");
   const [errorApellido, setErrorApellido] = useState("");
@@ -82,7 +85,7 @@ export default function CreateAccount({ onLogin }) {
       setErrorUser("El usuario no puede contener números");
       return false;
     }
-    const existe = await existeUsuario();
+    const existe = existeUsuario();
     if (existe) {
       setErrorUser("El nombre de usuario ya está en uso");
       return false;
@@ -92,39 +95,31 @@ export default function CreateAccount({ onLogin }) {
 
   const existeUsuario = async () => {
     let existe = false;
-    const responseLogin = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: process.env.ADMIN_ROLE_EMAIL,
-          password: process.env.ADMIN_ROLE_PASSWORD,
-        }),
+    
+    try {
+      sign()
+      if (session?.user?.token) {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session?.user?.token}`,
+            },
+          }
+        );
+        const data = await response.json();
+        data.filter((e) => {
+          if (e.username === username) {
+            existe = true;
+          }
+        });
       }
-    );
-    const dataLogin = await responseLogin.json();
-    if (dataLogin.token) {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${dataLogin.token}`,
-          },
-        }
-      );
-      const data = await response.json();
-      data.filter((e) => {
-        if (e.username === username) {
-          existe = true;
-        }
-      });
+      return existe;
+    } catch (error) {
+      console.log(error);
     }
-    return existe;
   };
 
   const validarCorreo = () => {
@@ -146,42 +141,48 @@ export default function CreateAccount({ onLogin }) {
     return true;
   };
 
+  const sign = async () => {
+    const x = process.env.ADMIN_ROLE_EMAIL;
+    const y = process.env.ADMIN_ROLE_PASSWORD;
+    console.log("Entrando");
+    const response = await signIn("credentials", {
+      x,
+      y,
+      redirect: false,
+    });
+    if (response?.error) {
+      setError(response.error);
+      return;
+    }
+  };
+
   const existeCuenta = async () => {
     let existe = false;
-    const responseLogin = await fetch(
-      `http://localhost:3000/auth/login`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: process.env.ADMIN_ROLE_EMAIL,
-          password: process.env.ADMIN_ROLE_PASSWORD,
-        }),
+    try {
+      sign();
+      console.log("LOGEADO");
+      if (session?.user?.token) {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session?.user?.token}`,
+            },
+          }
+        );
+        const data = response.json();
+        data.filter((e) => {
+          if (e.email === email) {
+            return true;
+          }
+        });
       }
-    );
-    console.log("LOGEADO");
-    const dataLogin = await responseLogin.json();
-    if (dataLogin.token) {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${dataLogin.token}`,
-          },
-        }
-      );
-      const data = response.json();
-      data.filter((e) => {
-        if (e.email === email) {
-          existe = true;
-        }
-      });
+      return existe;
+    } catch (error) {
+      console.log(error);
     }
-    return existe;
   };
 
   const validarPassword = () => {

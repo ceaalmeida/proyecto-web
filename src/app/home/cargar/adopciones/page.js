@@ -296,9 +296,9 @@ export default function AdopcionesTable() {
           <TableBody>
             {filteredAdopciones.map((adopcion) => (
               <TableRow key={adopcion.ID_Adopcion}>
-                {visibleColumns.includes("ID_Adopcion") && (
+                {/* {visibleColumns.includes("ID_Adopcion") && (
                   <TableCell>{adopcion.ID_Adopcion}</TableCell>
-                )}
+                )} */}
                 {visibleColumns.includes("ID_Animal") && (
                   <TableCell>{adopcion.ID_Animal}</TableCell>
                 )}

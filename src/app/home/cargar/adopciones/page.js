@@ -1,446 +1,563 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import AdopcionService from "../../../api/adopcion/adopcion.service";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
-    Button,
-    TextField,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    Checkbox,
-    FormControlLabel,
-    IconButton,
-    Menu,
-    MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Checkbox,
+  FormControlLabel,
+  IconButton,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import {
-    Add as AddIcon,
-    Edit as EditIcon,
-    Delete as DeleteIcon,
-    ViewColumn as ViewColumnIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  ViewColumn as ViewColumnIcon,
 } from "@mui/icons-material";
+import animalService from "../../../api/animal/animal.service";
 
 const initialAdopciones = [
-    {
-        idAdopcion: "AD001",
-        idAnimal: "A001",
-        fecha: "2024-01-15",
-        costoAdopcion: 200,
-        nombreAdoptante: "Juan Pérez",
-        emailAdoptante: "juan@example.com",
-        telefonoAdoptante: "123456789",
-    },
-    {
-        idAdopcion: "AD002",
-        idAnimal: "A002",
-        fecha: "2024-02-12",
-        costoAdopcion: 150,
-        nombreAdoptante: "María Gómez",
-        emailAdoptante: "maria@example.com",
-        telefonoAdoptante: "987654321",
-    },
+  {
+    idAdopcion: "AD001",
+    idAnimal: "A001",
+    fecha: "2024-01-15",
+    costoAdopcion: 200,
+    nombreAdoptante: "Juan Pérez",
+    emailAdoptante: "juan@example.com",
+    telefonoAdoptante: "123456789",
+  },
+  {
+    idAdopcion: "AD002",
+    idAnimal: "A002",
+    fecha: "2024-02-12",
+    costoAdopcion: 150,
+    nombreAdoptante: "María Gómez",
+    emailAdoptante: "maria@example.com",
+    telefonoAdoptante: "987654321",
+  },
 ];
 
 export default function AdopcionesTable() {
-    const [adopciones, setAdopciones] = useState(initialAdopciones);
-    const [sortOrder, setSortOrder] = useState("asc");
-    const [visibleColumns, setVisibleColumns] = useState([
-        "idAdopcion",
-        "idAnimal",
-        "fecha",
-        "costoAdopcion",
-        "nombreAdoptante",
-        "emailAdoptante",
-        "telefonoAdoptante",
-    ]);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [editingAdopcion, setEditingAdopcion] = useState(null);
-    const [errors, setErrors] = useState({});
-    const [newAdopcion, setNewAdopcion] = useState({
-        idAdopcion: "",
-        idAnimal: "",
-        fecha: "",
-        costoAdopcion: "",
-        nombreAdoptante: "",
-        emailAdoptante: "",
-        telefonoAdoptante: "",
-    });
-    const [openAddDialog, setOpenAddDialog] = useState(false);
-    const [openEditDialog, setOpenEditDialog] = useState(false);
-    const [anchorEl, setAnchorEl] = useState(null);
+  const [adopciones, setAdopciones] = useState([]);
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [visibleColumns, setVisibleColumns] = useState([
+    "ID_Adopcion",
+    "ID_Animal",
+    "Fecha",
+    "Costo_Adopcion",
+    "Nombre_Adoptante",
+    "Email_Adoptante",
+    "Telefono_Adoptante",
+  ]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [editingAdopcion, setEditingAdopcion] = useState(null);
+  const [editado, setEditado] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [newAdopcion, setNewAdopcion] = useState({
+    ID_Adopcion: "",
+    ID_Animal: "",
+    Fecha: "",
+    Costo_Adopcion: "",
+    Nombre_Adoptante: "",
+    Email_Adoptante: "",
+    Telefono_Adoptante: "",
+  });
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [add, setAdd] = useState(null);
 
-    const handleSort = () => {
-        setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  useEffect(() => {
+    const inicia = async () => {
+      const initi = await AdopcionService.getAll();
+      setAdopciones(initi);
     };
+    inicia(); // Llama a la función asíncrona cuando el componente se monte
+  }, [editado]);
 
-    const handleSearch = (event) => {
-        setSearchTerm(event.target.value);
+  useEffect(() => {
+    const update = async () => {
+      if (editado) {
+        const a = await AdopcionService.update(editado.ID_Adopcion, editado);
+      }
     };
-
-    const handleDelete = (id) => {
-        setAdopciones(adopciones.filter((adopcion) => adopcion.idAdopcion !== id));
+    update();
+    setEditado(null);
+  }, [editado]);
+  useEffect(() => {
+    const ad = async () => {
+      if(add) {
+        await AdopcionService.create(add);
+      }
     };
-    const validate = (adopcion) => {
-        let errors = {};
+    ad();
+    setAdd(null);
+  },[add]);
+  const handleSort = () => {
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  };
 
-        if (!adopcion.idAdopcion || !/^[a-zA-Z0-9]{6,}$/.test(adopcion.idAdopcion)) {
-            errors.idAdopcion = "El ID de adopción debe tener al menos 6 caracteres y contener solo letras o números.";
-        }
-        if (!adopcion.idAnimal || !/^[a-zA-Z0-9]{6,}$/.test(adopcion.idAnimal)) {
-            errors.idAnimal = "El ID de animal debe tener al menos 6 caracteres y contener solo letras o números.";
-        }
-        if (!adopcion.costoAdopcion || isNaN(adopcion.costoAdopcion)) {
-            errors.costoAdopcion = "El costo de adopción debe ser un número y no puede estar vacío.";
-        }
-        if (!adopcion.nombreAdoptante || !/^[a-zA-Z\s]+$/.test(adopcion.nombreAdoptante)) {
-            errors.nombreAdoptante = "El nombre no puede estar vacío y debe contener solo letras y espacios.";
-        }
-        if (!adopcion.emailAdoptante || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adopcion.emailAdoptante)) {
-            errors.emailAdoptante = "El email debe tener un formato válido (ej. correo@correo.com).";
-        }
-        if (!adopcion.telefonoAdoptante || !/^\d{8}$/.test(adopcion.telefonoAdoptante)) {
-            errors.telefonoAdoptante = "El teléfono debe contener solo números y tener 8 caracteres.";
-        }
-        if (!adopcion.fecha) {
-            errors.fecha = "La fecha no puede estar vacía.";
-        }
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
+  };
 
-        setErrors(errors);
-        return Object.keys(errors).length === 0;
-    };
+  const handleDelete = async (id) => {
+    setAdopciones(adopciones.filter((adopcion) => adopcion.ID_Adopcion !== id));
+    await AdopcionService.delete(id);
+  };
 
+  const validate = (adopcion) => {
+    let errors = {};
 
-    const handleEdit = (adopcion) => {
-        setEditingAdopcion(adopcion);
-        setOpenEditDialog(true);
-    };
+    if (
+      !adopcion.ID_Adopcion ||
+      !/^[a-zA-Z0-9]{6,}$/.test(adopcion.ID_Adopcion)
+    ) {
+      errors.ID_Adopcion =
+        "El ID de adopción debe tener al menos 6 caracteres y contener solo letras o números.";
+    }
+    if (!adopcion.ID_Animal || !/^[a-zA-Z0-9]+$/.test(adopcion.ID_Animal)) {
+      errors.ID_Animal =
+        "El ID de animal debe tener al menos 6 caracteres y contener solo letras o números.";
+    }
+    if (!adopcion.Costo_Adopcion || isNaN(adopcion.Costo_Adopcion)) {
+      errors.Costo_Adopcion =
+        "El costo de adopción debe ser un número y no puede estar vacío.";
+    }
+    if (
+      !adopcion.Nombre_Adoptante ||
+      !/^[a-zA-Z\s]+$/.test(adopcion.Nombre_Adoptante)
+    ) {
+      errors.Nombre_Adoptante =
+        "El nombre no puede estar vacío y debe contener solo letras y espacios.";
+    }
+    if (
+      !adopcion.Email_Adoptante ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adopcion.Email_Adoptante)
+    ) {
+      errors.Email_Adoptante =
+        "El email debe tener un formato válido (ej. correo@correo.com).";
+    }
+    if (
+      !adopcion.Telefono_Adoptante ||
+      !/^\d{8}$/.test(adopcion.Telefono_Adoptante)
+    ) {
+      errors.Telefono_Adoptante =
+        "El teléfono debe contener solo números y tener 8 caracteres.";
+    }
+    if (!adopcion.Fecha) {
+      errors.Fecha = "La fecha no puede estar vacía.";
+    }
 
-    const handleAdd = () => {
-        if (validate(newAdopcion)) {
-            setAdopciones([...adopciones, { ...newAdopcion }]);
-            setNewAdopcion({
-                idAdopcion: "", idAnimal: "", fecha: "", costoAdopcion: "", nombreAdoptante: "", emailAdoptante: "", telefonoAdoptante: "",
-            });
-            setOpenAddDialog(false);
-        }
-    };
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
-    const handleSaveEdit = () => {
-        if (validate(editingAdopcion)) {
-            setAdopciones(adopciones.map((adopcion) => (adopcion.idAdopcion === editingAdopcion.idAdopcion ? editingAdopcion : adopcion)));
-            setOpenEditDialog(false);
-        }
-    };
+  const handleEdit = (adopcion) => {
+    setEditingAdopcion(adopcion);
 
+    setOpenEditDialog(true);
+  };
 
-    const toggleColumn = (column) => {
-        setVisibleColumns((prev) =>
-            prev.includes(column)
-                ? prev.filter((col) => col !== column)
-                : [...prev, column]
-        );
-    };
+  const handleAdd = () => {
+    
+      setAdopciones([...adopciones, { ...newAdopcion }]);
+      setAdd(newAdopcion);
+      setNewAdopcion({
+        ID_Adopcion: "",
+        ID_Animal: "",
+        Fecha: "",
+        Costo_Adopcion: "",
+        Nombre_Adoptante: "",
+        Email_Adoptante: "",
+        Telefono_Adoptante: "",
+      });
+      setOpenAddDialog(false);
+    
+  };
 
-    const filteredAdopciones = adopciones
-        .filter((adopcion) =>
-            Object.values(adopcion).some((value) =>
-                value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-            )
-        )
-        .sort((a, b) => {
-            if (sortOrder === "asc") {
-                return a.idAdopcion.localeCompare(b.idAdopcion);
-            } else {
-                return b.idAdopcion.localeCompare(a.idAdopcion);
-            }
-        });
+  const handleSaveEdit = () => {
+    setEditado(editingAdopcion);
+    // if (validate(editingAdopcion)) {
+    // if(true){
+    //     //setAdopciones(adopciones.map((adopcion) => (adopcion.ID_Adopcion === editingAdopcion.ID_Adopcion ? editingAdopcion : adopcion)));
+    //     await AdopcionService.update(editingAdopcion);
+    //     setOpenEditDialog(false);
+    // }
+    setOpenEditDialog(false);
+  };
 
-    return (
-        <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
-            <TextField
-                label="Buscar adopciones"
-                variant="outlined"
-                value={searchTerm}
-                onChange={handleSearch}
-                sx={{ mb: 2 }}
-            />
-            <IconButton
-                onClick={(event) => setAnchorEl(event.currentTarget)}
-                sx={{ mb: 2, ml: 2 }}
-            >
-                <ViewColumnIcon />
-            </IconButton>
-            <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={() => setAnchorEl(null)}
-            >
-                {visibleColumns.map((column) => (
-                    <MenuItem key={column}>
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={visibleColumns.includes(column)}
-                                    onChange={() => toggleColumn(column)}
-                                />
-                            }
-                            label={column.charAt(0).toUpperCase() + column.slice(1)}
-                        />
-                    </MenuItem>
-                ))}
-            </Menu>
-            <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                    <TableHead>
-                        <TableRow>
-                            {visibleColumns.includes("idAdopcion") && (
-                                <TableCell onClick={handleSort} sx={{ cursor: "pointer" }}>
-                                    ID Adopción {sortOrder === "asc" ? "↑" : "↓"}
-                                </TableCell>
-                            )}
-                            {visibleColumns.includes("idAnimal") && (
-                                <TableCell>ID Animal</TableCell>
-                            )}
-                            {visibleColumns.includes("fecha") && <TableCell>Fecha</TableCell>}
-                            {visibleColumns.includes("costoAdopcion") && <TableCell>Costo Adopción</TableCell>}
-                            {visibleColumns.includes("nombreAdoptante") && <TableCell>Nombre Adoptante</TableCell>}
-                            {visibleColumns.includes("emailAdoptante") && <TableCell>Email Adoptante</TableCell>}
-                            {visibleColumns.includes("telefonoAdoptante") && <TableCell>Teléfono Adoptante</TableCell>}
-                            <TableCell>Acciones</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {filteredAdopciones.map((adopcion) => (
-                            <TableRow key={adopcion.idAdopcion}>
-                                {visibleColumns.includes("idAdopcion") && (
-                                    <TableCell>{adopcion.idAdopcion}</TableCell>
-                                )}
-                                {visibleColumns.includes("idAnimal") && (
-                                    <TableCell>{adopcion.idAnimal}</TableCell>
-                                )}
-                                {visibleColumns.includes("fecha") && (
-                                    <TableCell>{adopcion.fecha}</TableCell>
-                                )}
-                                {visibleColumns.includes("costoAdopcion") && (
-                                    <TableCell>{adopcion.costoAdopcion}</TableCell>
-                                )}
-                                {visibleColumns.includes("nombreAdoptante") && (
-                                    <TableCell>{adopcion.nombreAdoptante}</TableCell>
-                                )}
-                                {visibleColumns.includes("emailAdoptante") && (
-                                    <TableCell>{adopcion.emailAdoptante}</TableCell>
-                                )}
-                                {visibleColumns.includes("telefonoAdoptante") && (
-                                    <TableCell>{adopcion.telefonoAdoptante}</TableCell>
-                                )}
-                                <TableCell>
-                                    <IconButton
-                                        onClick={() => handleEdit(adopcion)}
-                                        color="primary"
-                                    >
-                                        <EditIcon />
-                                    </IconButton>
-                                    <IconButton
-                                        onClick={() => handleDelete(adopcion.idAdopcion)}
-                                        color="error"
-                                    >
-                                        <DeleteIcon />
-                                    </IconButton>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-            <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => setOpenAddDialog(true)}
-                sx={{ mt: 2 }}
-            >
-                Agregar Adopción
-            </Button>
-
-            <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
-                <DialogTitle>Agregar Nueva Adopción</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Llenar los detalles de la nueva adopción.
-                    </DialogContentText>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        label="ID Adopción"
-                        fullWidth
-                        variant="outlined"
-                        value={newAdopcion.idAdopcion}
-                        onChange={(e) => setNewAdopcion({ ...newAdopcion, idAdopcion: e.target.value })}
-                        error={!!errors.idAdopcion}
-                        helperText={errors.idAdopcion}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="ID Animal"
-                        fullWidth
-                        variant="outlined"
-                        value={newAdopcion.idAnimal}
-                        onChange={(e) => setNewAdopcion({ ...newAdopcion, idAnimal: e.target.value })}
-                        error={!!errors.idAnimal}
-                        helperText={errors.idAnimal}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Fecha"
-                        type="date"
-                        fullWidth
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                        value={newAdopcion.fecha}
-                        onChange={(e) => setNewAdopcion({ ...newAdopcion, fecha: e.target.value })}
-                        error={!!errors.fecha}
-                        helperText={errors.fecha}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Costo Adopción"
-                        fullWidth
-                        variant="outlined"
-                        value={newAdopcion.costoAdopcion}
-                        onChange={(e) => setNewAdopcion({ ...newAdopcion, costoAdopcion: e.target.value })}
-                        error={!!errors.costoAdopcion}
-                        helperText={errors.costoAdopcion}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Nombre Adoptante"
-                        fullWidth
-                        variant="outlined"
-                        value={newAdopcion.nombreAdoptante}
-                        onChange={(e) => setNewAdopcion({ ...newAdopcion, nombreAdoptante: e.target.value })}
-                        error={!!errors.nombreAdoptante}
-                        helperText={errors.nombreAdoptante}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Email Adoptante"
-                        fullWidth
-                        variant="outlined"
-                        value={newAdopcion.emailAdoptante}
-                        onChange={(e) => setNewAdopcion({ ...newAdopcion, emailAdoptante: e.target.value })}
-                        error={!!errors.emailAdoptante}
-                        helperText={errors.emailAdoptante}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Teléfono Adoptante"
-                        fullWidth
-                        variant="outlined"
-                        value={newAdopcion.telefonoAdoptante}
-                        onChange={(e) => setNewAdopcion({ ...newAdopcion, telefonoAdoptante: e.target.value })}
-                        error={!!errors.telefonoAdoptante}
-                        helperText={errors.telefonoAdoptante}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenAddDialog(false)}>Cancelar</Button>
-                    <Button onClick={handleAdd}>Agregar</Button>
-                </DialogActions>
-
-            </Dialog>
-            <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
-                <DialogTitle>Editar Adopción</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Modificar los detalles de la adopción.
-                    </DialogContentText>
-                    {editingAdopcion && (
-                        <>
-                            <TextField
-                                margin="dense"
-                                label="ID Adopción"
-                                fullWidth
-                                variant="outlined"
-                                value={editingAdopcion.idAdopcion}
-                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, idAdopcion: e.target.value })}
-                                disabled
-                            />
-                            <TextField
-                                margin="dense"
-                                label="ID Animal"
-                                fullWidth
-                                variant="outlined"
-                                value={editingAdopcion.idAnimal}
-                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, idAnimal: e.target.value })}
-                                error={!!errors.idAnimal}
-                                helperText={errors.idAnimal}
-                            />
-                            <TextField
-                                margin="dense"
-                                label="Fecha"
-                                type="date"
-                                fullWidth
-                                variant="outlined"
-                                InputLabelProps={{ shrink: true }}
-                                value={editingAdopcion.fecha}
-                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, fecha: e.target.value })}
-                            />
-                            <TextField
-                                margin="dense"
-                                label="Costo Adopción"
-                                fullWidth
-                                variant="outlined"
-                                value={editingAdopcion.costoAdopcion}
-                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, costoAdopcion: e.target.value })}
-                                error={!!errors.costoAdopcion}
-                                helperText={errors.costoAdopcion}
-                            />
-                            <TextField
-                                margin="dense"
-                                label="Nombre Adoptante"
-                                fullWidth
-                                variant="outlined"
-                                value={editingAdopcion.nombreAdoptante}
-                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, nombreAdoptante: e.target.value })}
-                                error={!!errors.nombreAdoptante}
-                                helperText={errors.nombreAdoptante}
-                            />
-                            <TextField
-                                margin="dense"
-                                label="Email Adoptante"
-                                fullWidth
-                                variant="outlined"
-                                value={editingAdopcion.emailAdoptante}
-                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, emailAdoptante: e.target.value })}
-                                error={!!errors.emailAdoptante}
-                                helperText={errors.emailAdoptante}
-                            />
-                            <TextField
-                                margin="dense"
-                                label="Teléfono Adoptante"
-                                fullWidth
-                                variant="outlined"
-                                value={editingAdopcion.telefonoAdoptante}
-                                onChange={(e) => setEditingAdopcion({ ...editingAdopcion, telefonoAdoptante: e.target.value })}
-                                error={!!errors.telefonoAdoptante}
-                                helperText={errors.telefonoAdoptante}
-                            />
-                        </>
-                    )}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
-                    <Button onClick={handleSaveEdit}>Guardar</Button>
-                </DialogActions>
-            </Dialog>
-
-        </Paper>
+  const toggleColumn = (column) => {
+    setVisibleColumns((prev) =>
+      prev.includes(column)
+        ? prev.filter((col) => col !== column)
+        : [...prev, column]
     );
+  };
+
+  const filteredAdopciones = adopciones.filter((adopcion) =>
+    Object.values(adopcion).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+  // .sort((a, b) => {
+  //     if (sortOrder === "asc") {
+  //         return a.ID_Adopcion.localeCompare(b.ID_Adopcion);
+  //     } else {
+  //         return b.ID_Adopcion.localeCompare(a.ID_Adopcion);
+  //     }
+  // });
+
+  return (
+    <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
+      <TextField
+        label="Buscar adopciones"
+        variant="outlined"
+        value={searchTerm}
+        onChange={handleSearch}
+        sx={{ mb: 2 }}
+      />
+      <IconButton
+        onClick={(event) => setAnchorEl(event.currentTarget)}
+        sx={{ mb: 2, ml: 2 }}
+      >
+        <ViewColumnIcon />
+      </IconButton>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={() => setAnchorEl(null)}
+      >
+        {visibleColumns.map((column) => (
+          <MenuItem key={column}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={visibleColumns.includes(column)}
+                  onChange={() => toggleColumn(column)}
+                />
+              }
+              label={column.charAt(0).toUpperCase() + column.slice(1)}
+            />
+          </MenuItem>
+        ))}
+      </Menu>
+
+      <TableContainer component={Paper}>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setOpenAddDialog(true)}
+          sx={{ mt: 2 }}
+        >
+          Agregar Adopción
+        </Button>
+        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+          <TableHead>
+            <TableRow>
+              {/* {visibleColumns.includes("ID_Adopcion") && (
+                            <TableCell onClick={handleSort} sx={{ cursor: "pointer" }}>
+                                ID Adopción {sortOrder === "asc" ? "↑" : "↓"}
+                            </TableCell>
+                        )} */}
+              {visibleColumns.includes("ID_Animal") && (
+                <TableCell>ID Animal</TableCell>
+              )}
+              {visibleColumns.includes("Fecha") && <TableCell>Fecha</TableCell>}
+              {visibleColumns.includes("Costo_Adopcion") && (
+                <TableCell>Costo Adopción</TableCell>
+              )}
+              {visibleColumns.includes("Nombre_Adoptante") && (
+                <TableCell>Nombre Adoptante</TableCell>
+              )}
+              {visibleColumns.includes("Email_Adoptante") && (
+                <TableCell>Email Adoptante</TableCell>
+              )}
+              {visibleColumns.includes("Telefono_Adoptante") && (
+                <TableCell>Teléfono Adoptante</TableCell>
+              )}
+              <TableCell>Acciones</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredAdopciones.map((adopcion) => (
+              <TableRow key={adopcion.ID_Adopcion}>
+                {visibleColumns.includes("ID_Adopcion") && (
+                  <TableCell>{adopcion.ID_Adopcion}</TableCell>
+                )}
+                {visibleColumns.includes("ID_Animal") && (
+                  <TableCell>{adopcion.ID_Animal}</TableCell>
+                )}
+                {visibleColumns.includes("Fecha") && (
+                  <TableCell>{adopcion.Fecha}</TableCell>
+                )}
+                {visibleColumns.includes("Costo_Adopcion") && (
+                  <TableCell>{adopcion.Costo_Adopcion}</TableCell>
+                )}
+                {visibleColumns.includes("Nombre_Adoptante") && (
+                  <TableCell>{adopcion.Nombre_Adoptante}</TableCell>
+                )}
+                {visibleColumns.includes("Email_Adoptante") && (
+                  <TableCell>{adopcion.Email_Adoptante}</TableCell>
+                )}
+                {visibleColumns.includes("Telefono_Adoptante") && (
+                  <TableCell>{adopcion.Telefono_Adoptante}</TableCell>
+                )}
+                <TableCell>
+                  <IconButton
+                    onClick={() => handleEdit(adopcion)}
+                    color="primary"
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => handleDelete(adopcion.ID_Adopcion)}
+                    color="error"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
+        <DialogTitle>Agregar Nueva Adopción</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Llenar los detalles de la nueva adopción.
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="ID Adopción"
+            fullWidth
+            variant="outlined"
+            value={newAdopcion.ID_Adopcion}
+            onChange={(e) =>
+              setNewAdopcion({ ...newAdopcion, ID_Adopcion: e.target.value })
+            }
+            error={!!errors.ID_Adopcion}
+            helperText={errors.ID_Adopcion}
+          />
+          <TextField
+            margin="dense"
+            label="ID Animal"
+            fullWidth
+            variant="outlined"
+            value={newAdopcion.ID_Animal}
+            onChange={(e) =>
+              setNewAdopcion({ ...newAdopcion, ID_Animal: e.target.value })
+            }
+            error={!!errors.ID_Animal}
+            helperText={errors.ID_Animal}
+          />
+          <TextField
+            margin="dense"
+            label="Fecha"
+            type="date"
+            fullWidth
+            variant="outlined"
+            InputLabelProps={{ shrink: true }}
+            value={newAdopcion.Fecha}
+            onChange={(e) =>
+              setNewAdopcion({ ...newAdopcion, Fecha: e.target.value })
+            }
+            error={!!errors.Fecha}
+            helperText={errors.Fecha}
+          />
+          <TextField
+            margin="dense"
+            label="Costo Adopción"
+            fullWidth
+            variant="outlined"
+            value={newAdopcion.Costo_Adopcion}
+            onChange={(e) =>
+              setNewAdopcion({ ...newAdopcion, Costo_Adopcion: e.target.value })
+            }
+            error={!!errors.Costo_Adopcion}
+            helperText={errors.Costo_Adopcion}
+          />
+          <TextField
+            margin="dense"
+            label="Nombre Adoptante"
+            fullWidth
+            variant="outlined"
+            value={newAdopcion.Nombre_Adoptante}
+            onChange={(e) =>
+              setNewAdopcion({
+                ...newAdopcion,
+                Nombre_Adoptante: e.target.value,
+              })
+            }
+            error={!!errors.Nombre_Adoptante}
+            helperText={errors.Nombre_Adoptante}
+          />
+          <TextField
+            margin="dense"
+            label="Email Adoptante"
+            fullWidth
+            variant="outlined"
+            value={newAdopcion.Email_Adoptante}
+            onChange={(e) =>
+              setNewAdopcion({
+                ...newAdopcion,
+                Email_Adoptante: e.target.value,
+              })
+            }
+            error={!!errors.Email_Adoptante}
+            helperText={errors.Email_Adoptante}
+          />
+          <TextField
+            margin="dense"
+            label="Teléfono Adoptante"
+            fullWidth
+            variant="outlined"
+            value={newAdopcion.Telefono_Adoptante}
+            onChange={(e) =>
+              setNewAdopcion({
+                ...newAdopcion,
+                Telefono_Adoptante: e.target.value,
+              })
+            }
+            error={!!errors.Telefono_Adoptante}
+            helperText={errors.Telefono_Adoptante}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenAddDialog(false)}>Cancelar</Button>
+          <Button onClick={handleAdd}>Agregar</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
+        <DialogTitle>Editar Adopción</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Modificar los detalles de la adopción.
+          </DialogContentText>
+          {editingAdopcion && (
+            <>
+              <TextField
+                margin="dense"
+                label="ID Adopción"
+                fullWidth
+                variant="outlined"
+                value={editingAdopcion.ID_Adopcion}
+                onChange={(e) =>
+                  setEditingAdopcion({
+                    ...editingAdopcion,
+                    ID_Adopcion: e.target.value,
+                  })
+                }
+                disabled
+              />
+              <TextField
+                margin="dense"
+                label="ID Animal"
+                fullWidth
+                variant="outlined"
+                value={editingAdopcion.ID_Animal}
+                onChange={(e) =>
+                  setEditingAdopcion({
+                    ...editingAdopcion,
+                    ID_Animal: e.target.value,
+                  })
+                }
+                error={!!errors.ID_Animal}
+                helperText={errors.ID_Animal}
+              />
+              <TextField
+                margin="dense"
+                label="Fecha"
+                type="date"
+                fullWidth
+                variant="outlined"
+                InputLabelProps={{ shrink: true }}
+                value={editingAdopcion.Fecha}
+                onChange={(e) =>
+                  setEditingAdopcion({
+                    ...editingAdopcion,
+                    Fecha: e.target.value,
+                  })
+                }
+              />
+              <TextField
+                margin="dense"
+                label="Costo Adopción"
+                fullWidth
+                variant="outlined"
+                value={editingAdopcion.Costo_Adopcion}
+                onChange={(e) =>
+                  setEditingAdopcion({
+                    ...editingAdopcion,
+                    Costo_Adopcion: e.target.value,
+                  })
+                }
+              />
+              <TextField
+                margin="dense"
+                label="Nombre Adoptante"
+                fullWidth
+                variant="outlined"
+                value={editingAdopcion.Nombre_Adoptante}
+                onChange={(e) =>
+                  setEditingAdopcion({
+                    ...editingAdopcion,
+                    Nombre_Adoptante: e.target.value,
+                  })
+                }
+              />
+              <TextField
+                margin="dense"
+                label="Email Adoptante"
+                fullWidth
+                variant="outlined"
+                value={editingAdopcion.Email_Adoptante}
+                onChange={(e) =>
+                  setEditingAdopcion({
+                    ...editingAdopcion,
+                    Email_Adoptante: e.target.value,
+                  })
+                }
+              />
+              <TextField
+                margin="dense"
+                label="Teléfono Adoptante"
+                fullWidth
+                variant="outlined"
+                value={editingAdopcion.Telefono_Adoptante}
+                onChange={(e) =>
+                  setEditingAdopcion({
+                    ...editingAdopcion,
+                    Telefono_Adoptante: e.target.value,
+                  })
+                }
+              />
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
+          <Button onClick={handleSaveEdit}>Actualizar</Button>
+        </DialogActions>
+      </Dialog>
+    </Paper>
+  );
 }

@@ -1,4 +1,5 @@
 "use client";
+import AdopcionService from "../api/adopcion/adopcion.service";
 import {
   Table,
   TableBody,
@@ -19,12 +20,46 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Snackbar,
+  Alert
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-export default function Adoptar({ element,onButtonClick}) {
+import { useState, useEffect } from "react";
+export default function Adoptar({ element, onButtonClick }) {
   const router = useRouter();
-  const [adopcion, setAdopcion] = useState();  
+  const [adopcion, setAdopcion] = useState({
+    ID_Adopcion: "",
+    ID_Animal: "",
+    Costo_Adopcion: "",
+    Nombre_Adoptante: "",
+    Email_Adoptante: "",
+    Telefono_Adoptante: "",
+    Fecha: "",
+  });
+  const [nuevo, setNuevo] = useState(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+
+  const handleAdd = async () => {
+    setOpenSnackbar(true)
+    adopcion.ID_Adopcion = 1;
+    adopcion.ID_Animal = element.ID_Animal;
+    adopcion.Costo_Adopcion = element.Precio_Adopción;
+    await AdopcionService.create(adopcion);
+  };
+  // useEffect(() => {
+  //   const add = async () => {
+  //     if (nuevo) {
+  //       const res = await AdopcionService.create(nuevo);
+  //     }
+  //   };
+  //   add();
+
+  //   window.alert("bbb")
+  //   setNuevo(null);
+  // }, [updateCount]);
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
   return (
     <div>
       <div>
@@ -42,7 +77,7 @@ export default function Adoptar({ element,onButtonClick}) {
         onChange={(e) =>
           setAdopcion({
             ...adopcion,
-            nombreAdoptante: e.target.value,
+            Nombre_Adoptante: e.target.value,
           })
         }
       />
@@ -55,7 +90,7 @@ export default function Adoptar({ element,onButtonClick}) {
         onChange={(e) =>
           setAdopcion({
             ...adopcion,
-            emailAdoptante: e.target.value,
+            Email_Adoptante: e.target.value,
           })
         }
       />
@@ -68,7 +103,7 @@ export default function Adoptar({ element,onButtonClick}) {
         onChange={(e) =>
           setAdopcion({
             ...adopcion,
-            telefonoAdoptante: e.target.value,
+            Telefono_Adoptante: e.target.value,
           })
         }
       />
@@ -85,12 +120,33 @@ export default function Adoptar({ element,onButtonClick}) {
         onChange={(e) =>
           setAdopcion({
             ...adopcion,
-            fecha: e.target.value,
+            Fecha: e.target.value,
           })
         }
       />
-      <Button onClick={()=>onButtonClick("Animales")}>Aceptar</Button>
-      <Button onClick={()=>onButtonClick("Animales")}>Salir</Button>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        //sx={{ textAlign: "right" }}
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          Ah adoptado a {element.Nombre}
+        </Alert>
+      </Snackbar>
+      <Button
+        onClick={() => {
+          handleAdd(), onButtonClick("Animales");
+        }}
+      >
+        Aceptar
+      </Button>
+      <Button onClick={() => onButtonClick("Animales")}>Salir</Button>
     </div>
   );
 }

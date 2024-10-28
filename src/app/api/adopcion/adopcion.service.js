@@ -52,6 +52,10 @@ class AdopcionService {
       },
       body: JSON.stringify(element),
     });
+    if(!res.ok){
+        window.alert("aaaaaa")
+    }
   }
+
 }
 export  default new AdopcionService();

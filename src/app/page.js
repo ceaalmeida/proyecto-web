@@ -52,15 +52,16 @@ export default function SlotsSignIn() {
         setRedirecting(false);
         return;
       }
-      if (session?.user?.role === "user") {
-        router.replace("/homeUser");
-        setRedirected(true);
-        setRedirecting(false);
-      }else if(session?.user?.role === "admin"){
-        router.replace("/home");
-        setRedirected(true);
-        setRedirecting(false);
-      }
+      // if (session?.user?.role === "user") {
+      //   router.replace("/homeUser");
+      //   setRedirected(true);
+      //   setRedirecting(false);
+      // }else if(session?.user?.role === "admin"){
+      //   router.replace("/home");
+      //   setRedirected(true);
+      //   setRedirecting(false);
+      // }
+      router.replace("/home")
     } else {
       setError("Errores de Validacion");
       setOpenSnackbar(true);

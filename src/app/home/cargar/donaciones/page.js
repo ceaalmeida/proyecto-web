@@ -1,365 +1,509 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
-    Button,
-    TextField,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    Checkbox,
-    FormControlLabel,
-    IconButton,
-    Menu,
-    MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Checkbox,
+  FormControlLabel,
+  IconButton,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import {
-    Add as AddIcon,
-    Edit as EditIcon,
-    Delete as DeleteIcon,
-    ViewColumn as ViewColumnIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  ViewColumn as ViewColumnIcon,
 } from "@mui/icons-material";
-
+import DonacionService from "../../../api/donacion/donacion.service";
 const initialDonaciones = [
-    {
-        id: "1",
-        nombreDonante: "Juan Pérez",
-        monto: 150.0,
-        fecha: "2024-10-01",
-        tipoDonacion: "Monetaria",
-    },
-    {
-        id: "2",
-        nombreDonante: "Maria Gómez",
-        monto: 200.0,
-        fecha: "2024-09-25",
-        tipoDonacion: "Alimentos",
-    },
+  {
+    id: "1",
+    nombreDonante: "Juan Pérez",
+    monto: 150.0,
+    fecha: "2024-10-01",
+    tipoDonacion: "Monetaria",
+  },
+  {
+    id: "2",
+    nombreDonante: "Maria Gómez",
+    monto: 200.0,
+    fecha: "2024-09-25",
+    tipoDonacion: "Alimentos",
+  },
 ];
 
 export default function DonacionesTable() {
-    const [donaciones, setDonaciones] = useState(initialDonaciones);
-    const [sortOrder, setSortOrder] = useState("asc");
-    const [visibleColumns, setVisibleColumns] = useState([
-        "nombreDonante",
-        "monto",
-        "fecha",
-        "tipoDonacion",
-    ]);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [editingDonacion, setEditingDonacion] = useState(null);
-    const [errors, setErrors] = useState({});
-    const [newDonacion, setNewDonacion] = useState({
-        nombreDonante: "",
-        monto: "",
-        fecha: "",
-        tipoDonacion: "",
+  const [donaciones, setDonaciones] = useState([]);
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [visibleColumns, setVisibleColumns] = useState([
+    "Nombre_Donante",
+    "Monto",
+    "Fecha",
+    "Email_Donante",
+    "Telefono_Donante",
+    "ID_Animal",
+  ]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [editingDonacion, setEditingDonacion] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [newDonacion, setNewDonacion] = useState({
+    Nombre_Donante: "",
+    Monto: "",
+    Fecha: "",
+    Email_Donante: "",
+    Telefono_Donante: "",
+    ID_Animal: "",
+  });
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  useEffect(() => {
+    const inicial = async () => {
+      const res = await DonacionService.getAll();
+      setDonaciones(res);
+    };
+    inicial();
+  }, []);
+
+  const handleSort = () => {
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  };
+
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleDelete = async (id) => {
+    setDonaciones(donaciones.filter((donacion) => donacion.ID_Donacion !== id));
+    await DonacionService.delete(id);
+  };
+
+  const handleEdit = (donacion) => {
+    setEditingDonacion(donacion);
+    setOpenEditDialog(true);
+  };
+
+  const handleAdd = async () => {
+    const id = Math.floor(100000 + Math.random() * 900000);
+    newDonacion.ID_Donacion = id;
+    const neww = newDonacion;
+    window.alert(neww.Fecha);
+    const res = await DonacionService.create(neww);
+    setDonaciones([...donaciones, { ...newDonacion, ID_Donacion: id }]);
+    setNewDonacion({
+      Nombre_Donante: "",
+      Monto: "",
+      Fecha: "",
+      Email_Donante: "",
+      Telefono_Donante: "",
+      ID_Animal: "",
     });
-    const [openAddDialog, setOpenAddDialog] = useState(false);
-    const [openEditDialog, setOpenEditDialog] = useState(false);
-    const [anchorEl, setAnchorEl] = useState(null);
+    setOpenAddDialog(false);
+  };
+  //   useEffect(() => {
+  //     handleAdd()
+  //   }, []);
 
-    const handleSort = () => {
-        setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    };
-
-    const handleSearch = (event) => {
-        setSearchTerm(event.target.value);
-    };
-
-    const handleDelete = (id) => {
-        setDonaciones(donaciones.filter((donacion) => donacion.id !== id));
-    };
-
-    const handleEdit = (donacion) => {
-        setEditingDonacion(donacion);
-        setOpenEditDialog(true);
-    };
-
-    const handleAdd = () => {
-        if (validate(newDonacion)) {
-            const id = (donaciones.length + 1).toString();
-            setDonaciones([...donaciones, { ...newDonacion, id }]);
-            setNewDonacion({
-                nombreDonante: "", monto: "", fecha: "", tipoDonacion: "",
-            });
-            setOpenAddDialog(false);
-        }
-    };
-
-    const handleSaveEdit = () => {
-        if (validate(editingDonacion)) {
-            setDonaciones(donaciones.map((donacion) => (donacion.id === editingDonacion.id ? editingDonacion : donacion)));
-            setOpenEditDialog(false);
-        }
-    };
-
-    const validate = (donacion) => {
-        let errors = {};
-
-        if (!donacion.nombreDonante || !/^[a-zA-Z\s]+$/.test(donacion.nombreDonante)) {
-            errors.nombreDonante = "El nombre del donante no puede estar vacío y debe contener solo letras y espacios.";
-        }
-        if (!donacion.monto || isNaN(donacion.monto)) {
-            errors.monto = "El monto debe ser un número y no puede estar vacío.";
-        }
-        if (!donacion.fecha) {
-            errors.fecha = "La fecha no puede estar vacía.";
-        }
-        if (!donacion.tipoDonacion || !/^[a-zA-Z\s]+$/.test(donacion.tipoDonacion)) {
-            errors.tipoDonacion = "El tipo de donación no puede estar vacío y debe contener solo letras.";
-        }
-
-        setErrors(errors);
-        return Object.keys(errors).length === 0;
-    };
-
-
-    const toggleColumn = (column) => {
-        setVisibleColumns((prev) =>
-            prev.includes(column)
-                ? prev.filter((col) => col !== column)
-                : [...prev, column]
-        );
-    };
-
-    const filteredDonaciones = donaciones
-        .filter((donacion) =>
-            Object.values(donacion).some((value) =>
-                value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-            )
+  const handleSaveEdit = () => {
+    if (validate(editingDonacion)) {
+      setDonaciones(
+        donaciones.map((donacion) =>
+          donacion.ID_Donacion === editingDonacion.ID_Donacion
+            ? editingDonacion
+            : donacion
         )
-        .sort((a, b) => {
-            if (sortOrder === "asc") {
-                return a.nombreDonante.localeCompare(b.nombreDonante);
-            } else {
-                return b.nombreDonante.localeCompare(a.nombreDonante);
-            }
-        });
+      );
+      setOpenEditDialog(false);
+    }
+  };
 
-    return (
-        <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
-            <TextField
-                label="Buscar donaciones"
-                variant="outlined"
-                value={searchTerm}
-                onChange={handleSearch}
-                sx={{ mb: 2 }}
-            />
-            <IconButton
-                onClick={(event) => setAnchorEl(event.currentTarget)}
-                sx={{ mb: 2, ml: 2 }}
-            >
-                <ViewColumnIcon />
-            </IconButton>
-            <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={() => setAnchorEl(null)}
-            >
-                {["nombreDonante", "monto", "fecha", "tipoDonacion"].map((column) => (
-                    <MenuItem key={column}>
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={visibleColumns.includes(column)}
-                                    onChange={() => toggleColumn(column)}
-                                />
-                            }
-                            label={column.charAt(0).toUpperCase() + column.slice(1)}
-                        />
-                    </MenuItem>
-                ))}
-            </Menu>
-            <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                    <TableHead>
-                        <TableRow>
-                            {visibleColumns.includes("nombreDonante") && (
-                                <TableCell onClick={handleSort} sx={{ cursor: "pointer" }}>
-                                    Nombre del Donante {sortOrder === "asc" ? "↑" : "↓"}
-                                </TableCell>
-                            )}
-                            {visibleColumns.includes("monto") && <TableCell>Monto</TableCell>}
-                            {visibleColumns.includes("fecha") && <TableCell>Fecha</TableCell>}
-                            {visibleColumns.includes("tipoDonacion") && (
-                                <TableCell>Tipo de Donación</TableCell>
-                            )}
-                            <TableCell>Acciones</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {filteredDonaciones.map((donacion) => (
-                            <TableRow key={donacion.id}>
-                                {visibleColumns.includes("nombreDonante") && (
-                                    <TableCell>{donacion.nombreDonante}</TableCell>
-                                )}
-                                {visibleColumns.includes("monto") && (
-                                    <TableCell>{donacion.monto}</TableCell>
-                                )}
-                                {visibleColumns.includes("fecha") && (
-                                    <TableCell>{donacion.fecha}</TableCell>
-                                )}
-                                {visibleColumns.includes("tipoDonacion") && (
-                                    <TableCell>{donacion.tipoDonacion}</TableCell>
-                                )}
-                                <TableCell>
-                                    <IconButton
-                                        onClick={() => handleEdit(donacion)}
-                                        color="primary"
-                                    >
-                                        <EditIcon />
-                                    </IconButton>
-                                    <IconButton
-                                        onClick={() => handleDelete(donacion.id)}
-                                        color="error"
-                                    >
-                                        <DeleteIcon />
-                                    </IconButton>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-            <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => setOpenAddDialog(true)}
-                sx={{ mt: 2 }}
-            >
-                Agregar Donación
-            </Button>
+  const validate = (donacion) => {
+    let errors = {};
 
-            {/* Diálogo para agregar donación */}
-            <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
-                <DialogTitle>Agregar Nueva Donación</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Por favor, ingrese los detalles de la nueva donación.
-                    </DialogContentText>
-                    <TextField
-                        margin="dense"
-                        label="Nombre Donante"
-                        type="text"
-                        fullWidth
-                        variant="standard"
-                        value={newDonacion.nombreDonante}
-                        onChange={(e) => setNewDonacion({ ...newDonacion, nombreDonante: e.target.value })}
-                        error={!!errors.nombreDonante}
-                        helperText={errors.nombreDonante}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Monto"
-                        type="text"
-                        fullWidth
-                        variant="standard"
-                        value={newDonacion.monto}
-                        onChange={(e) => setNewDonacion({ ...newDonacion, monto: e.target.value })}
-                        error={!!errors.monto}
-                        helperText={errors.monto}
-                    />
-                    <TextField
-                        key="fecha"
-                        margin="dense"
-                        label="Fecha"
-                        type="date"
-                        fullWidth
-                        variant="outlined"
-                        InputLabelProps={{ shrink: true }}
-                        value={newDonacion.fecha}
-                        onChange={(e) => setNewDonacion({ ...newDonacion, fecha: e.target.value })}
-                        error={!!errors.fecha}
-                        helperText={errors.fecha}
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Tipo Donación"
-                        type="text"
-                        fullWidth
-                        variant="standard"
-                        value={newDonacion.tipoDonacion}
-                        onChange={(e) => setNewDonacion({ ...newDonacion, tipoDonacion: e.target.value })}
-                        error={!!errors.tipoDonacion}
-                        helperText={errors.tipoDonacion}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenAddDialog(false)}>Cancelar</Button>
-                    <Button onClick={handleAdd}>Agregar</Button>
-                </DialogActions>
-            </Dialog>
+    if (
+      !donacion.Nombre_Donante ||
+      !/^[a-zA-Z\s]+$/.test(donacion.Nombre_Donante)
+    ) {
+      errors.Nombre_Donante =
+        "El nombre del donante no puede estar vacío y debe contener solo letras y espacios.";
+    }
+    if (!donacion.Monto || isNaN(donacion.Monto)) {
+      errors.Monto = "El monto debe ser un número y no puede estar vacío.";
+    }
+    if (!donacion.Fecha) {
+      errors.Fecha = "La fecha no puede estar vacía.";
+    }
+    if (!donacion.ID_Animal) {
+      errors.ID_Animal = "El ID del animal no puede estar vacío.";
+    }
 
-            {/* Diálogo para editar donación */}
-            <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
-                <DialogTitle>Editar Donación</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Por favor, modifique los detalles de la donación.
-                    </DialogContentText>
-                    {editingDonacion && (
-                        <>
-                            <TextField
-                                margin="dense"
-                                label="Nombre Donante"
-                                type="text"
-                                fullWidth
-                                variant="standard"
-                                value={editingDonacion.nombreDonante}
-                                onChange={(e) => setEditingDonacion({ ...editingDonacion, nombreDonante: e.target.value })}
-                                error={!!errors.nombreDonante}
-                                helperText={errors.nombreDonante}
-                            />
-                            <TextField
-                                margin="dense"
-                                label="Monto"
-                                type="text"
-                                fullWidth
-                                variant="standard"
-                                value={editingDonacion.monto}
-                                onChange={(e) => setEditingDonacion({ ...editingDonacion, monto: e.target.value })}
-                                error={!!errors.monto}
-                                helperText={errors.monto}
-                            />
-                            <TextField
-                                key="fecha"
-                                margin="dense"
-                                label="Fecha"
-                                type="date"
-                                fullWidth
-                                variant="outlined"
-                                InputLabelProps={{ shrink: true }}
-                                value={editingDonacion.fecha}
-                                onChange={(e) => setEditingDonacion({ ...editingDonacion, fecha: e.target.value })}
-                            />
-                            <TextField
-                                margin="dense"
-                                label="Tipo Donación"
-                                type="text"
-                                fullWidth
-                                variant="standard"
-                                value={editingDonacion.tipoDonacion}
-                                onChange={(e) => setEditingDonacion({ ...editingDonacion, tipoDonacion: e.target.value })}
-                                error={!!errors.tipoDonacion}
-                                helperText={errors.tipoDonacion}
-                            />
-                        </>
-                    )}
-        </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
-                    <Button onClick={handleSaveEdit}>Guardar</Button>
-                </DialogActions>
-            </Dialog>
-        </Paper>
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const toggleColumn = (column) => {
+    setVisibleColumns((prev) =>
+      prev.includes(column)
+        ? prev.filter((col) => col !== column)
+        : [...prev, column]
     );
+  };
+
+  // Filtrado y ordenamiento
+  const filteredDonaciones = donaciones.filter((donacion) =>
+    Object.values(donacion).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+  //   .sort((a, b) => {
+  //     if (sortOrder === "asc") {
+  //       return a.Nombre_Donante.localeCompare(b.Nombre_Donante);
+  //     } else {
+  //       return b.Nombre_Donante.localeCompare(a.Nombre_Donante);
+  //     }
+  //   });
+
+  return (
+    <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
+      <TextField
+        label="Buscar donaciones"
+        variant="outlined"
+        value={searchTerm}
+        onChange={handleSearch}
+        sx={{ mb: 2 }}
+      />
+      <IconButton
+        onClick={(event) => setAnchorEl(event.currentTarget)}
+        sx={{ mb: 2, ml: 2 }}
+      >
+        <ViewColumnIcon />
+      </IconButton>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={() => setAnchorEl(null)}
+      >
+        {[
+          "Nombre_Donante",
+          "Monto",
+          "Fecha",
+          "Email_Donante",
+          "Telefono_Donante",
+          "ID_Animal",
+        ].map((column) => (
+          <MenuItem key={column}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={visibleColumns.includes(column)}
+                  onChange={() => toggleColumn(column)}
+                />
+              }
+              label={column.replace("_", " ")}
+            />
+          </MenuItem>
+        ))}
+      </Menu>
+      <TableContainer component={Paper}>
+        {" "}
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setOpenAddDialog(true)}
+          sx={{ mt: 2 }}
+        >
+          Agregar Donación
+        </Button>
+        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+          <TableHead>
+            <TableRow>
+              {visibleColumns.includes("Nombre_Donante") && (
+                <TableCell onClick={handleSort} sx={{ cursor: "pointer" }}>
+                  Nombre del Donante {sortOrder === "asc" ? "↑" : "↓"}
+                </TableCell>
+              )}
+              {visibleColumns.includes("Monto") && <TableCell>Monto</TableCell>}
+              {visibleColumns.includes("Fecha") && <TableCell>Fecha</TableCell>}
+              {visibleColumns.includes("Email_Donante") && (
+                <TableCell>Email del Donante</TableCell>
+              )}
+              {visibleColumns.includes("Telefono_Donante") && (
+                <TableCell>Teléfono del Donante</TableCell>
+              )}
+              {visibleColumns.includes("ID_Animal") && (
+                <TableCell>ID del Animal</TableCell>
+              )}
+              <TableCell>Acciones</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredDonaciones.map((donacion) => (
+              <TableRow key={donacion.ID_Donacion}>
+                {visibleColumns.includes("Nombre_Donante") && (
+                  <TableCell>{donacion.Nombre_Donante}</TableCell>
+                )}
+                {visibleColumns.includes("Monto") && (
+                  <TableCell>{donacion.Monto}</TableCell>
+                )}
+                {visibleColumns.includes("Fecha") && (
+                  <TableCell>{donacion.Fecha}</TableCell>
+                )}
+                {visibleColumns.includes("Email_Donante") && (
+                  <TableCell>{donacion.Email_Donante}</TableCell>
+                )}
+                {visibleColumns.includes("Telefono_Donante") && (
+                  <TableCell>{donacion.Telefono_Donante}</TableCell>
+                )}
+                {visibleColumns.includes("ID_Animal") && (
+                  <TableCell>{donacion.ID_Animal}</TableCell>
+                )}
+                <TableCell>
+                  <IconButton
+                    onClick={() => handleEdit(donacion)}
+                    color="primary"
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => handleDelete(donacion.ID_Donacion)}
+                    color="error"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Diálogo para agregar donación */}
+      <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
+        <DialogTitle>Agregar Nueva Donación</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Por favor, ingrese los detalles de la nueva donación.
+          </DialogContentText>
+          <TextField
+            margin="dense"
+            label="Nombre Donante"
+            type="text"
+            fullWidth
+            variant="standard"
+            value={newDonacion.Nombre_Donante}
+            onChange={(e) =>
+              setNewDonacion({ ...newDonacion, Nombre_Donante: e.target.value })
+            }
+            error={!!errors.Nombre_Donante}
+            helperText={errors.Nombre_Donante}
+          />
+          <TextField
+            margin="dense"
+            label="Monto"
+            type="number"
+            fullWidth
+            variant="standard"
+            value={newDonacion.Monto}
+            onChange={(e) =>
+              setNewDonacion({
+                ...newDonacion,
+                Monto: parseFloat(e.target.value),
+              })
+            }
+            error={!!errors.Monto}
+            helperText={errors.Monto}
+          />
+          <TextField
+            margin="dense"
+            label="Fecha"
+            type="date"
+            fullWidth
+            variant="outlined"
+            InputLabelProps={{ shrink: true }}
+            value={newDonacion.Fecha}
+            onChange={(e) =>
+              setNewDonacion({ ...newDonacion, Fecha: e.target.value })
+            }
+            error={!!errors.Fecha}
+            helperText={errors.Fecha}
+          />
+          <TextField
+            margin="dense"
+            label="Email Donante"
+            type="email"
+            fullWidth
+            variant="standard"
+            value={newDonacion.Email_Donante}
+            onChange={(e) =>
+              setNewDonacion({ ...newDonacion, Email_Donante: e.target.value })
+            }
+            error={!!errors.Email_Donante}
+            helperText={errors.Email_Donante}
+          />
+          <TextField
+            margin="dense"
+            label="Teléfono Donante"
+            type="text"
+            fullWidth
+            variant="standard"
+            value={newDonacion.Telefono_Donante}
+            onChange={(e) =>
+              setNewDonacion({
+                ...newDonacion,
+                Telefono_Donante: e.target.value,
+              })
+            }
+            error={!!errors.Telefono_Donante}
+            helperText={errors.Telefono_Donante}
+          />
+          <TextField
+            margin="dense"
+            label="ID Animal"
+            type="text"
+            fullWidth
+            variant="standard"
+            value={newDonacion.ID_Animal}
+            onChange={(e) =>
+              setNewDonacion({ ...newDonacion, ID_Animal: e.target.value })
+            }
+            error={!!errors.ID_Animal}
+            helperText={errors.ID_Animal}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenAddDialog(false)}>Cancelar</Button>
+          <Button onClick={handleAdd}>Agregar</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Diálogo para editar donación */}
+      <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
+        <DialogTitle>Editar Donación</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Por favor, modifique los detalles de la donación.
+          </DialogContentText>
+          {editingDonacion && (
+            <>
+              <TextField
+                margin="dense"
+                label="Nombre Donante"
+                type="text"
+                fullWidth
+                variant="standard"
+                value={editingDonacion.Nombre_Donante}
+                onChange={(e) =>
+                  setEditingDonacion({
+                    ...editingDonacion,
+                    Nombre_Donante: e.target.value,
+                  })
+                }
+                error={!!errors.Nombre_Donante}
+                helperText={errors.Nombre_Donante}
+              />
+              <TextField
+                margin="dense"
+                label="Monto"
+                type="number"
+                fullWidth
+                variant="standard"
+                value={editingDonacion.Monto}
+                onChange={(e) =>
+                  setEditingDonacion({
+                    ...editingDonacion,
+                    Monto: parseFloat(e.target.value),
+                  })
+                }
+                error={!!errors.Monto}
+                helperText={errors.Monto}
+              />
+              <TextField
+                margin="dense"
+                label="Fecha"
+                type="date"
+                fullWidth
+                variant="outlined"
+                InputLabelProps={{ shrink: true }}
+                value={editingDonacion.Fecha}
+                onChange={(e) =>
+                  setEditingDonacion({
+                    ...editingDonacion,
+                    Fecha: e.target.value,
+                  })
+                }
+                error={!!errors.Fecha}
+                helperText={errors.Fecha}
+              />
+              <TextField
+                margin="dense"
+                label="Email Donante"
+                type="email"
+                fullWidth
+                variant="standard"
+                value={editingDonacion.Email_Donante}
+                onChange={(e) =>
+                  setEditingDonacion({
+                    ...editingDonacion,
+                    Email_Donante: e.target.value,
+                  })
+                }
+                error={!!errors.Email_Donante}
+                helperText={errors.Email_Donante}
+              />
+              <TextField
+                margin="dense"
+                label="Teléfono Donante"
+                type="text"
+                fullWidth
+                variant="standard"
+                value={editingDonacion.Telefono_Donante}
+                onChange={(e) =>
+                  setEditingDonacion({
+                    ...editingDonacion,
+                    Telefono_Donante: e.target.value,
+                  })
+                }
+                error={!!errors.Telefono_Donante}
+                helperText={errors.Telefono_Donante}
+              />
+              <TextField
+                margin="dense"
+                label="ID Animal"
+                type="text"
+                fullWidth
+                variant="standard"
+                value={editingDonacion.ID_Animal}
+                onChange={(e) =>
+                  setEditingDonacion({
+                    ...editingDonacion,
+                    ID_Animal: e.target.value,
+                  })
+                }
+                error={!!errors.ID_Animal}
+                helperText={errors.ID_Animal}
+              />
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
+          <Button onClick={handleEdit}>Guardar Cambios</Button>
+        </DialogActions>
+      </Dialog>
+    </Paper>
+  );
 }

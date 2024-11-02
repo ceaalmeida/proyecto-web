@@ -9,8 +9,6 @@ class DonacionService {
       });
       if (!response.ok) {
        window.alert("Error obteniendo donacion");
-      }else{
-        window.alert("Se obtuvo");
       }
       const data = await response.json();
       return data;

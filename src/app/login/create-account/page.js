@@ -335,7 +335,16 @@ export default function CreateAccount({ onLogin }) {
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <Paper elevation={3}>
+      <Paper
+        elevation={3}
+        sx={{
+          mt: 8,
+          p: 4,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
         <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
           <LockOutlinedIcon />
         </Avatar>

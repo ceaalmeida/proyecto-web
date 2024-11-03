@@ -16,6 +16,10 @@ import {
   DialogContentText,
   DialogTitle,
   IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem 
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -24,28 +28,16 @@ import {
 } from "@mui/icons-material";
 import ActividadService from "../../../api/actividad/actividad.service";
 import { useSession } from "next-auth/react";
-const initialActivities = [
-  {
-    ID_Actividad: 1,
-    Descripción_Actividad: "Cuidado de perros",
-    Precio: 100,
-    Precio_Transporte: 20,
-    ID_Animal: 1,
-  },
-  {
-    ID_Actividad: 2,
-    Descripción_Actividad: "Adopción de gatos",
-    Precio: 150,
-    Precio_Transporte: 25,
-    ID_Animal: 2,
-  },
-];
 
 function ActivityTable() {
   const [activities, setActivities] = useState([]);
   const [sortOrder, setSortOrder] = useState("asc");
   const [searchTerm, setSearchTerm] = useState("");
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [editingActivity, setEditingActivity] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [borrar, setBorrar] = useState(null);
+  const [listaAnimal,setListaAnimal]=useState([])
   const [newActivity, setNewActivity] = useState({
     Descripción_Actividad: "",
     Precio: "",
@@ -62,7 +54,7 @@ function ActivityTable() {
     const ini = async () => {
       const resp = await ActividadService.getAll(session?.user?.token);
       setActivities(resp);
-      window.alert(resp.Descripción_Actividad)
+      window.alert(resp.Descripción_Actividad);
     };
     ini();
   }, []);
@@ -93,19 +85,21 @@ function ActivityTable() {
     return Object.keys(errors).length === 0;
   };
 
-  const handleAdd = () => {
-    if (validate(newActivity)) {
-      const id = Math.max(...activities.map((a) => a.ID_Actividad)) + 1;
-      setActivities([...activities, { ...newActivity, ID_Actividad: id }]);
-      setNewActivity({
-        Descripción_Actividad: "",
-        Precio: "",
-        Precio_Transporte: "",
-        ID_Animal: "",
-      });
-      setOpenAddDialog(false);
-    }
+  const handleAdd = async () => {
+    const id = Math.max(...activities.map((a) => a.ID_Actividad)) + 1;
+    setActivities([...activities, { ...newActivity, ID_Actividad: id }]);
+    await ActividadService.create(newActivity, session?.user?.token);
+    setNewActivity({
+      Descripción_Actividad: "",
+      Precio: "",
+      Precio_Transporte: "",
+      ID_Animal: "",
+    });
+    setOpenAddDialog(false);
   };
+  // useEffect(() => {
+  //   handleAdd()
+  // }, [])
 
   const handleSaveEdit = () => {
     if (validate(editingActivity)) {
@@ -127,26 +121,28 @@ function ActivityTable() {
     setSearchTerm(event.target.value);
   };
   const handleDelete = (id) => {
+    setDeleting(true);
+    ActividadService.delete(id);
     setActivities(
       activities.filter((activity) => activity.ID_Actividad !== id)
     );
   };
+
   const handleEdit = (activity) => {
     setEditingActivity(activity);
     setOpenEditDialog(true);
   };
 
-  const filteredActivities = activities
-    .filter((activity) =>
-      Object.values(activity).some((value) =>
-        value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-      )
+  const filteredActivities = activities.filter((activity) =>
+    Object.values(activity).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
-    // .sort((a, b) =>
-    //   sortOrder === "asc"
-    //     ? a.Descripción_Actividad.localeCompare(b.Descripción_Actividad)
-    //     : b.Descripción_Actividad.localeCompare(a.Descripción_Actividad)
-    // );
+  );
+  // .sort((a, b) =>
+  //   sortOrder === "asc"
+  //     ? a.Descripción_Actividad.localeCompare(b.Descripción_Actividad)
+  //     : b.Descripción_Actividad.localeCompare(a.Descripción_Actividad)
+  // );
 
   return (
     <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
@@ -158,6 +154,14 @@ function ActivityTable() {
         sx={{ mb: 2 }}
       />
       <TableContainer component={Paper}>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setOpenAddDialog(true)}
+          sx={{ mt: 2 }}
+        >
+          Agregar Actividad
+        </Button>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
@@ -185,7 +189,10 @@ function ActivityTable() {
                     <EditIcon />
                   </IconButton>
                   <IconButton
-                    onClick={() => handleDelete(activity.ID_Actividad)}
+                    onClick={() => {
+                      setBorrar(activity.ID_Actividad),
+                        setOpenConfirmDialog(true);
+                    }}
                     color="error"
                   >
                     <DeleteIcon />
@@ -196,14 +203,6 @@ function ActivityTable() {
           </TableBody>
         </Table>
       </TableContainer>
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={() => setOpenAddDialog(true)}
-        sx={{ mt: 2 }}
-      >
-        Agregar Actividad
-      </Button>
 
       <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
         <DialogTitle>Agregar Nueva Actividad</DialogTitle>
@@ -214,8 +213,9 @@ function ActivityTable() {
           {[
             "Descripción_Actividad",
             "Precio",
-            "Precio_Transporte",
-            "ID_Animal",
+            "Precio_Transporte",            
+            "Dia",
+            "Hora",
           ].map((field) => (
             <TextField
               key={field}
@@ -224,7 +224,9 @@ function ActivityTable() {
                 field.replace(/_/g, " ").charAt(0).toUpperCase() +
                 field.replace(/_/g, " ").slice(1)
               }
-              type="text"
+              type={
+                field === "Dia" ? "date" : field === "Hora" ? "time" : "text"
+              }
               fullWidth
               variant="standard"
               value={newActivity[field]}
@@ -233,7 +235,55 @@ function ActivityTable() {
               }
               error={!!errors[field]}
               helperText={errors[field]}
+              InputLabelProps={
+                field === "Dia" || field === "Hora" ? { shrink: true } : {}
+              }
             />
+          ))}
+          {[
+            "Animal",
+            "Contratado_Veterinario",
+            "Contratado_Proveedor_Alimentos",
+            "Contratado_Proveedor_Servicios_Complementarios",
+            "Transporte",
+          ].map((field) => (
+            <FormControl fullWidth margin="dense" key={field}>
+              <InputLabel>
+                {field.replace(/_/g, " ").charAt(0).toUpperCase() +
+                  field.replace(/_/g, " ").slice(1)}
+              </InputLabel>
+              <Select
+                value={newActivity[field]}
+                onChange={(e) =>
+                  setNewActivity({ ...newActivity, ["ID_"+field]: e.target.value })
+                }
+              >
+                {/* Aquí deberías mapear las opciones disponibles */}
+                <MenuItem value="">
+                  <em>Ninguno</em>
+                </MenuItem>
+                {/* Ejemplo de opciones */}
+                {field==="Animal" && listaAnimal.map((tab)=>(
+                  <MenuItem value={tab.ID_Animal}>{tab.Nombre}</MenuItem>
+                ))}
+                {field==="Contratado_Veterinario" && listaAnimal.map((tab)=>(
+                  <MenuItem value>{}</MenuItem>
+                ))}
+                {field==="Contratado_Proveedor_Alimentos" && listaAnimal.map((tab)=>(
+                  <MenuItem value>{}</MenuItem>
+                ))}
+                {field==="Contratado_Proveedor_Servicios_Complementarios" && listaAnimal.map((tab)=>(
+                  <MenuItem value>{}</MenuItem>
+                ))}
+                {field==="Transporte" && listaAnimal.map((tab)=>(
+                  <MenuItem value>{}</MenuItem>
+                ))}
+                
+              </Select>
+              {errors[field] && (
+                <FormHelperText error>{errors[field]}</FormHelperText>
+              )}
+            </FormControl>
           ))}
         </DialogContent>
         <DialogActions>
@@ -284,6 +334,24 @@ function ActivityTable() {
             disabled={Object.keys(errors).length > 0}
           >
             Guardar Cambios
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={openConfirmDialog}
+        onClose={() => setOpenConfirmDialog(false)}
+      >
+        <DialogTitle>Eliminar Transporte</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            ¿Está seguro de que desea eliminar la actividad?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenConfirmDialog(false)}>Cancelar</Button>
+          <Button onClick={deleting ? null : handleDelete} color="error">
+            {deleting ? <CircularProgress /> : "Eliminar"}
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,7 +1,7 @@
 class AdopcionService {
     async getAll(token) {
       const adop = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/Adopcion`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/Actividad`,
         {
           method: "GET",
           headers: {
@@ -16,7 +16,7 @@ class AdopcionService {
   
     async delete(id, token) {
       await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/Adopcion/${id}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/Actividad/${id}`,
         {
           method: "DELETE",
           headers: {
@@ -29,7 +29,7 @@ class AdopcionService {
   
     async update(id, element, token) {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/Adopcion/${id}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/Actividad/${id}`,
         {
           method: "PUT",
           headers: {

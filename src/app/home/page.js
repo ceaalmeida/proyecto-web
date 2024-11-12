@@ -134,23 +134,23 @@ const NAVIGATION = [
     icon: <List />,
     children: [
       {
-        segment: "list1",
-        title: "Listado 1",
+        segment: "listPC",
+        title: "Listado Contratos Proveedores de Servicios Complementarios",
         icon: <ChevronRight />,
       },
       {
-        segment: "list2",
-        title: "Listado 2",
+        segment: "listPA",
+        title: "Listado Contratos Proveedores de Alimentos",
         icon: <ChevronRight />,
       },
       {
-        segment: "list3",
-        title: "Listado 3",
+        segment: "listV",
+        title: "Listado Contratos Veterinarios",
         icon: <ChevronRight />,
       },
       {
-        segment: "list4",
-        title: "Listado 4",
+        segment: "listVA",
+        title: "Listado Veterinarios Activos",
         icon: <ChevronRight />,
       },
     ],
@@ -269,6 +269,8 @@ export default function DashboardLayoutBasic(props) {
         return components.serviceType;
       case "/transport":
         return components.transporte;
+      case "/listPA":
+        return
     }
   };
 

@@ -6,9 +6,13 @@ import CardMedia from "@mui/material/CardMedia";
 import "./style.css";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const buttons = ["Adoptar", "Donar", "MAS"];
 export function AnimalCard({ elements, onButtonClick }) {
+
+ 
   console.log(elements);
   if (!elements) {
     return (
@@ -22,13 +26,16 @@ export function AnimalCard({ elements, onButtonClick }) {
       </Card>
     );
   }
+
   return (
     <>
       {elements.map((element) => (
-        <Card 
-        onClick={()=>onButtonClick("Perfil",element)}
-        key={element.nombre} sx={{ maxWidth: 345 }} 
-        className="card">
+        <Card
+          onClick={() => onButtonClick("Perfil", element)}
+          key={element.nombre}
+          sx={{ maxWidth: 345 }}
+          className="card"
+        >
           <CardMedia
             className="cont"
             component="img"
@@ -36,7 +43,7 @@ export function AnimalCard({ elements, onButtonClick }) {
             height="140"
             image="/animal.jpg"
           />
-          <CardContent >
+          <CardContent>
             <Typography gutterBottom variant="h5" component="div">
               {element.Nombre}
             </Typography>
@@ -47,19 +54,19 @@ export function AnimalCard({ elements, onButtonClick }) {
             </Typography>
           </CardContent>
           {/* <CardActions >
-            {buttons.map((butt) => (
-              <Button
-                variant="contained"
-                style={{ color: "Black" }}
-                size="small"
-                key={butt}
-                onClick={() => onButtonClick(butt, element)}
-              >
-                {butt}
-              </Button>
-            ))} */}
-            {/* <Button size="small">Donar</Button>
-                <Button size="small">Mas..</Button> */}
+              {buttons.map((butt) => (
+                <Button
+                  variant="contained"
+                  style={{ color: "Black" }}
+                  size="small"
+                  key={butt}
+                  onClick={() => onButtonClick(butt, element)}
+                >
+                  {butt}
+                </Button>
+              ))} */}
+          {/* <Button size="small">Donar</Button>
+                  <Button size="small">Mas..</Button> */}
           {/* </CardActions> */}
         </Card>
       ))}

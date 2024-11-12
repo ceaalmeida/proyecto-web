@@ -16,6 +16,7 @@ import {
   DialogContentText,
   DialogTitle,
   Checkbox,
+  CircularProgress,
   FormControlLabel,
   IconButton,
   Menu,
@@ -28,52 +29,6 @@ import {
   ViewColumn as ViewColumnIcon,
 } from "@mui/icons-material";
 import AnimalService from "../../../api/animal/animal.service";
-const initialAnimals = [
-  {
-    ID_Animal: "A001",
-    Nombre: "Max",
-    Especie: "Perro",
-    Raza: "Labrador",
-    Edad: 3,
-    Peso: 25.5,
-    Dias_Refugio: 10,
-    Precio_Mantenimiento: 150,
-    Precio_Adopción: 300,
-  },
-  {
-    ID_Animal: "A002",
-    Nombre: "Luna",
-    Especie: "Gato",
-    Raza: "Siamés",
-    Edad: 2,
-    Peso: 4.2,
-    Dias_Refugio: 5,
-    Precio_Mantenimiento: 100,
-    Precio_Adopción: 250,
-  },
-  {
-    ID_Animal: "A003",
-    Nombre: "Rocky",
-    Especie: "Perro",
-    Raza: "Pastor Alemán",
-    Edad: 5,
-    Peso: 30.0,
-    Dias_Refugio: 20,
-    Precio_Mantenimiento: 200,
-    Precio_Adopción: 350,
-  },
-  {
-    ID_Animal: "A004",
-    Nombre: "Milo",
-    Especie: "Gato",
-    Raza: "Persa",
-    Edad: 4,
-    Peso: 4.5,
-    Dias_Refugio: 15,
-    Precio_Mantenimiento: 120,
-    Precio_Adopción: 270,
-  },
-];
 
 export default function AnimalTable() {
   const [animals, setAnimals] = useState([]);
@@ -104,6 +59,9 @@ export default function AnimalTable() {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [borrar, setBorrar] = useState(null);
+  const [deleting, setDeleting] = useState(null);
 
   useEffect(() => {
     const animales = async () => {
@@ -115,7 +73,7 @@ export default function AnimalTable() {
 
   useEffect(() => {
     const update = async () => {
-      if (editado) {        
+      if (editado) {
         const a = await AnimalService.updateAnimal(editado.ID_Animal, editado);
       }
     };
@@ -125,12 +83,13 @@ export default function AnimalTable() {
 
   useEffect(() => {
     const add = async () => {
-      if (addAnimal) {        
+      if (addAnimal) {
         const ani = await AnimalService.createAnimal(addAnimal);
+        window.alert(ani);
       }
     };
     add();
-    setaddAnimal(null);    
+    setaddAnimal(null);
   }, [addAnimal]);
 
   const handleSort = () => {
@@ -141,9 +100,12 @@ export default function AnimalTable() {
     setSearchTerm(event.target.value);
   };
 
-  const handleDelete = (id) => {
-    setAnimals(animals.filter((animal) => animal.ID_Animal !== id));
-    AnimalService.deleteAnimal(id);
+  const handleDelete = async () => {
+    setDeleting(true);
+    setAnimals(animals.filter((animal) => animal.ID_Animal !== borrar));
+    await AnimalService.deleteAnimal(borrar);
+    setOpenConfirmDialog(false);
+    setDeleting(false);
   };
 
   const handleEdit = (animal) => {
@@ -157,15 +119,15 @@ export default function AnimalTable() {
     //     animal.ID_Animal === editingAnimal.ID_Animal ? editingAnimal : animal
     //   )
     // );
-    
+
     setEditado(editingAnimal);
     setOpenEditDialog(false);
   };
 
   const handleAdd = () => {
-    newAnimal.ID_Animal=Math.floor(100000 + Math.random() * 900000);
-    window.alert(newAnimal.ID_Animal)
-    setAnimals([...animals, { ...newAnimal }]);    
+    newAnimal.ID_Animal = Math.floor(100000 + Math.random() * 900000);
+    //window.alert(newAnimal.ID_Animal);
+    setAnimals([...animals, { ...newAnimal }]);
     setaddAnimal(newAnimal);
     setNewAnimal({
       ID_Animal: "",
@@ -264,7 +226,9 @@ export default function AnimalTable() {
               {visibleColumns.includes("Raza") && <TableCell>Raza</TableCell>}
               {visibleColumns.includes("Edad") && <TableCell>Edad</TableCell>}
               {visibleColumns.includes("Peso") && <TableCell>Peso</TableCell>}
-              {visibleColumns.includes("Precio_Adopción") && <TableCell>Precio de Adopción</TableCell>}
+              {visibleColumns.includes("Precio_Adopción") && (
+                <TableCell>Precio de Adopción</TableCell>
+              )}
               <TableCell>Acciones</TableCell>
             </TableRow>
           </TableHead>
@@ -297,7 +261,10 @@ export default function AnimalTable() {
                     <EditIcon />
                   </IconButton>
                   <IconButton
-                    onClick={() => handleDelete(animal.ID_Animal)}
+                    onClick={() => {
+                      setOpenConfirmDialog(true);
+                      setBorrar(animal.ID_Animal);
+                    }}
                     color="error"
                   >
                     <DeleteIcon />
@@ -385,6 +352,24 @@ export default function AnimalTable() {
         <DialogActions>
           <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
           <Button onClick={handleSaveEdit}>Guardar</Button>
+        </DialogActions>
+      </Dialog>
+      {/* Diálogo de confirmación para eliminar */}
+      <Dialog
+        open={openConfirmDialog}
+        onClose={() => setOpenConfirmDialog(false)}
+      >
+        <DialogTitle>Eliminar Animal</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            ¿Está seguro de que desea eliminar este Animal?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenConfirmDialog(false)}>Cancelar</Button>
+          <Button onClick={deleting ? null : handleDelete} color="error">
+            {deleting ? <CircularProgress color="error" /> : "Eliminar"}
+          </Button>
         </DialogActions>
       </Dialog>
     </Paper>

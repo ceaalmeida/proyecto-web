@@ -18,18 +18,20 @@ import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import { TextField } from "@mui/material";
-import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 // import "./style.css";
 
 const pages = ["Animales", "Adopciones", "Donaciones"];
-const settings = ["Profile", "Account", "Dashboard", "Cerrar sesion"];
+const settings = ["Profile", "Cerrar sesion"];
 
-
-export const ResponsiveAppBar = ({ value, Changes ,Log}) => {
+export const ResponsiveAppBar = ({ value, Changes, Log }) => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
+  const { data: session, status } = useSession();
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const [activeButton, setActiveButton] = React.useState("");
   const [inicio, setInicio] = React.useState("");
+  const router=useRouter()
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
@@ -45,8 +47,8 @@ export const ResponsiveAppBar = ({ value, Changes ,Log}) => {
     setAnchorElUser(null);
   };
 
-    const manejarBusqueda = async (e) => {
-    const valor=e.target.value;
+  const manejarBusqueda = async (e) => {
+    const valor = e.target.value;
     setInicio(valor);
     Changes(valor);
   };
@@ -54,7 +56,7 @@ export const ResponsiveAppBar = ({ value, Changes ,Log}) => {
     <AppBar position="fixed">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
+          <AdbIcon sx={{ display: { xs: "none", md: "flex" ,color:"black"}, mr: 1 }} />
           <Typography
             variant="h6"
             noWrap
@@ -63,10 +65,10 @@ export const ResponsiveAppBar = ({ value, Changes ,Log}) => {
             sx={{
               mr: 2,
               display: { xs: "none", md: "flex" },
-              fontFamily: "monospace",
+              // fontFamily: "monospace",
               fontWeight: 700,
               letterSpacing: ".3rem",
-              color: "inherit",
+              color: "black",
               textDecoration: "none",
             }}
           >
@@ -84,7 +86,7 @@ export const ResponsiveAppBar = ({ value, Changes ,Log}) => {
             >
               <MenuIcon />
             </IconButton>
-            
+
             <Menu
               id="menu-appbar"
               anchorEl={anchorElNav}
@@ -129,7 +131,13 @@ export const ResponsiveAppBar = ({ value, Changes ,Log}) => {
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}></Box>
-          <Box sx={{ flexGrow: 0.3 ,display: 'flex', justifyContent: 'flex-start'}}>
+          <Box
+            sx={{
+              flexGrow: 0.3,
+              display: "flex",
+              justifyContent: "flex-start",
+            }}
+          >
             {value === "Animales" && (
               <MenuItem>
                 <TextField
@@ -148,50 +156,79 @@ export const ResponsiveAppBar = ({ value, Changes ,Log}) => {
                     },
                     "& .MuiInputLabel-root": {
                       color: "black", // Cambia el color del label
-                      
                     },
                   }}
                 />
               </MenuItem>
             )}
           </Box>
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
-              </IconButton>
-            </Tooltip>
-
-            <Menu
-              sx={{ mt: "45px" }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={()=>{
-                handleCloseUserMenu;
-                if(setting==="Cerrar sesion"){
-                Log(false)}
-              }
-                }>
-                  <Typography sx={{ textAlign: "center" }}>
-                    {setting}
-                  </Typography>
-                </MenuItem>                
-              ))}
-            </Menu>
-          </Box>
+          {!session && (
+            <Box sx={{ flexGrow: 0 }}>
+              <Tooltip title="Open settings">
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                </IconButton>
+              </Tooltip>
+              <Menu
+                sx={{ mt: "45px" }}
+                id="menu-appbar"
+                anchorEl={anchorElUser}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                open={Boolean(anchorElUser)}
+                onClose={handleCloseUserMenu}
+              >
+                {settings.map((setting) => (
+                  <MenuItem
+                    key={setting}
+                    onClick={() => {
+                      handleCloseUserMenu;
+                      if (setting === "Cerrar sesion") {
+                        router.replace("../login")
+                      }
+                    }}
+                  >
+                    <Typography sx={{ textAlign: "center" }}>
+                      {setting}
+                    </Typography>
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Box>
+          )}
+          {session && (
+            <Box sx={{ flexGrow: 0 }}>
+              <MenuItem>
+                <Button
+                  variant="outlined"
+                  // sx={{
+                  //   mb: 2,
+                  //   p: 0,
+                  //   mt: 2,
+                  //   "& .MuiInputBase-input": {
+                  //     color: "black", // Cambia el color del texto
+                  //   },
+                  //   "& .MuiInputLabel-root": {
+                  //     color: "black", // Cambia el color del label
+                  //   },
+                  // }}
+                  style={{
+                    color: "black",
+                  }}
+                  onClick={()=>{router.replace("../login")}}
+                >
+                  Iniciar sesion
+                </Button>
+              </MenuItem>
+            </Box>
+          )}
         </Toolbar>
       </Container>
     </AppBar>

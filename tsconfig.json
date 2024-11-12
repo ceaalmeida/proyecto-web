@@ -28,7 +28,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-, "src/app/home/page.js", "src/app/page.js", "src/app/api/send/route.js", "src/app/home/cargar/user/user.js"  ],
+, "src/app/home/page.js", "src/app/login/page.js", "src/app/api/send/route.js"  ],
   "exclude": [
     "node_modules"
   ]

@@ -18,6 +18,7 @@ import {
   DialogTitle,
   Checkbox,
   FormControlLabel,
+  CircularProgress,
   IconButton,
   Menu,
   MenuItem,
@@ -80,6 +81,9 @@ export default function AdopcionesTable() {
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [add, setAdd] = useState(null);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [borrar, setBorrar] = useState(null);
+  const [deleting, setDeleting] = useState(null);
 
   useEffect(() => {
     const inicia = async () => {
@@ -115,9 +119,12 @@ export default function AdopcionesTable() {
     setSearchTerm(event.target.value);
   };
 
-  const handleDelete = async (id) => {
-    setAdopciones(adopciones.filter((adopcion) => adopcion.ID_Adopcion !== id));
-    await AdopcionService.delete(id);
+  const handleDelete = async () => {
+    setDeleting(true);
+    setAdopciones(adopciones.filter((adopcion) => adopcion.ID_Adopcion !== borrar));
+    await AdopcionService.delete(borrar);
+    setOpenConfirmDialog(false);
+    setDeleting(false);
   };
 
   const validate = (adopcion) => {
@@ -325,7 +332,9 @@ export default function AdopcionesTable() {
                     <EditIcon />
                   </IconButton>
                   <IconButton
-                    onClick={() => handleDelete(adopcion.ID_Adopcion)}
+                    onClick={() =>{ 
+                    setOpenConfirmDialog(true);
+                    borrar(adopcion.ID_Adopcion)}}
                     color="error"
                   >
                     <DeleteIcon />
@@ -556,6 +565,24 @@ export default function AdopcionesTable() {
         <DialogActions>
           <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
           <Button onClick={handleSaveEdit}>Actualizar</Button>
+        </DialogActions>
+      </Dialog>
+      {/* Diálogo de confirmación para eliminar */}
+      <Dialog
+        open={openConfirmDialog}
+        onClose={() => setOpenConfirmDialog(false)}
+      >
+        <DialogTitle>Eliminar Animal</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            ¿Está seguro de que desea eliminar este Animal?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenConfirmDialog(false)}>Cancelar</Button>
+          <Button onClick={deleting ? null : handleDelete} color="error">
+            {deleting ? <CircularProgress color="error" /> : "Eliminar"}
+          </Button>
         </DialogActions>
       </Dialog>
     </Paper>

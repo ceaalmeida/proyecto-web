@@ -137,8 +137,8 @@ export function AnimalProfile({ animal,onButtonClick }) {
 
             <Divider sx={{ my: 2 }} />
 
-            <Typography variant="h6">Estado de Salud</Typography>
-            <List dense>
+            {/* <Typography variant="h6">Estado de Salud</Typography> */}
+            {/* <List dense>
               <ListItem>
                 <Chip
                   label={animal.Estado_Salud || "No especificado"}
@@ -163,7 +163,7 @@ export function AnimalProfile({ animal,onButtonClick }) {
                   primary={`Esterilizado: ${animal.Esterilizado ? "Sí" : "No"}`}
                 />
               </ListItem>
-            </List>
+            </List> */}
 
             {animal.Personalidad && (
               <>

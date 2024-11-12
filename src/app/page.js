@@ -40,7 +40,6 @@ export default function SlotsSignIn() {
     e.preventDefault();
     setRedirecting(true);
     if (validarEntrada()) {
-      console.log("Entrando");
       const response = await signIn("credentials", {
         email,
         password,
@@ -56,8 +55,11 @@ export default function SlotsSignIn() {
         router.replace("/homeUser");
         setRedirected(true);
         // setRedirecting(false);
-      }else if(session?.user?.role === "admin"){
-        router.replace("/home");
+      } else if (
+        session?.user?.role === "admin" ||
+        session?.user?.role === "user_admin"
+      ) {
+        router.push("/home");
         setRedirected(true);
         // setRedirecting(false);
       }

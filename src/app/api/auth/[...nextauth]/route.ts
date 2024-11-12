@@ -23,6 +23,7 @@ const handler = NextAuth({
           }
         );
         const user = await res.json();
+        console.log("DENTRO DEL AUTORIZE")
         console.log(user)
 
         if (user.error) throw user;

@@ -21,6 +21,7 @@ import FoodTypeTable from "./cargar/tipos-alimentos/page";
 import TransporteTable from "./cargar/transportes/page";
 import VeterinarianTable from "./cargar/veterinarios/page";
 import SwipeableTemporaryDrawer from "./usuario-barra-lateral";
+import UserTable from "./cargar/user/page"
 
 import {
   PawPrint,
@@ -42,10 +43,11 @@ import {
   ChevronLeft,
   ChevronDown,
   ChefHat,
+  User,
 } from "lucide-react";
 import { CircularProgress } from "@mui/material";
 
-const NAVIGATION = [
+const adminNavigation = [
   {
     kind: "header",
     title: "Gestión de Animales",
@@ -180,6 +182,153 @@ const NAVIGATION = [
     ],
   },
 ];
+const userAdminNavigation = [
+  {
+    kind: "header",
+    title: "Gestión de Animales",
+  },
+  {
+    segment: "animals",
+    title: "Animales",
+    icon: <PawPrint />,
+  },
+  {
+    segment: "activities",
+    title: "Actividades",
+    icon: <Activity />,
+  },
+  {
+    segment: "adoptions",
+    title: "Adopciones",
+    icon: <Heart />,
+  },
+  {
+    segment: "donations",
+    title: "Donaciones",
+    icon: <DollarSign />,
+  },
+  {
+    kind: "divider",
+  },
+  {
+    kind: "header",
+    title: "Gestión de Contratos",
+  },
+  {
+    segment: "contracts",
+    title: "Contratos",
+    icon: <FileText />,
+    children: [
+      {
+        segment: "veterinarian",
+        title: "Veterinarios",
+        icon: <Stethoscope />,
+      },
+      {
+        segment: "complementaryServicesProvider",
+        title: "Proveedor Servicios Complementarios",
+        icon: <Briefcase />,
+      },
+      {
+        segment: "foodProvider",
+        title: "Proveedor Alimentos",
+        icon: <ShoppingBag />,
+      },
+    ],
+  },
+  {
+    kind: "divider",
+  },
+  {
+    kind: "header",
+    title: "Gestión de Cuentas",
+  },
+  {
+    segment: "users",
+    title: "Cuentas",
+    icon: <User />,
+  },
+  {
+    kind: "divider",
+  },
+  {
+    kind: "header",
+    title: "Otros",
+  },
+  {
+    segment: "foods",
+    title: "Alimentos",
+    icon: <ChefHat />,
+  },
+  {
+    segment: "services",
+    title: "Servicios",
+    icon: <Store />,
+  },
+  {
+    segment: "transport",
+    title: "Transporte",
+    icon: <Truck />,
+  },
+  {
+    kind: "divider",
+  },
+  {
+    kind: "header",
+    title: "Reportes",
+  },
+  {
+    segment: "lists",
+    title: "Listados",
+    icon: <List />,
+    children: [
+      {
+        segment: "listPC",
+        title: "Listado Contratos Proveedores de Servicios Complementarios",
+        icon: <ChevronRight />,
+      },
+      {
+        segment: "listPA",
+        title: "Listado Contratos Proveedores de Alimentos",
+        icon: <ChevronRight />,
+      },
+      {
+        segment: "listV",
+        title: "Listado Contratos Veterinarios",
+        icon: <ChevronRight />,
+      },
+      {
+        segment: "listVA",
+        title: "Listado Veterinarios Activos",
+        icon: <ChevronRight />,
+      },
+    ],
+  },
+  {
+    segment: "Programas",
+    title: "Servicios",
+    icon: <BarChart2 />,
+    children: [
+      {
+        segment: "animal-activity-program",
+        title: "Programa de Actividades del Animal",
+        icon: <ChevronRight />,
+      },
+    ],
+  },
+  {
+    segment: "revenues",
+    title: "Ingresos",
+    icon: <TrendingUp />,
+    children: [
+      {
+        segment: "adpotions/donations-revenues",
+        title: "Ingresos por Donaciones y Adopciones",
+        icon: <ChevronRight />,
+      },
+    ],
+  },
+];
 
 const components = {
   activities: <ActivityTable />,
@@ -193,6 +342,7 @@ const components = {
   foodType: <FoodTypeTable />,
   transporte: <TransporteTable />,
   veterinarian: <VeterinarianTable />,
+  users: <UserTable/>
 };
 
 const demoTheme = extendTheme({
@@ -235,6 +385,19 @@ export default function DashboardLayoutBasic(props) {
 
   const [drawerOpen, setDrawerOpen] = React.useState(false);
 
+  const [navigation, setNavigation] = useState([]);
+  const { data: session, status } = useSession();
+  const router = useDemoRouter("/dashboard");
+
+  useEffect(() => {
+    if (session?.user?.role === process.env.NEXT_PUBLIC_USER_ADMIN_ROLE) {
+      setNavigation(userAdminNavigation);
+    } else {
+      setNavigation(adminNavigation);
+    }
+    console.log(navigation)
+  }, [session, status, router]);
+
   const handleAvatarClick = () => {
     setDrawerOpen(!drawerOpen);
   };
@@ -242,10 +405,6 @@ export default function DashboardLayoutBasic(props) {
   const handleDrawerClose = () => {
     setDrawerOpen(false);
   };
-
-  const router = useDemoRouter("/dashboard");
-
-  console.log("Router pathname:", router.pathname);
 
   const renderComponent = () => {
     switch (router.pathname) {
@@ -269,12 +428,11 @@ export default function DashboardLayoutBasic(props) {
         return components.serviceType;
       case "/transport":
         return components.transporte;
-      case "/listPA":
-        return
+      case "/users":
+        return components.users;
     }
   };
 
-  const { data: session, status } = useSession();
   if (status === "loading") {
     return (
       <div
@@ -297,7 +455,7 @@ export default function DashboardLayoutBasic(props) {
   return (
     <>
       <AppProvider
-        navigation={NAVIGATION}
+        navigation={navigation}
         router={router}
         theme={demoTheme}
         window={demoWindow}

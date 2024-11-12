@@ -85,7 +85,7 @@ export default function AnimalTable() {
     const add = async () => {
       if (addAnimal) {
         const ani = await AnimalService.createAnimal(addAnimal);
-        window.alert(ani);
+       // window.alert(ani);
       }
     };
     add();

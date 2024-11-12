@@ -222,7 +222,7 @@ export const ResponsiveAppBar = ({ value, Changes, Log }) => {
                   style={{
                     color: "black",
                   }}
-                  onClick={()=>{router.replace("../login")}}
+                  onClick={()=>{router.push("../login")}}
                 >
                   Iniciar sesion
                 </Button>

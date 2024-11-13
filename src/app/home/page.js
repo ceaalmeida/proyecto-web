@@ -24,6 +24,8 @@ import SwipeableTemporaryDrawer from "./usuario-barra-lateral";
 import UserTable from "./cargar/user/page";
 import TablePIAD from "./cargar/ingresodonacionadopcion/page";
 import TablePAA from "./cargar/programaactividadanimal/page";
+import ReporteContratosProveedoresAlimentos from "./cargar/reportes/contratos-proveedores-alimentos";
+import ReporteContratosProveedoresServiciosComplementarios from "./cargar/reportes/contratos-servicios-complementarios";
 
 import {
   PawPrint,
@@ -347,6 +349,8 @@ const components = {
   users: <UserTable />,
   PIAD: <TablePIAD />,
   PAA: <TablePAA />,
+  reporteCPA: <ReporteContratosProveedoresAlimentos />,
+  reporteCPSC: <ReporteContratosProveedoresServiciosComplementarios />,
 };
 
 const demoTheme = extendTheme({
@@ -438,6 +442,10 @@ export default function DashboardLayoutBasic(props) {
         return components.PIAD;
       case "/Programas/animal-activity-program":
         return components.PAA;
+      case "/lists/listPA":
+        return components.reporteCPA;
+      case "/lists/listPC":
+        return components.reporteCPSC;
     }
   };
 

@@ -1,4 +1,5 @@
 "use client";
+import AnimalService from "../../../api/animal/animal.service";
 import React, { useEffect, useState } from "react";
 import {
   Table,
@@ -70,6 +71,21 @@ export default function DonacionesTable() {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [animales, setAnimales] = useState([]);
+  
+  const GetBy = (id) => {       
+    const res=animales.find(animales => animales.ID_Animal === id);    
+    return res.Nombre ;
+  };
+
+  useEffect(() => {
+    const getAll = async () => {
+      const listaAnimal = await AnimalService.getAllAnimal();
+     // window.alert(JSON.stringify(listaAnimal, null, 2));
+      setAnimales(listaAnimal);
+    };
+    getAll();
+  }, []);
 
   useEffect(() => {
     const inicial = async () => {
@@ -269,7 +285,7 @@ export default function DonacionesTable() {
                   <TableCell>{donacion.Telefono_Donante}</TableCell>
                 )}
                 {visibleColumns.includes("ID_Animal") && (
-                  <TableCell>{donacion.ID_Animal}</TableCell>
+                  <TableCell>{GetBy(donacion.ID_Animal)}</TableCell>
                 )}
                 <TableCell>
                   <IconButton

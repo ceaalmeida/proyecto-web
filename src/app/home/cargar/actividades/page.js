@@ -247,6 +247,7 @@ function ActivityTable() {
             "Contratado_Proveedor_Servicios_Complementarios",
             "Transporte",
           ].map((field) => (
+            
             <FormControl fullWidth margin="dense" key={field}>
               <InputLabel>
                 {field.replace(/_/g, " ").charAt(0).toUpperCase() +

@@ -18,10 +18,13 @@ import {
   DialogTitle,
   Checkbox,
   FormControlLabel,
+  FormControl,
   CircularProgress,
   IconButton,
   Menu,
+  Select,
   MenuItem,
+  InputLabel,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -29,7 +32,7 @@ import {
   Delete as DeleteIcon,
   ViewColumn as ViewColumnIcon,
 } from "@mui/icons-material";
-import animalService from "../../../api/animal/animal.service";
+import AnimalService from "../../../api/animal/animal.service";
 
 const initialAdopciones = [
   {
@@ -84,6 +87,16 @@ export default function AdopcionesTable() {
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [borrar, setBorrar] = useState(null);
   const [deleting, setDeleting] = useState(null);
+  const [animales, setAnimales] = useState([]);
+
+  useEffect(() => {
+    const getAll = async () => {
+      const listaAnimal = await AnimalService.getAllAnimal();
+     // window.alert(JSON.stringify(listaAnimal, null, 2));
+      setAnimales(listaAnimal);
+    };
+    getAll();
+  }, []);
 
   useEffect(() => {
     const inicia = async () => {
@@ -92,6 +105,12 @@ export default function AdopcionesTable() {
     };
     inicia(); // Llama a la función asíncrona cuando el componente se monte
   }, [editado]);
+
+
+  const GetBy = (id) => {       
+    const res=animales.find(animales => animales.ID_Animal === id);    
+    return res.Nombre ;
+  };
 
   useEffect(() => {
     const update = async () => {
@@ -104,13 +123,13 @@ export default function AdopcionesTable() {
   }, [editado]);
   useEffect(() => {
     const ad = async () => {
-      if(add) {
+      if (add) {
         await AdopcionService.create(add);
       }
     };
     ad();
     setAdd(null);
-  },[add]);
+  }, [add]);
   const handleSort = () => {
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
   };
@@ -121,7 +140,9 @@ export default function AdopcionesTable() {
 
   const handleDelete = async () => {
     setDeleting(true);
-    setAdopciones(adopciones.filter((adopcion) => adopcion.ID_Adopcion !== borrar));
+    setAdopciones(
+      adopciones.filter((adopcion) => adopcion.ID_Adopcion !== borrar)
+    );
     await AdopcionService.delete(borrar);
     setOpenConfirmDialog(false);
     setDeleting(false);
@@ -181,20 +202,18 @@ export default function AdopcionesTable() {
   };
 
   const handleAdd = () => {
-    
-      setAdopciones([...adopciones, { ...newAdopcion }]);
-      setAdd(newAdopcion);
-      setNewAdopcion({
-        ID_Adopcion: "",
-        ID_Animal: "",
-        Fecha: "",
-        Costo_Adopcion: "",
-        Nombre_Adoptante: "",
-        Email_Adoptante: "",
-        Telefono_Adoptante: "",
-      });
-      setOpenAddDialog(false);
-    
+    setAdopciones([...adopciones, { ...newAdopcion }]);
+    setAdd(newAdopcion);
+    setNewAdopcion({
+      ID_Adopcion: "",
+      ID_Animal: "",
+      Fecha: "",
+      Costo_Adopcion: "",
+      Nombre_Adoptante: "",
+      Email_Adoptante: "",
+      Telefono_Adoptante: "",
+    });
+    setOpenAddDialog(false);
   };
 
   const handleSaveEdit = () => {
@@ -221,13 +240,6 @@ export default function AdopcionesTable() {
       value.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
-  // .sort((a, b) => {
-  //     if (sortOrder === "asc") {
-  //         return a.ID_Adopcion.localeCompare(b.ID_Adopcion);
-  //     } else {
-  //         return b.ID_Adopcion.localeCompare(a.ID_Adopcion);
-  //     }
-  // });
 
   return (
     <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
@@ -307,7 +319,8 @@ export default function AdopcionesTable() {
                   <TableCell>{adopcion.ID_Adopcion}</TableCell>
                 )} */}
                 {visibleColumns.includes("ID_Animal") && (
-                  <TableCell>{adopcion.ID_Animal}</TableCell>
+                  <TableCell>{GetBy(adopcion.ID_Animal)}</TableCell>     
+                            
                 )}
                 {visibleColumns.includes("Fecha") && (
                   <TableCell>{adopcion.Fecha}</TableCell>
@@ -332,9 +345,10 @@ export default function AdopcionesTable() {
                     <EditIcon />
                   </IconButton>
                   <IconButton
-                    onClick={() =>{ 
-                    setOpenConfirmDialog(true);
-                    borrar(adopcion.ID_Adopcion)}}
+                    onClick={() => {
+                      setOpenConfirmDialog(true);
+                      borrar(adopcion.ID_Adopcion);
+                    }}
                     color="error"
                   >
                     <DeleteIcon />
@@ -352,31 +366,20 @@ export default function AdopcionesTable() {
           <DialogContentText>
             Llenar los detalles de la nueva adopción.
           </DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="ID Adopción"
-            fullWidth
-            variant="outlined"
-            value={newAdopcion.ID_Adopcion}
-            onChange={(e) =>
-              setNewAdopcion({ ...newAdopcion, ID_Adopcion: e.target.value })
-            }
-            error={!!errors.ID_Adopcion}
-            helperText={errors.ID_Adopcion}
-          />
-          <TextField
-            margin="dense"
-            label="ID Animal"
-            fullWidth
-            variant="outlined"
-            value={newAdopcion.ID_Animal}
-            onChange={(e) =>
-              setNewAdopcion({ ...newAdopcion, ID_Animal: e.target.value })
-            }
-            error={!!errors.ID_Animal}
-            helperText={errors.ID_Animal}
-          />
+          <FormControl fullWidth margin="dense" key="Animal">
+            <InputLabel>Animal</InputLabel>
+            <Select
+              value={newAdopcion.ID_Animal}
+              onChange={(e) =>
+                setNewAdopcion({ ...newAdopcion, ID_Animal: e.target.value })
+              }
+            >
+              {animales.map((field) => (
+                <MenuItem value={field.ID_Animal}>{field.Nombre}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
           <TextField
             margin="dense"
             label="Fecha"

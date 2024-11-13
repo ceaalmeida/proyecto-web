@@ -42,6 +42,8 @@ export default function GenericCRUDTable({
   const [itemToDelete, setItemToDelete] = useState(null);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [deletedEntity, setDeletedEntity] = useState(false);
+  let borrado;
 
   useEffect(() => {
     loadData();
@@ -59,10 +61,11 @@ export default function GenericCRUDTable({
   const handleAdd = async () => {
     setLoading(true);
     try {
+      console.log(newItem);
       await createEntity(newItem);
-      setData([...data, newItem]);
       setNewItem({});
       setOpenAddDialog(false);
+      await loadData();
     } catch (error) {
       console.error("Error adding item:", error);
     }
@@ -73,11 +76,7 @@ export default function GenericCRUDTable({
     setLoading(true);
     try {
       await updateEntity(editingItem[idItem], editingItem);
-      setData(
-        data.map((item) =>
-          item[idItem] === editingItem[idItem] ? editingItem : item
-        )
-      );
+      await loadData();
       setOpenEditDialog(false);
     } catch (error) {
       console.error("Error editing item:", error);
@@ -88,12 +87,17 @@ export default function GenericCRUDTable({
   const handleDelete = async () => {
     setLoading(true);
     try {
+      console.log(session);
+      console.log(session?.user?.token);
+      console.log("Item to delete");
       await deleteEntity(itemToDelete, session?.user?.token);
-      setData(data.filter((item) => item[idItem] !== itemToDelete));
+      await loadData();
       setOpenConfirmDialog(false);
+      setDeletedEntity(true);
     } catch (error) {
       console.error("Error deleting item:", error);
     }
+    setDeletedEntity(false);
     setLoading(false);
   };
 
@@ -117,14 +121,16 @@ export default function GenericCRUDTable({
 
   return (
     <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={() => setOpenAddDialog(true)}
-        sx={{ mt: 2 }}
-      >
-        {`Agregar ${entityName}`}
-      </Button>
+      {idItem != "id" && (
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setOpenAddDialog(true)}
+          sx={{ mt: 2 }}
+        >
+          {`Agregar ${entityName}`}
+        </Button>
+      )}
 
       <TableContainer component={Paper}>
         <Table>

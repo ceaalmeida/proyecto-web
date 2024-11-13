@@ -18,7 +18,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useTheme } from "@mui/material/styles";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn, useSession } from "next-auth/react";
+import { getSession, signIn, useSession } from "next-auth/react";
 
 // Define the providers for authentication
 const providers = [{ id: "credentials", name: "Email and Password" }];
@@ -52,11 +52,13 @@ export default function SlotsSignIn() {
         setRedirecting(false);
         return;
       }
+      const session = await getSession()
+      
       if (session?.user?.role === "user") {
         router.replace("/homeUser");
         setRedirected(true);
         setRedirecting(false);
-      }else if(session?.user?.role === "admin"){
+      }else if(session?.user?.role === "admin" || session?.user?.role === "user_admin"){
         router.replace("/home");
         setRedirected(true);
         setRedirecting(false);

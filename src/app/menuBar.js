@@ -141,7 +141,7 @@ export const ResponsiveAppBar = ({ value, Changes, Log }) => {
             {value === "Animales" && (
               <MenuItem>
                 <TextField
-                  classname="busqueda"
+                  className="busqueda"
                   label="Buscar animales"
                   variant="outlined"
                   value={inicio}

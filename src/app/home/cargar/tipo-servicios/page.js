@@ -18,7 +18,7 @@ export default function ServiceTypeTable() {
     try {
       const ID_Servicio = Math.floor(100000 + Math.random() * 900000);
       const servicio = { ...newData, ID_Servicio };
-      await createService(newData, session?.user?.token);
+      await createService(servicio, session?.user?.token);
     } catch (error) {
       console.log(error);
     }

@@ -4,6 +4,8 @@ import {
   deleteUser,
   getAllUsers,
   udpdateUser,
+  readUserByEmail,
+  readUserById,
 } from "../../../api/user/user.service";
 import GenericCRUDTable from "../../../../components/home/generic-table.jsx";
 
@@ -13,10 +15,10 @@ export default function UserTable() {
   const columns = [
     { key: "name", label: "Nombre" },
     { key: "lastname", label: "Apellido" },
-    { key: "username", label: "Nombre de Usuario" },
+    { key: "username", label: "Usuario" },
     { key: "email", label: "Correo" },
     { key: "age", label: "Edad" },
-    { key: "password", label: "Contraseña" },
+    // { key: "password", label: "Contraseña" },
     { key: "permiso", label: "Permiso" },
   ];
 
@@ -40,10 +42,31 @@ export default function UserTable() {
 
   const handleDelete = async (id) => {
     try {
-      await deleteUser(id, session?.user?.token);
+      const usuarioActual = session?.user?.email;
+      console.log("Usuario actual:", usuarioActual);
+      const deletingUser = await readUserById(id, session?.user?.token);
+      console.log("Deleting User: ", deletingUser.email)
+      const isAdmin = await esAdmin(usuarioActual, deletingUser.email);
+      if (isAdmin) {
+        alert("No se puede borrar este usuario");
+        return false;
+      } else {
+        // await deleteUser(id, session?.user?.token);
+        console.log("Se Borra el usuario");
+        return true;
+      }
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const esAdmin = async (emailActual, emailABorrar) => {
+    if (emailActual === emailABorrar) {
+      console.log("Es Admin");
+      return true;
+    }
+    console.log("No Es Admin");
+    return false;
   };
 
   return (

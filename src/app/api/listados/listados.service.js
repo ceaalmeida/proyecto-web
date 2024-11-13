@@ -1,7 +1,7 @@
 const getContratosProveedoresAlimentos = async (token) => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/contratos/proveedores-alimentos`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/listado/contratos/proveedores-alimentos`,
       {
         method: "GET",
         headers: {
@@ -20,7 +20,7 @@ const getContratosProveedoresAlimentos = async (token) => {
 const getContratosProveedoresServicios = async (token) => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/contratos/proveedores-servicios-complementarios`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/listado/contratos/proveedores-servicios-complementarios`,
       {
         method: "GET",
         headers: {

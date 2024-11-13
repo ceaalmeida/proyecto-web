@@ -71,9 +71,49 @@ const deleteUser = async (id, token) => {
   }
 };
 
+const readUserByEmail = async (email, token) => {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/${email}`,
+      {
+        method: "GET",
+        headers: {
+          ContentType: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const readUserById = async (id, token)=>{
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/id/${id}`,
+      {
+        method: "GET",
+        headers: {
+          ContentType: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 module.exports = {
   getAllUsers,
   createUser,
   udpdateUser,
   deleteUser,
+  readUserByEmail,
+  readUserById
 };

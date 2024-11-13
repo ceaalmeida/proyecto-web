@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { readUserByEmailRegister } from "../../api/user/user.service";
 import {
   Box,
   Button,
@@ -19,7 +20,8 @@ import {
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useRouter } from "next/navigation";
-import { signIn, useSession, signOut } from "next-auth/react";
+import { signIn, useSession, signOut, getSession } from "next-auth/react";
+import axios from "axios";
 
 export default function CreateAccount({ onLogin }) {
   const [name, setNombre] = useState("");
@@ -46,7 +48,6 @@ export default function CreateAccount({ onLogin }) {
   const [errorEmail, setErrorEmail] = useState("");
   const [error, setError] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [i, setI] = useState(0);
 
   const router = useRouter();
 
@@ -85,46 +86,10 @@ export default function CreateAccount({ onLogin }) {
       setErrorUser("El usuario no puede contener números");
       return false;
     }
-    const existe = existeUsuario();
-    if (existe) {
-      setErrorUser("El nombre de usuario ya está en uso");
-      return false;
-    }
     return true;
   };
 
-  const existeUsuario = async () => {
-    let existe = false;
-
-    try {
-      sign();
-      if (session?.user?.token) {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session?.user?.token}`,
-            },
-          }
-        );
-        const data = await response.json();
-        data.filter((e) => {
-          if (e.username === username) {
-            signOut();
-            existe = true;
-          }
-        });
-      }
-      signOut();
-      return existe;
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const validarCorreo = () => {
+  const validarCorreo = async () => {
     setErrorEmail(""); // Resetea el error
     if (email.trim() === "") {
       setErrorEmail("El correo electrónico es requerido");
@@ -136,20 +101,24 @@ export default function CreateAccount({ onLogin }) {
       return false;
     }
 
-    if (existeCuenta()) {
+    if (await existeCuenta()) {
+      console.log("Entro a poner error");
       setErrorEmail("El correo electrónico ya está en uso");
+      setSendingToken(false);
       return false;
     }
     return true;
   };
 
   const sign = async () => {
-    const x = process.env.ADMIN_ROLE_EMAIL;
-    const y = process.env.ADMIN_ROLE_PASSWORD;
-    console.log("Entrando");
+    const x = process.env.NEXT_PUBLIC_ADMIN_ROLE_EMAIL;
+    const y = process.env.NEXT_PUBLIC_ADMIN_ROLE_PASSWORD;
+    console.log("Iniciando sesion en la cuenta de administrador de cuentas");
+    console.log(x);
+    console.log(y);
     const response = await signIn("credentials", {
-      x,
-      y,
+      email: x,
+      pass: y,
       redirect: false,
     });
     if (response?.error) {
@@ -161,28 +130,15 @@ export default function CreateAccount({ onLogin }) {
   const existeCuenta = async () => {
     let existe = false;
     try {
-      sign();
+      const session2 = await getSession();
       console.log("LOGEADO");
-      if (session?.user?.token) {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session?.user?.token}`,
-            },
-          }
-        );
-        const data = response.json();
-        data.filter((e) => {
-          if (e.email === email) {
-            signOut();
-            return true;
-          }
-        });
+
+      const data = await readUserByEmailRegister(email);
+
+      if (data) {
+        console.log("TRUE");
+        existe = true;
       }
-      signOut();
       return existe;
     } catch (error) {
       console.log(error);
@@ -215,9 +171,7 @@ export default function CreateAccount({ onLogin }) {
     return true;
   };
 
-  const generarYEnviarToken = async () => {
-    // Validar antes de enviar el token
-    setCreating(true);
+  const validarEntradas = () => {
     const validaciones =
       validarNombre() &&
       validarApellido() &&
@@ -225,7 +179,12 @@ export default function CreateAccount({ onLogin }) {
       validarCorreo() &&
       validarPassword() &&
       validarConfirmPassword();
+    if (validaciones) {
+      setSendingToken(true);
+    }
+  };
 
+  const generarYEnviarToken = async () => {
     console.log({
       name,
       lastname,
@@ -234,14 +193,10 @@ export default function CreateAccount({ onLogin }) {
       password,
     });
 
-    if (validaciones) {
-      setTokenGenerado(Math.floor(100000 + Math.random() * 900000));
-      console.log(tokenGenerado);
-      // await enviarCorreo();
-      setSendingToken(true);
-    } else {
-      setCreating(false);
-    }
+    setTokenGenerado(Math.floor(100000 + Math.random() * 900000));
+    console.log(tokenGenerado);
+    await enviarCorreo();
+    setSendingToken(true);
   };
 
   const enviarCorreo = async () => {
@@ -253,19 +208,39 @@ export default function CreateAccount({ onLogin }) {
         </h1>
       </div>
     `;
-      const response = await fetch("/api/send/", {
+      // const response = await fetch("/api/send/", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     to: email,
+      //     subject: "Token para Validar Correo",
+      //     html: html,
+      //     text: "Texto de prueba",
+      //   }),
+      // });
+      console.log("PINGAAAA");
+      // const response = await axios.post("/api/send", {
+      //   to: email,
+      //   subject: "Token para validar creacion de cuentas",
+      //   text: "A ver donde va esto",
+      //   html: html,
+      // });
+
+      const response = await fetch("http://localhost:3001/api/send", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: process.env.EMAIL_USER,
           to: email,
-          subject: "Token para Validar Correo",
-          html,
+          subject: "Token para validar creacion de cuentas",
+          text: "A ver donde va esto",
+          html: html,
         }),
       });
-      console.log("PINGAAAA");
+
       console.log(await response.json());
     } catch (error) {
       console.error("Error sending email:", error);
@@ -275,20 +250,20 @@ export default function CreateAccount({ onLogin }) {
   const register = async () => {
     const id = Math.floor(100000 + Math.random() * 900000);
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/register`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id,
-          name,
-          lastname,
-          username,
-          email,
+          id: id,
+          name: name,
+          lastname: lastname,
+          username: username,
+          email: email,
           age: 20,
-          password,
+          password: password,
           permiso: "user",
         }),
       }
@@ -297,12 +272,16 @@ export default function CreateAccount({ onLogin }) {
 
   const validateToken = async () => {
     if (tokenGenerado.toString() === token) {
-      await register();
-      setSendingToken(false);
-      setCreating(false);
-      setToken("");
-      setTokenGenerado("");
-      router.replace("/");
+      try {
+        await register();
+        setSendingToken(false);
+        setCreating(false);
+        setToken("");
+        setTokenGenerado("");
+        router.replace("/");
+      } catch (error) {
+        console.log(error);
+      }
     } else {
       console.log("PINGA");
       setError("El token no es correcto");
@@ -442,7 +421,7 @@ export default function CreateAccount({ onLogin }) {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
-            onClick={() => (creating ? null : setSendingToken(true))}
+            onClick={() => (creating ? null : validarEntradas())}
           >
             {creating ? <CircularProgress color="inherit" /> : "Crear cuenta"}
           </Button>
@@ -451,7 +430,7 @@ export default function CreateAccount({ onLogin }) {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
-            onClick={() => (creating ? null : router.replace("/"))}
+            onClick={() => (creating ? null : router.replace("/login"))}
           >
             {creating ? <CircularProgress color="inherit" /> : "Iniciar Sesión"}
           </Button>

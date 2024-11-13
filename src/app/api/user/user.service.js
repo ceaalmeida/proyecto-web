@@ -90,7 +90,7 @@ const readUserByEmail = async (email, token) => {
   }
 };
 
-const readUserById = async (id, token)=>{
+const readUserById = async (id, token) => {
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/id/${id}`,
@@ -107,7 +107,31 @@ const readUserById = async (id, token)=>{
   } catch (error) {
     console.log(error);
   }
-}
+};
+
+const readUserByEmailRegister = async (email) => {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/register/${email}`,
+      {
+        method: "GET",
+        headers: {
+          ContentType: "application/json",
+        },
+      }
+    );
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
+      const data = await response.json();
+      return data;
+    } else {
+      console.log("La respuesta no es un JSON.");
+      return null;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 module.exports = {
   getAllUsers,
@@ -115,5 +139,6 @@ module.exports = {
   udpdateUser,
   deleteUser,
   readUserByEmail,
-  readUserById
+  readUserById,
+  readUserByEmailRegister,
 };

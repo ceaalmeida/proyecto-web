@@ -21,7 +21,9 @@ import FoodTypeTable from "./cargar/tipos-alimentos/page";
 import TransporteTable from "./cargar/transportes/page";
 import VeterinarianTable from "./cargar/veterinarios/page";
 import SwipeableTemporaryDrawer from "./usuario-barra-lateral";
-import UserTable from "./cargar/user/page"
+import UserTable from "./cargar/user/page";
+import TablePIAD from "./cargar/ingresodonacionadopcion/page";
+import TablePAA from "./cargar/programaactividadanimal/page";
 
 import {
   PawPrint,
@@ -175,7 +177,7 @@ const adminNavigation = [
     icon: <TrendingUp />,
     children: [
       {
-        segment: "adpotions/donations-revenues",
+        segment: "adoptions/donations-revenues",
         title: "Ingresos por Donaciones y Adopciones",
         icon: <ChevronRight />,
       },
@@ -322,7 +324,7 @@ const userAdminNavigation = [
     icon: <TrendingUp />,
     children: [
       {
-        segment: "adpotions/donations-revenues",
+        segment: "adoptions/donations-revenues",
         title: "Ingresos por Donaciones y Adopciones",
         icon: <ChevronRight />,
       },
@@ -342,7 +344,9 @@ const components = {
   foodType: <FoodTypeTable />,
   transporte: <TransporteTable />,
   veterinarian: <VeterinarianTable />,
-  users: <UserTable/>
+  users: <UserTable />,
+  PIAD: <TablePIAD />,
+  PAA: <TablePAA />,
 };
 
 const demoTheme = extendTheme({
@@ -395,7 +399,7 @@ export default function DashboardLayoutBasic(props) {
     } else {
       setNavigation(adminNavigation);
     }
-    console.log(navigation)
+    console.log(navigation);
   }, [session, status, router]);
 
   const handleAvatarClick = () => {
@@ -430,6 +434,10 @@ export default function DashboardLayoutBasic(props) {
         return components.transporte;
       case "/users":
         return components.users;
+      case "/revenues/adoptions/donations-revenues":
+        return components.PIAD;
+      case "/Programas/animal-activity-program":
+        return components.PAA;
     }
   };
 

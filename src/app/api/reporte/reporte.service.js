@@ -5,11 +5,13 @@ class ReportService {
       {
         method: "GET",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       }
     );
     const data = await resp.json();
+   // window.alert(data[1]);
     return data;
   }
 

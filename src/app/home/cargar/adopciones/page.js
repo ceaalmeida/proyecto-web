@@ -109,7 +109,7 @@ export default function AdopcionesTable() {
 
   const GetBy = (id) => {       
     const res=animales.find(animales => animales.ID_Animal === id);    
-    return res.Nombre ;
+    return res.Nombre || "Cargando..." ;
   };
 
   useEffect(() => {
@@ -347,7 +347,7 @@ export default function AdopcionesTable() {
                   <IconButton
                     onClick={() => {
                       setOpenConfirmDialog(true);
-                      borrar(adopcion.ID_Adopcion);
+                      setBorrar(adopcion.ID_Adopcion);
                     }}
                     color="error"
                   >
@@ -578,7 +578,7 @@ export default function AdopcionesTable() {
         <DialogTitle>Eliminar Animal</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            ¿Está seguro de que desea eliminar este Animal?
+            ¿Está seguro de que desea eliminar esta Adopcion?
           </DialogContentText>
         </DialogContent>
         <DialogActions>

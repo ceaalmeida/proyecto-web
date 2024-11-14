@@ -1,4 +1,5 @@
 "use client";
+import AnimalService from "../../../api/animal/animal.service";
 import React, { useEffect, useState } from "react";
 import {
   Table,
@@ -17,7 +18,11 @@ import {
   DialogTitle,
   Checkbox,
   FormControlLabel,
+  InputLabel,
+  FormControl,
+  Select,
   IconButton,
+  CircularProgress,
   Menu,
   MenuItem,
 } from "@mui/material";
@@ -70,6 +75,26 @@ export default function DonacionesTable() {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [animales, setAnimales] = useState([]);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [borrar, setBorrar] = useState(null);
+  const [deleting, setDeleting] = useState(null);
+  const [editado, setEditado] = useState();
+  
+
+  const GetBy = (id) => {
+    const res = animales.find((animales) => animales.ID_Animal === id);
+    return res.Nombre;
+  };
+
+  useEffect(() => {
+    const getAll = async () => {
+      const listaAnimal = await AnimalService.getAllAnimal();
+      // window.alert(JSON.stringify(listaAnimal, null, 2));
+      setAnimales(listaAnimal);
+    };
+    getAll();
+  }, []);
 
   useEffect(() => {
     const inicial = async () => {
@@ -87,9 +112,14 @@ export default function DonacionesTable() {
     setSearchTerm(event.target.value);
   };
 
-  const handleDelete = async (id) => {
-    setDonaciones(donaciones.filter((donacion) => donacion.ID_Donacion !== id));
-    await DonacionService.delete(id);
+  const handleDelete = async () => {
+    setDeleting(true);
+    setDonaciones(
+      donaciones.filter((donacion) => donacion.ID_Donacion !== borrar)
+    );
+    await DonacionService.delete(borrar);
+    setOpenConfirmDialog(false);
+    setDeleting(false);
   };
 
   const handleEdit = (donacion) => {
@@ -117,18 +147,26 @@ export default function DonacionesTable() {
   //   useEffect(() => {
   //     handleAdd()
   //   }, []);
+  useEffect(() => {
+    const update = async () => {
+      if (editado) {
+        const a = await DonacionService.update(editado.ID_Donacion, editado);
+      }
+    };
+    update();
+    setEditado(null);
+  }, [editado]);
 
   const handleSaveEdit = () => {
-    if (validate(editingDonacion)) {
-      setDonaciones(
-        donaciones.map((donacion) =>
-          donacion.ID_Donacion === editingDonacion.ID_Donacion
-            ? editingDonacion
-            : donacion
-        )
-      );
-      setOpenEditDialog(false);
-    }
+    setDonaciones(
+      donaciones.map((donacion) =>
+        donacion.ID_Donacion === editingDonacion.ID_Donacion
+          ? editingDonacion
+          : donacion
+      )
+    );
+    setEditado(editingDonacion);
+    setOpenEditDialog(false);
   };
 
   const validate = (donacion) => {
@@ -269,7 +307,7 @@ export default function DonacionesTable() {
                   <TableCell>{donacion.Telefono_Donante}</TableCell>
                 )}
                 {visibleColumns.includes("ID_Animal") && (
-                  <TableCell>{donacion.ID_Animal}</TableCell>
+                  <TableCell>{GetBy(donacion.ID_Animal)}</TableCell>
                 )}
                 <TableCell>
                   <IconButton
@@ -279,7 +317,10 @@ export default function DonacionesTable() {
                     <EditIcon />
                   </IconButton>
                   <IconButton
-                    onClick={() => handleDelete(donacion.ID_Donacion)}
+                    onClick={() => {
+                      setOpenConfirmDialog(true);
+                      setBorrar(donacion.ID_Donacion);
+                    }}
                     color="error"
                   >
                     <DeleteIcon />
@@ -370,19 +411,19 @@ export default function DonacionesTable() {
             error={!!errors.Telefono_Donante}
             helperText={errors.Telefono_Donante}
           />
-          <TextField
-            margin="dense"
-            label="ID Animal"
-            type="text"
-            fullWidth
-            variant="standard"
-            value={newDonacion.ID_Animal}
-            onChange={(e) =>
-              setNewDonacion({ ...newDonacion, ID_Animal: e.target.value })
-            }
-            error={!!errors.ID_Animal}
-            helperText={errors.ID_Animal}
-          />
+          <FormControl fullWidth margin="dense" key="Animal">
+            <InputLabel>Animal</InputLabel>
+            <Select
+              value={newDonacion.ID_Animal}
+              onChange={(e) =>
+                setNewDonacion({ ...newDonacion, ID_Animal: e.target.value })
+              }
+            >
+              {animales.map((field) => (
+                <MenuItem value={field.ID_Animal}>{field.Nombre}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenAddDialog(false)}>Cancelar</Button>
@@ -480,28 +521,46 @@ export default function DonacionesTable() {
                 error={!!errors.Telefono_Donante}
                 helperText={errors.Telefono_Donante}
               />
-              <TextField
-                margin="dense"
-                label="ID Animal"
-                type="text"
-                fullWidth
-                variant="standard"
-                value={editingDonacion.ID_Animal}
-                onChange={(e) =>
-                  setEditingDonacion({
-                    ...editingDonacion,
-                    ID_Animal: e.target.value,
-                  })
-                }
-                error={!!errors.ID_Animal}
-                helperText={errors.ID_Animal}
-              />
+              <FormControl fullWidth margin="dense" key="Animal">
+                <InputLabel>Animal</InputLabel>
+                <Select
+                  value={editingDonacion.ID_Animal}
+                  onChange={(e) =>
+                    setEditingDonacion({
+                      ...editingDonacion,
+                      ID_Animal: e.target.value,
+                    })
+                  }
+                >
+                  {animales.map((field) => (
+                    <MenuItem value={field.ID_Animal}>{field.Nombre}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </>
           )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
-          <Button onClick={handleEdit}>Guardar Cambios</Button>
+          <Button onClick={handleSaveEdit}>Guardar Cambios</Button>
+        </DialogActions>
+      </Dialog>
+      {/* Diálogo de confirmación para eliminar */}
+      <Dialog
+        open={openConfirmDialog}
+        onClose={() => setOpenConfirmDialog(false)}
+      >
+        <DialogTitle>Eliminar Animal</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            ¿Está seguro de que desea eliminar esta Adopcion?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenConfirmDialog(false)}>Cancelar</Button>
+          <Button onClick={deleting ? null : handleDelete} color="error">
+            {deleting ? <CircularProgress color="error" /> : "Eliminar"}
+          </Button>
         </DialogActions>
       </Dialog>
     </Paper>

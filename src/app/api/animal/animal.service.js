@@ -6,6 +6,13 @@ class AnimalService {
     const data = await animales.json();
     return data;
   }
+  async getBy(id){
+    const animal= await fetch(`http://localhost:3000/Animal/${id}`, {
+      method: "GET",
+    })
+    return  await animal.json()
+
+  }
   async updateAnimal(id, animal) {
     const animales = await fetch(`http://localhost:3000/Animal/${id}`, {
       method: "PUT",

@@ -1,5 +1,6 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { readUserByEmailRegister } from "../../api/user/user.service";
 import {
   Box,
   Button,
@@ -19,7 +20,7 @@ import {
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useRouter } from "next/navigation";
-import { signIn, useSession, signOut } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 
 export default function CreateAccount({ onLogin }) {
   const [name, setNombre] = useState("");
@@ -29,14 +30,13 @@ export default function CreateAccount({ onLogin }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [email, setEmail] = useState("");
   const [sendingToken, setSendingToken] = useState(false);
-  const [token, setToken] = useState("");
-  const [tokenGenerado, setTokenGenerado] = useState("");
-  const [countdown, setCountdown] = useState(60); // Estado para el contador
-  const [isCounting, setIsCounting] = useState(false); // Estado para saber si el contador está activo
-
+  const [token, setToken] = useState(null);
+  const [tokenGenerado, setTokenGenerado] = useState(null);
+  const [countdown, setCountdown] = useState(60);
+  const [isCounting, setIsCounting] = useState(false);
   const [creating, setCreating] = useState(false);
-
-  const { data: session, status } = useSession();
+  const [error, setError] = useState("");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
   const [errorNombre, setErrorNombre] = useState("");
   const [errorApellido, setErrorApellido] = useState("");
@@ -44,157 +44,70 @@ export default function CreateAccount({ onLogin }) {
   const [errorPassword, setErrorPassword] = useState("");
   const [errorConfirmPassword, setErrorConfirmPassword] = useState("");
   const [errorEmail, setErrorEmail] = useState("");
-  const [error, setError] = useState("");
-  const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [i, setI] = useState(0);
+  const [correoEnviado, setCorreoEnviado] = useState(false)
 
   const router = useRouter();
 
+  useEffect(() => {
+    if (tokenGenerado !== null && !correoEnviado) {  // Asegura que `tokenGenerado` no sea null antes de enviar el correo
+      enviarCorreo(tokenGenerado); // Llama a la función para enviar el correo con el token actualizado
+      setCorreoEnviado(true)
+    }
+  }, [tokenGenerado, correoEnviado]);
+
   const validarNombre = () => {
-    setErrorNombre(""); // Resetea el error
-    if (name.trim() === "") {
-      setErrorNombre("El nombre es requerido");
-      return false;
-    } else if (/[0-9]/.test(name)) {
-      setErrorNombre("El nombre no puede contener números");
+    setErrorNombre("");
+    if (name.trim() === "" || /[0-9]/.test(name)) {
+      setErrorNombre("El nombre es requerido y no puede contener números");
       return false;
     }
     return true;
   };
 
   const validarApellido = () => {
-    setErrorApellido(""); // Resetea el error
-    if (lastname.trim() === "") {
-      setErrorApellido("El apellido es requerido");
-      return false;
-    }
-    if (/[0-9]/.test(lastname)) {
-      setErrorApellido("El apellido no puede contener números");
+    setErrorApellido("");
+    if (lastname.trim() === "" || /[0-9]/.test(lastname)) {
+      setErrorApellido("El apellido es requerido y no puede contener números");
       return false;
     }
     return true;
   };
 
-  const validarUsuario = async () => {
-    setErrorUser(""); // Resetea el error
-    if (username.trim() === "") {
-      setErrorUser("El usuario es requerido");
-      return false;
-    }
-    if (/[0-9]/.test(username)) {
-      setErrorUser("El usuario no puede contener números");
-      return false;
-    }
-    const existe = existeUsuario();
-    if (existe) {
-      setErrorUser("El nombre de usuario ya está en uso");
+  const validarUsuario = () => {
+    setErrorUser("");
+    if (username.trim() === "" || /[0-9]/.test(username)) {
+      setErrorUser("El usuario es requerido y no puede contener números");
       return false;
     }
     return true;
   };
 
-  const existeUsuario = async () => {
-    let existe = false;
-
-    try {
-      sign();
-      if (session?.user?.token) {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session?.user?.token}`,
-            },
-          }
-        );
-        const data = await response.json();
-        data.filter((e) => {
-          if (e.username === username) {
-            signOut();
-            existe = true;
-          }
-        });
-      }
-      signOut();
-      return existe;
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const validarCorreo = () => {
-    setErrorEmail(""); // Resetea el error
-    if (email.trim() === "") {
-      setErrorEmail("El correo electrónico es requerido");
-      return false;
-    }
+  const validarCorreo = async () => {
+    setErrorEmail("");
     const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!regex.test(email)) {
-      setErrorEmail("El correo no es válido");
+    if (!email.trim() || !regex.test(email)) {
+      setErrorEmail("El correo electrónico es requerido o no es válido");
       return false;
     }
-
-    if (existeCuenta()) {
+    if (await existeCuenta()) {
       setErrorEmail("El correo electrónico ya está en uso");
       return false;
     }
     return true;
   };
 
-  const sign = async () => {
-    const x = process.env.ADMIN_ROLE_EMAIL;
-    const y = process.env.ADMIN_ROLE_PASSWORD;
-    console.log("Entrando");
-    const response = await signIn("credentials", {
-      x,
-      y,
-      redirect: false,
-    });
-    if (response?.error) {
-      setError(response.error);
-      return;
-    }
-  };
-
   const existeCuenta = async () => {
-    let existe = false;
     try {
-      sign();
-      console.log("LOGEADO");
-      if (session?.user?.token) {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session?.user?.token}`,
-            },
-          }
-        );
-        const data = response.json();
-        data.filter((e) => {
-          if (e.email === email) {
-            signOut();
-            return true;
-          }
-        });
-      }
-      signOut();
-      return existe;
-    } catch (error) {
-      console.log(error);
+      await getSession();
+      const data = await readUserByEmailRegister(email);
+      return !!data;
+    } catch {
+      return false;
     }
   };
 
   const validarPassword = () => {
-    setErrorPassword(""); // Resetea el error
-    if (password.trim() === "") {
-      setErrorPassword("La contraseña es requerida");
-      return false;
-    }
+    setErrorPassword("");
     if (password.length < 8) {
       setErrorPassword("La contraseña debe tener al menos 8 caracteres");
       return false;
@@ -203,11 +116,7 @@ export default function CreateAccount({ onLogin }) {
   };
 
   const validarConfirmPassword = () => {
-    setErrorConfirmPassword(""); // Resetea el error
-    if (confirmPassword.trim() === "") {
-      setErrorConfirmPassword("La confirmación de contraseña es requerida");
-      return false;
-    }
+    setErrorConfirmPassword("");
     if (password !== confirmPassword) {
       setErrorConfirmPassword("Las contraseñas no coinciden");
       return false;
@@ -215,9 +124,7 @@ export default function CreateAccount({ onLogin }) {
     return true;
   };
 
-  const generarYEnviarToken = async () => {
-    // Validar antes de enviar el token
-    setCreating(true);
+  const validarEntradas = () => {
     const validaciones =
       validarNombre() &&
       validarApellido() &&
@@ -225,105 +132,79 @@ export default function CreateAccount({ onLogin }) {
       validarCorreo() &&
       validarPassword() &&
       validarConfirmPassword();
-
-    console.log({
-      name,
-      lastname,
-      username,
-      email,
-      password,
-    });
-
     if (validaciones) {
-      setTokenGenerado(Math.floor(100000 + Math.random() * 900000));
-      console.log(tokenGenerado);
-      // await enviarCorreo();
       setSendingToken(true);
-    } else {
-      setCreating(false);
+      generarYEnviarToken();
     }
   };
 
+  const generarYEnviarToken = async () => {
+    setTokenGenerado(Math.floor(100000 + Math.random() * 900000));
+    console.log(tokenGenerado)
+    setIsCounting(true);
+    setCorreoEnviado(false)
+  };
+
   const enviarCorreo = async () => {
-    try {
-      const html = `
-      <div>
-        <h1>
-          Welcome, ${name}. This is your token: ${tokenGenerado} !
-        </h1>
-      </div>
-    `;
-      const response = await fetch("/api/send/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: process.env.EMAIL_USER,
-          to: email,
-          subject: "Token para Validar Correo",
-          html,
-        }),
-      });
-      console.log("PINGAAAA");
-      console.log(await response.json());
-    } catch (error) {
-      console.error("Error sending email:", error);
-    }
+    const html = `<div><h1>Hola, ${name}. Este es tu código de validación: ${tokenGenerado} !</h1></div>`;
+    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/send/email`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        to: email,
+        subject: "Token para validar creación de cuentas",
+        html: html,
+      }),
+    });
   };
 
   const register = async () => {
     const id = Math.floor(100000 + Math.random() * 900000);
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id,
-          name,
-          lastname,
-          username,
-          email,
-          age: 20,
-          password,
-          permiso: "user",
-        }),
-      }
-    );
+    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id,
+        name,
+        lastname,
+        username,
+        email,
+        age: 20,
+        password,
+        permiso: "user",
+      }),
+    });
   };
 
   const validateToken = async () => {
+    console.log("El qie escribi",token)
+    console.log("El que me mando",tokenGenerado)
     if (tokenGenerado.toString() === token) {
-      await register();
-      setSendingToken(false);
-      setCreating(false);
-      setToken("");
-      setTokenGenerado("");
-      router.replace("/");
+      try {
+        await register();
+        setSendingToken(false);
+        setToken(null);
+        setTokenGenerado(null);
+        router.replace("/");
+      } catch (error) {
+        console.error(error);
+      }
     } else {
-      console.log("PINGA");
       setError("El token no es correcto");
       setOpenSnackbar(true);
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     let timer;
     if (isCounting && countdown > 0) {
-      timer = setInterval(() => {
-        setCountdown((prev) => prev - 1);
-      }, 1000);
+      timer = setInterval(() => setCountdown((prev) => prev - 1), 1000);
     } else if (countdown === 0) {
       setIsCounting(false);
-      clearInterval(timer);
-      setToken("");
-      setTokenGenerado("");
+      setToken(null);
+      setTokenGenerado(null);
     }
-
-    return () => clearInterval(timer); // Limpiar el intervalo al desmontar
+    return () => clearInterval(timer);
   }, [isCounting, countdown]);
 
   const handleResendCode = () => {
@@ -335,30 +216,33 @@ export default function CreateAccount({ onLogin }) {
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <Paper elevation={3}>
+      <Paper
+        elevation={3}
+        sx={{
+          mt: 8,
+          p: 4,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
         <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
           <LockOutlinedIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
           Crear cuenta
         </Typography>
-        <Box
-          sx={{
-            mt: 1,
-          }}
-        >
+        <Box sx={{ mt: 1 }}>
           <TextField
             margin="normal"
             required
             fullWidth
             id="nombre"
             label="Nombre"
-            name="nombre"
-            autoComplete="nombre"
             autoFocus
             value={name}
             onChange={(e) => setNombre(e.target.value)}
-            error={errorNombre !== ""}
+            error={!!errorNombre}
             helperText={errorNombre}
           />
           <TextField
@@ -367,11 +251,9 @@ export default function CreateAccount({ onLogin }) {
             fullWidth
             id="apellido"
             label="Apellido"
-            name="apellido"
-            autoComplete="apellido"
             value={lastname}
             onChange={(e) => setApellido(e.target.value)}
-            error={errorApellido !== ""}
+            error={!!errorApellido}
             helperText={errorApellido}
           />
           <TextField
@@ -380,11 +262,9 @@ export default function CreateAccount({ onLogin }) {
             fullWidth
             id="user"
             label="Usuario"
-            name="user"
-            autoComplete="user"
             value={username}
             onChange={(e) => setUser(e.target.value)}
-            error={errorUser !== ""}
+            error={!!errorUser}
             helperText={errorUser}
           />
           <TextField
@@ -393,150 +273,79 @@ export default function CreateAccount({ onLogin }) {
             fullWidth
             id="email"
             label="Correo electrónico"
-            name="email"
-            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            error={errorEmail !== ""}
+            error={!!errorEmail}
             helperText={errorEmail}
           />
           <TextField
             margin="normal"
             required
             fullWidth
-            name="password"
+            id="password"
             label="Contraseña"
             type="password"
-            id="password"
-            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            error={errorPassword !== ""}
+            error={!!errorPassword}
             helperText={errorPassword}
           />
           <TextField
             margin="normal"
             required
             fullWidth
-            name="confirmPassword"
+            id="confirmPassword"
             label="Confirmar contraseña"
             type="password"
-            id="confirmPassword"
-            autoComplete="current-password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            error={errorConfirmPassword !== ""}
+            error={!!errorConfirmPassword}
             helperText={errorConfirmPassword}
           />
           <Button
-            type="submit"
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
-            onClick={() => (creating ? null : setSendingToken(true))}
+            onClick={validarEntradas}
           >
             {creating ? <CircularProgress color="inherit" /> : "Crear cuenta"}
           </Button>
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-            onClick={() => (creating ? null : router.replace("/"))}
-          >
-            {creating ? <CircularProgress color="inherit" /> : "Iniciar Sesión"}
-          </Button>
         </Box>
-        {/* Enviar Correo */}
-        <Dialog open={sendingToken}>
-          <DialogTitle>Validar Correo</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              {isCounting
-                ? "  Se ha enviado un correo electrónico a tu dirección de correoelectrónico con un enlace de validación. Por favor introduzca el código en el siguiente cuadro de texto"
-                : "Toque enviar para enviar"}
-            </DialogContentText>
-            <TextField
-              margin="dense"
-              id="token"
-              label="Código de validación"
-              type="text"
-              fullWidth
-              value={token}
-              onChange={(e) => {
-                setToken(e.target.value);
-                console.log(tokenGenerado);
-              }}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              disabled={!isCounting}
-              sx={{ mt: 3, mb: 2 }}
-              onClick={validateToken}
-            >
-              Validar
-            </Button>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginTop: "16px",
-              }}
-            >
-              <Button
-                variant="contained"
-                onClick={() => {
-                  setSendingToken(false);
-                  setCreating(false);
-                  setTokenGenerado("");
-                  setToken("");
-                }}
-              >
-                Cancelar
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleResendCode}
-                disabled={isCounting}
-                style={{ margin: "0 10px" }} // Margen para separación
-              >
-                {isCounting ? `Reenviar en ${countdown}s` : "Enviar Código"}
-              </Button>
-              <Button
-                variant="contained"
-                onClick={() => {
-                  setSendingToken(false);
-                  setToken("");
-                  setTokenGenerado(false);
-                }}
-              >
-                Cambiar de Correo
-              </Button>
-            </div>
-          </DialogContent>
-          <Snackbar
-            anchorOrigin={{ vertical: "top", horizontal: "center" }}
-            //sx={{ textAlign: "right" }}
-            open={openSnackbar}
-            autoHideDuration={6000}
-            onClose={() => {
-              setOpenSnackbar(false);
-            }}
-          >
-            <Alert
-              onClose={() => {
-                setOpenSnackbar(false);
-              }}
-              severity="error"
-              sx={{ width: "100%" }}
-            >
-              {error}
-            </Alert>
-          </Snackbar>
-        </Dialog>
       </Paper>
+
+      <Dialog open={sendingToken}>
+        <DialogTitle>Validar Correo</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {isCounting
+              ? `Código enviado. Por favor ingrese el código (Tiempo restante: ${countdown}s)`
+              : "¿No recibiste el código? Haz clic en reenviar"}
+          </DialogContentText>
+          <TextField
+            autoFocus
+            fullWidth
+            margin="dense"
+            label="Código de validación"
+            type="text"
+            value={token}
+            onChange={(e) => setToken(e.target.value)}
+          />
+          <Button disabled={isCounting} onClick={handleResendCode}>
+            Reenviar código
+          </Button>
+          <Button onClick={validateToken} color="primary">
+            Validar
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={() => setOpenSnackbar(false)}
+      >
+        <Alert severity="error">{error}</Alert>
+      </Snackbar>
     </Container>
   );
 }

@@ -1,5 +1,5 @@
 "use client";
-import AdopcionService from "../api/adopcion/adopcion.service";
+import AdopcionService from "./api/adopcion/adopcion.service";
 import {
   Table,
   TableBody,

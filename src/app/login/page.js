@@ -11,12 +11,14 @@ import {
   Avatar,
   TextField,
   Button,
-  Box
+  Box,
+  CircularProgress,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useTheme } from "@mui/material/styles";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { getSession, signIn, useSession } from "next-auth/react";
 
 // Define the providers for authentication
 const providers = [{ id: "credentials", name: "Email and Password" }];
@@ -26,22 +28,55 @@ const providers = [{ id: "credentials", name: "Email and Password" }];
 export default function SlotsSignIn() {
   const theme = useTheme();
   const router = useRouter();
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [email, setEmail] = useState(null)
-  const [password, setPassword] = useState(null)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { data: session, status } = useSession();
+  const [redirecting, setRedirecting] = useState(false);
+  const [redirected, setRedirected] = useState(false);
 
-  const signIn = async (e) => {
-    
-    e.preventDefault()
-
-    if (email.trim() === "asd@gmail.com" && password.trim() === "asd") {
-      router.replace("/home");
-    } else if (email.trim() === "qwe@gmail.com" && password.trim() === "qwe") {
-      router.replace("/homeUser");
+  const sign = async (e) => {
+    e.preventDefault();
+    setRedirecting(true);
+    if (validarEntrada()) {
+      console.log("Entrando");
+      const response = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+      if (response?.error) {
+        setError(response.error);
+        setOpenSnackbar(true);
+        setRedirecting(false);
+        return;
+      }
+      const session = await getSession()
+      
+      if (session?.user?.role === "user") {
+        router.replace("/homeUser");
+        setRedirected(true);
+        setRedirecting(false);
+      }else if(session?.user?.role === "admin" || session?.user?.role === "user_admin"){
+        router.replace("/home");
+        setRedirected(true);
+        setRedirecting(false);
+      }
     } else {
+      setError("Errores de Validacion");
       setOpenSnackbar(true);
+      setRedirecting(false);
     }
+    setRedirecting(false);
+  };
+
+  const validarEntrada = () => {
+    return true;
+  };
+
+  const handleRegister = (e) => {
+    router.push("/login/create-account");
   };
 
   const handleCloseSnackbar = () => {
@@ -67,7 +102,12 @@ export default function SlotsSignIn() {
         <Typography component="h1" variant="h5">
           Iniciar Sesión
         </Typography>
-        <Box component="form" onSubmit={signIn} noValidate sx={{ mt: 1 }}>
+        <Box
+          component="form"
+          onSubmit={redirected || redirecting ? null : sign}
+          noValidate
+          sx={{ mt: 1 }}
+        >
           <TextField
             margin="normal"
             required
@@ -89,8 +129,30 @@ export default function SlotsSignIn() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <Button fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} type="submit">
-            Iniciar Sesión
+          <Button
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+            type="submit"
+          >
+            {redirecting ? (
+              <CircularProgress color="inherit" />
+            ) : (
+              "Iniciar Sesión"
+            )}
+          </Button>
+          <Button
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+            type="submit"
+            onClick={redirected || redirecting ? null : handleRegister}
+          >
+            {redirecting ? (
+              <CircularProgress color="inherit" />
+            ) : (
+              "Crear Cuenta"
+            )}
           </Button>
         </Box>
       </Paper>
@@ -106,9 +168,7 @@ export default function SlotsSignIn() {
           severity="error"
           sx={{ width: "100%" }}
         >
-          Contraseña o usuario
-          <br />
-          incorrectos
+          {error}
         </Alert>
       </Snackbar>
     </Container>

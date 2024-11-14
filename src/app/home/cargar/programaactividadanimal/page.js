@@ -49,6 +49,7 @@ export default function TablePAA() {
   return (
     <Paper sx={{ width: "90%", overflow: "hidden", p: 2 }}>
       <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
+      <h1>Selecciona un animal</h1>
         <FormControl fullWidth margin="dense" key="Animal">
           <InputLabel>Animal</InputLabel>
           <Select value={id} onChange={(e) => setID(e.target.value)}>

@@ -120,7 +120,7 @@ export default function GenericCRUDTable({
   );
 
   return (
-    <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
+    <Paper sx={{ width: "90%", overflow: "hidden", p: 2 }}>
       {idItem != "id" && (
         <Button
           variant="contained"
@@ -132,7 +132,7 @@ export default function GenericCRUDTable({
         </Button>
       )}
 
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
         <Table>
           <TableHead>
             <TableRow>

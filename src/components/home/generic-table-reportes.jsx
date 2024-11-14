@@ -66,11 +66,11 @@ export default function GenericTableDisplay({
   };
 
   return (
-    <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
+    <Paper sx={{ width: "90%", overflow: "hidden", p: 2 }}>
       <Typography component="h6" variant="h5">
-        {entityName} 
+        {entityName}
       </Typography>
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
         <Table>
           <TableHead>
             <TableRow>

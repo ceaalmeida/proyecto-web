@@ -67,8 +67,8 @@ export default function SwipeableTemporaryDrawer({ values }) {
       </List>
       <Divider />
       <ListItemButton
-        onClick={() => {
-          signOut({
+        onClick={async() => {
+          await signOut({
             callbackUrl: "http://localhost:3001",
             redirect: false,
           });

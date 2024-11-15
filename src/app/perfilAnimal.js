@@ -56,7 +56,7 @@ export function AnimalProfile({ animal, onButtonClick }) {
 
   return (
     <>
-      {!session && (
+      {session && (
         <div className="contenedor" style={{ width: "50%" }}>
           <Card style={{ width: "100%", maxwidth: "600px" }}>
             <CardHeader
@@ -191,7 +191,7 @@ export function AnimalProfile({ animal, onButtonClick }) {
           </Card>
         </div>
       )}
-      {session && (
+      {!session && (
         <div className="container">
           
           <Dialog

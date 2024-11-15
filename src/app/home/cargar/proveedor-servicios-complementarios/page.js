@@ -1,5 +1,4 @@
-"use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Table,
     TableBody,
@@ -13,185 +12,359 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    DialogContentText,
     DialogTitle,
+    IconButton,
+    Select,
+    MenuItem,
     Checkbox,
     FormControlLabel,
-    IconButton,
-    Menu,
-    MenuItem,
 } from "@mui/material";
 import {
     Add as AddIcon,
     Edit as EditIcon,
     Delete as DeleteIcon,
-    ViewColumn as ViewColumnIcon,
 } from "@mui/icons-material";
+import ContratadosService from "../../../api/contratados/contratados.service";
+import ContratoService from "../../../api/contratos/contratos.service";
+import ProveedorServiciosComplementariosService from "../../../api/proveedor_servicios_comp/proveedor_servicios_comp.service";
+import { loadAllProvincias } from "../../../api/provincia/provincia.service";
 
-const initialProveedoresServicios = [
-    {
-        id: 1,
-        nombre: "Limpieza Animal",
-        tipoServicio: "Limpieza",
-        direccion: "Calle 78, Ciudad",
-    },
-    {
-        id: 2,
-        nombre: "Transporte Express",
-        tipoServicio: "Transporte",
-        direccion: "Avenida 102, Ciudad",
-    },
-];
+// Generar código de contrato aleatorio
+const generarCodigoContrato = (nombre) => {
+    return nombre.slice(0, 6) + Math.floor(Math.random() * 100000);
+};
 
 export default function ProveedorServiciosTable() {
-    const [proveedores, setProveedores] = useState(initialProveedoresServicios);
-    const [sortOrder, setSortOrder] = useState("asc");
-    const [visibleColumns, setVisibleColumns] = useState([
-        "nombre",
-        "tipoServicio",
-        "direccion",
-    ]);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [editingProveedor, setEditingProveedor] = useState(null);
+    const [proveedores, setProveedores] = useState([]);
+    const [provincias, setProvincias] = useState([]);
     const [newProveedor, setNewProveedor] = useState({
-        nombre: "",
+        nombreProveedor: "",
+        direccion: "",
+        telefono: "",
+        email: "",
+    });
+    const [newContrato, setNewContrato] = useState({
+        tipoContrato: "",
         tipoServicio: "",
         direccion: "",
+        telefono: "",
+        email: "",
+        nombreResponsable: "",
+        fechaInicio: "",
+        fechaTerminacion: "",
+        descripcion: "",
     });
-    const [openAddDialog, setOpenAddDialog] = useState(false);
-    const [openEditDialog, setOpenEditDialog] = useState(false);
-    const [anchorEl, setAnchorEl] = useState(null);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [openDialog, setOpenDialog] = useState(false);
+    const [tab, setTab] = useState("proveedor");
+    const [sortDirection, setSortDirection] = useState("asc");
+    const [sortColumn, setSortColumn] = useState("nombreProveedor");
+    const [visibleColumns, setVisibleColumns] = useState({
+        nombreProveedor: true,
+        direccion: true,
+        telefono: true,
+    });
 
-    const handleSort = () => {
-        setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    };
+    useEffect(() => {
+        const loadProveedores = async () => {
+            const data = await ProveedorServiciosComplementariosService.getAllProveedores();
+            setProveedores(data);
+        };
 
-    const handleSearch = (event) => {
-        setSearchTerm(event.target.value);
-    };
+        const loadProvinciasData = async () => {
+            const data = await loadAllProvincias();
+            setProvincias(data);
+        };
 
-    const handleDelete = (id) => {
-        setProveedores(proveedores.filter((proveedor) => proveedor.id !== id));
-    };
+        loadProveedores();
+        loadProvinciasData();
+    }, []);
 
-    const handleEdit = (proveedor) => {
-        setEditingProveedor(proveedor);
-        setOpenEditDialog(true);
-    };
+    const handleAdd = async () => {
+        if (!newProveedor.nombreProveedor || !newProveedor.direccion) {
+            alert("Por favor, complete todos los campos obligatorios.");
+            return;
+        }
 
-    const handleSaveEdit = () => {
-        setProveedores(
-            proveedores.map((proveedor) =>
-                proveedor.id === editingProveedor.id ? editingProveedor : proveedor
-            )
+        const codigoContrato = generarCodigoContrato(newProveedor.nombreProveedor);
+        const provinciaSeleccionada = provincias.find(
+            (p) => p.Nombre_Provincia === newContrato.direccion
         );
-        setOpenEditDialog(false);
+
+        if (!provinciaSeleccionada) {
+            alert("La dirección seleccionada no es válida.");
+            return;
+        }
+
+        const idContratado = codigoContrato.split("").reverse().join("");
+
+        const contrato = {
+            ...newContrato,
+            Codigo_Contrato: codigoContrato,
+            fechaInicio: new Date(newContrato.fechaInicio),
+            fechaTerminacion: new Date(newContrato.fechaTerminacion),
+        };
+
+        const contratado = {
+            Codigo_Contrato: codigoContrato,
+            ID_Provincia: provinciaSeleccionada.ID_Provincia,
+            ID_Contratado: idContratado,
+        };
+
+        const proveedor = {
+            ...newProveedor,
+            ID_Contratado: idContratado,
+        };
+
+        await ContratoService.createContrato(contrato);
+        await ContratadosService.createContratado(contratado);
+        await ProveedorServiciosComplementariosService.createProveedor(proveedor);
+
+        setProveedores([...proveedores, proveedor]);
+        setOpenDialog(false);
     };
 
-    const handleAdd = () => {
-        const id = Math.max(...proveedores.map((p) => p.id)) + 1;
-        setProveedores([...proveedores, { ...newProveedor, id }]);
-        setNewProveedor({ nombre: "", tipoServicio: "", direccion: "" });
-        setOpenAddDialog(false);
+    const handleSearch = (e) => {
+        setSearchQuery(e.target.value.toLowerCase());
     };
 
-    const toggleColumn = (column) => {
-        setVisibleColumns((prev) =>
-            prev.includes(column)
-                ? prev.filter((col) => col !== column)
-                : [...prev, column]
-        );
+    const handleSort = (column) => {
+        const direction = sortDirection === "asc" ? "desc" : "asc";
+        setSortDirection(direction);
+        setSortColumn(column);
+    };
+
+    const handleColumnVisibility = (column) => {
+        setVisibleColumns((prev) => ({
+            ...prev,
+            [column]: !prev[column],
+        }));
     };
 
     const filteredProveedores = proveedores
-        .filter((proveedor) =>
-            Object.values(proveedor).some((value) =>
-                value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-            )
-        )
+        .filter((prov) => {
+            const provLowerCase = JSON.stringify(prov).toLowerCase();
+            return provLowerCase.includes(searchQuery);
+        })
         .sort((a, b) => {
-            if (sortOrder === "asc") {
-                return a.nombre.localeCompare(b.nombre);
-            } else {
-                return b.nombre.localeCompare(a.nombre);
+            if (sortColumn === "nombreProveedor") {
+                return sortDirection === "asc"
+                    ? a.nombreProveedor.localeCompare(b.nombreProveedor)
+                    : b.nombreProveedor.localeCompare(a.nombreProveedor);
             }
+            return 0;
         });
 
     return (
         <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
             <TextField
-                label="Buscar proveedores"
+                label="Buscar Proveedor"
                 variant="outlined"
-                value={searchTerm}
+                fullWidth
+                margin="normal"
                 onChange={handleSearch}
-                sx={{ mb: 2 }}
             />
-            <IconButton
-                onClick={(event) => setAnchorEl(event.currentTarget)}
-                sx={{ mb: 2, ml: 2 }}
+
+            <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setOpenDialog(true)}
+                sx={{ mb: 2 }}
             >
-                <ViewColumnIcon />
-            </IconButton>
-            <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={() => setAnchorEl(null)}
-            >
-                {["nombre", "tipoServicio", "direccion"].map((column) => (
-                    <MenuItem key={column}>
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={visibleColumns.includes(column)}
-                                    onChange={() => toggleColumn(column)}
-                                />
-                            }
-                            label={column.charAt(0).toUpperCase() + column.slice(1)}
-                        />
-                    </MenuItem>
-                ))}
-            </Menu>
-            <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                Agregar Proveedor
+            </Button>
+
+            <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+                <DialogTitle>Agregar Nuevo Proveedor</DialogTitle>
+                <DialogContent>
+                    <div>
+                        <Button onClick={() => setTab("proveedor")}>Proveedor</Button>
+                        <Button onClick={() => setTab("contrato")}>Contrato</Button>
+                    </div>
+
+                    {tab === "proveedor" && (
+                        <div>
+                            <TextField
+                                label="Nombre del Proveedor"
+                                fullWidth
+                                value={newProveedor.nombreProveedor}
+                                onChange={(e) =>
+                                    setNewProveedor({ ...newProveedor, nombreProveedor: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Dirección"
+                                fullWidth
+                                value={newProveedor.direccion}
+                                onChange={(e) =>
+                                    setNewProveedor({ ...newProveedor, direccion: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Teléfono"
+                                fullWidth
+                                value={newProveedor.telefono}
+                                onChange={(e) =>
+                                    setNewProveedor({ ...newProveedor, telefono: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Email"
+                                fullWidth
+                                value={newProveedor.email}
+                                onChange={(e) =>
+                                    setNewProveedor({ ...newProveedor, email: e.target.value })
+                                }
+                            />
+                        </div>
+                    )}
+
+                    {tab === "contrato" && (
+                        <div>
+                            <TextField
+                                label="Tipo de Contrato"
+                                fullWidth
+                                value={newContrato.tipoContrato}
+                                onChange={(e) =>
+                                    setNewContrato({ ...newContrato, tipoContrato: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Tipo de Servicio"
+                                fullWidth
+                                value={newContrato.tipoServicio}
+                                onChange={(e) =>
+                                    setNewContrato({ ...newContrato, tipoServicio: e.target.value })
+                                }
+                            />
+                            <Select
+                                label="Dirección"
+                                fullWidth
+                                value={newContrato.direccion}
+                                onChange={(e) =>
+                                    setNewContrato({ ...newContrato, direccion: e.target.value })
+                                }
+                            >
+                                {provincias.map((provincia) => (
+                                    <MenuItem
+                                        key={provincia.ID_Provincia}
+                                        value={provincia.Nombre_Provincia}
+                                    >
+                                        {provincia.Nombre_Provincia}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                            <TextField
+                                label="Teléfono"
+                                fullWidth
+                                value={newContrato.telefono}
+                                onChange={(e) =>
+                                    setNewContrato({ ...newContrato, telefono: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Email"
+                                fullWidth
+                                value={newContrato.email}
+                                onChange={(e) =>
+                                    setNewContrato({ ...newContrato, email: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Nombre del Responsable"
+                                fullWidth
+                                value={newContrato.nombreResponsable}
+                                onChange={(e) =>
+                                    setNewContrato({ ...newContrato, nombreResponsable: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Fecha de Inicio"
+                                fullWidth
+                                placeholder="YYYY-MM-DD"
+                                value={newContrato.fechaInicio}
+                                onChange={(e) =>
+                                    setNewContrato({
+                                        ...newContrato,
+                                        fechaInicio: e.target.value,
+                                    })
+                                }
+                            />
+                            <TextField
+                                label="Fecha de Terminación"
+                                fullWidth
+                                placeholder="YYYY-MM-DD"
+                                value={newContrato.fechaTerminacion}
+                                onChange={(e) =>
+                                    setNewContrato({
+                                        ...newContrato,
+                                        fechaTerminacion: e.target.value,
+                                    })
+                                }
+                            />
+                            <TextField
+                                label="Descripción"
+                                fullWidth
+                                multiline
+                                rows={4}
+                                value={newContrato.descripcion}
+                                onChange={(e) =>
+                                    setNewContrato({
+                                        ...newContrato,
+                                        descripcion: e.target.value,
+                                    })
+                                }
+                            />
+                        </div>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenDialog(false)}>Cancelar</Button>
+                    <Button onClick={handleAdd}>Guardar</Button>
+                </DialogActions>
+            </Dialog>
+
+            <TableContainer>
+                <Table stickyHeader aria-label="Proveedor Servicios Complementarios">
                     <TableHead>
                         <TableRow>
-                            {visibleColumns.includes("nombre") && (
-                                <TableCell onClick={handleSort} sx={{ cursor: "pointer" }}>
-                                    Nombre {sortOrder === "asc" ? "↑" : "↓"}
+                            {visibleColumns.nombreProveedor && (
+                                <TableCell
+                                    onClick={() => handleSort("nombreProveedor")}
+                                >
+                                    Nombre del Proveedor
                                 </TableCell>
                             )}
-                            {visibleColumns.includes("tipoServicio") && (
-                                <TableCell>Tipo de Servicio</TableCell>
+                            {visibleColumns.direccion && (
+                                <TableCell onClick={() => handleSort("direccion")}>
+                                    Dirección
+                                </TableCell>
                             )}
-                            {visibleColumns.includes("direccion") && (
-                                <TableCell>Dirección</TableCell>
+                            {visibleColumns.telefono && (
+                                <TableCell onClick={() => handleSort("telefono")}>
+                                    Teléfono
+                                </TableCell>
                             )}
                             <TableCell>Acciones</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {filteredProveedores.map((proveedor) => (
-                            <TableRow key={proveedor.id}>
-                                {visibleColumns.includes("nombre") && (
-                                    <TableCell>{proveedor.nombre}</TableCell>
+                            <TableRow key={proveedor.ID_Contratado}>
+                                {visibleColumns.nombreProveedor && (
+                                    <TableCell>{proveedor.nombreProveedor}</TableCell>
                                 )}
-                                {visibleColumns.includes("tipoServicio") && (
-                                    <TableCell>{proveedor.tipoServicio}</TableCell>
-                                )}
-                                {visibleColumns.includes("direccion") && (
+                                {visibleColumns.direccion && (
                                     <TableCell>{proveedor.direccion}</TableCell>
                                 )}
+                                {visibleColumns.telefono && (
+                                    <TableCell>{proveedor.telefono}</TableCell>
+                                )}
                                 <TableCell>
-                                    <IconButton
-                                        onClick={() => handleEdit(proveedor)}
-                                        color="primary"
-                                    >
+                                    <IconButton>
                                         <EditIcon />
                                     </IconButton>
-                                    <IconButton
-                                        onClick={() => handleDelete(proveedor.id)}
-                                        color="error"
-                                    >
+                                    <IconButton>
                                         <DeleteIcon />
                                     </IconButton>
                                 </TableCell>
@@ -200,74 +373,7 @@ export default function ProveedorServiciosTable() {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => setOpenAddDialog(true)}
-                sx={{ mt: 2 }}
-            >
-                Agregar Proveedor de Servicios
-            </Button>
-
-            {/* Diálogo para agregar proveedor */}
-            <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
-                <DialogTitle>Agregar Nuevo Proveedor</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Por favor, ingrese los detalles del nuevo proveedor.
-                    </DialogContentText>
-                    {["nombre", "tipoServicio", "direccion"].map((field) => (
-                        <TextField
-                            key={field}
-                            margin="dense"
-                            label={field.charAt(0).toUpperCase() + field.slice(1)}
-                            type="text"
-                            fullWidth
-                            variant="standard"
-                            value={newProveedor[field]}
-                            onChange={(e) =>
-                                setNewProveedor({ ...newProveedor, [field]: e.target.value })
-                            }
-                        />
-                    ))}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenAddDialog(false)}>Cancelar</Button>
-                    <Button onClick={handleAdd}>Agregar</Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Diálogo para editar proveedor */}
-            <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
-                <DialogTitle>Editar Proveedor</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Por favor, modifique los detalles del proveedor.
-                    </DialogContentText>
-                    {editingProveedor &&
-                        ["nombre", "tipoServicio", "direccion"].map((field) => (
-                            <TextField
-                                key={field}
-                                margin="dense"
-                                label={field.charAt(0).toUpperCase() + field.slice(1)}
-                                type="text"
-                                fullWidth
-                                variant="standard"
-                                value={editingProveedor[field]}
-                                onChange={(e) =>
-                                    setEditingProveedor({
-                                        ...editingProveedor,
-                                        [field]: e.target.value,
-                                    })
-                                }
-                            />
-                        ))}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
-                    <Button onClick={handleSaveEdit}>Guardar Cambios</Button>
-                </DialogActions>
-            </Dialog>
         </Paper>
     );
 }
+

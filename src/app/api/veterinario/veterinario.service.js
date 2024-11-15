@@ -1,6 +1,6 @@
 class VeterinarioService {
     async getAllVeterinarios() {
-      const veterinarios = await fetch("http://localhost:3000/veterinarios/", {
+      const veterinarios = await fetch("http://localhost:3000/Veterinarios/", {
         method: "GET",
       });
       const data = await veterinarios.json();
@@ -8,7 +8,7 @@ class VeterinarioService {
     }
   
     async updateVeterinario(id, veterinario) {
-      const veterinarioResponse = await fetch(`http://localhost:3000/veterinarios/${id}`, {
+      const veterinarioResponse = await fetch(`http://localhost:3000/Veterinarios/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(veterinario),
@@ -17,7 +17,7 @@ class VeterinarioService {
     }
   
     async createVeterinario(veterinario) {
-      const veterinarioResponse = await fetch("http://localhost:3000/veterinarios/", {     
+      const veterinarioResponse = await fetch("http://localhost:3000/Veterinarios/", {     
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(veterinario),
@@ -26,8 +26,7 @@ class VeterinarioService {
     }
   
     async deleteVeterinario(id) {
-      await fetch(`http://localhost:3000/vSkyrim
-        eterinarios/${id}`, {
+      await fetch(`http://localhost:3000/Veterinarios/${id}`, {
         method: "DELETE",
       });
     }

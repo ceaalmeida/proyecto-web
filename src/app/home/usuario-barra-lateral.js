@@ -12,7 +12,7 @@ import MailIcon from "@mui/icons-material/Mail";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import { useRouter } from "next/navigation";
-import { signOut, useSession } from "next-auth/react";
+import { getSession, signOut, useSession } from "next-auth/react";
 
 export default function SwipeableTemporaryDrawer({ values }) {
   const router = useRouter();
@@ -67,12 +67,15 @@ export default function SwipeableTemporaryDrawer({ values }) {
       </List>
       <Divider />
       <ListItemButton
-        onClick={async() => {
-          await signOut({
+        onClick={async () => {
+          signOut({
             callbackUrl: "http://localhost:3001",
             redirect: false,
           });
+
+
           router.replace("/")
+
         }}
       >
         <ListItemIcon>

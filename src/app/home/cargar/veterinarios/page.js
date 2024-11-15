@@ -1,5 +1,4 @@
-"use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Table,
     TableBody,
@@ -13,130 +12,465 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    DialogContentText,
     DialogTitle,
     IconButton,
+    Select,
+    MenuItem,
+    Checkbox,
+    FormControlLabel,
 } from "@mui/material";
 import {
     Add as AddIcon,
     Edit as EditIcon,
     Delete as DeleteIcon,
+    Token,
 } from "@mui/icons-material";
+import ContratadosService from "../../../api/contratados/contratados.service";
+import ContratoService from "../../../api/contratos/contratos.service";
+import VeterinarioService from "../../../api/veterinario/veterinario.service";
+import { loadAllProvincias } from "../../../api/provincia/provincia.service";
+import { useSession } from "next-auth/react";
 
-const initialVeterinarians = [
-    { id: 1, nombre: "Dr. Pedro Pérez", clinica: "Clínica Veterinaria A", direccion: "Calle 123", especialidad: "Cirugía", telefono: "123456789", fax: "987654321", email: "pedro@clinica.com", distancia: "10 km", modalidad: "A domicilio" },
-    { id: 2, nombre: "Dra. Ana Gómez", clinica: "Clínica Veterinaria B", direccion: "Calle 456", especialidad: "Dermatología", telefono: "234567890", fax: "876543210", email: "ana@clinica.com", distancia: "15 km", modalidad: "En clínica" },
-];
+// id.aleatorio
+const generarCodigoContrato = (Nombre_Veterinario_Veterinario) => {
+    return Nombre_Veterinario_Veterinario.slice(0, 6) + Math.floor(Math.random() * 100000);
+};
 
 export default function VeterinarianTable() {
-    const [veterinarians, setVeterinarians] = useState(initialVeterinarians);
-    const [editingVeterinarian, setEditingVeterinarian] = useState(null);
+    const [veterinarians, setVeterinarians] = useState([]);
+    const [provincias, setProvincias] = useState([]);
     const [newVeterinarian, setNewVeterinarian] = useState({
-        nombre: "",
-        clinica: "",
-        direccion: "",
-        especialidad: "",
-        telefono: "",
-        fax: "",
-        email: "",
-        distancia: "",
-        modalidad: "",
+        ID_Contratado: "",
+        Nombre_Veterinario_Veterinario: "",
+        Clínica_Veterinario: "",
+        Dirección_Veterinario: "",
+        Especialidad_Veterinario: "",
+        Teléfono_Veterinario: "",
+        Fax_Veterinario: "",
+        Email_Veterinario: "",
+        Distancia_Ciudad: "",
+        Modalidad_Servicio: "",
     });
-    const [openAddDialog, setOpenAddDialog] = useState(false);
-    const [openEditDialog, setOpenEditDialog] = useState(false);
-    const [searchTerm, setSearchTerm] = useState("");
-
-    const handleDelete = (id) => {
-        setVeterinarians(veterinarians.filter((veterinarian) => veterinarian.id !== id));
+    const [newContrato, setNewContrato] = useState({
+        Código_Contrato: "",
+        Tipo_Servicio: "",
+        Direccion: "",
+        Telefono: "",
+        Email: "",
+        Nombre_Responsable: "",
+        Fecha_Inicio: "",
+        Fecha_Terminacion: "",
+        Fecha_Conciliacion: "",
+        Descripción: "",
+    });
+    const [searchQuery, setSearchQuery] = useState("");
+    const [openDialog, setOpenDialog] = useState(false);
+    const [tab, setTab] = useState("veterinario");
+    const [sortDirection, setSortDirection] = useState("asc");
+    const [sortColumn, setSortColumn] = useState("Nombre_Veterinario");
+    const [visibleColumns, setVisibleColumns] = useState({
+        Nombre_Veterinario_Veterinario: true,
+        Clínica_Veterinario: true,
+        Dirección_Veterinario: true,
+        Teléfono_Veterinario: true,
+    });
+    const { data: session } = useSession()
+    const loadVeterinarios = async () => {
+        const data = await VeterinarioService.getAllVeterinarios();
+        setVeterinarians(data);
     };
 
-    const handleEdit = (veterinarian) => {
-        setEditingVeterinarian(veterinarian);
-        setOpenEditDialog(true);
+    const loadProvinciasData = async () => {
+        try {
+            const data = await loadAllProvincias(session?.user?.token);
+            setProvincias(data);
+        } catch (error) {
+            console.log(error)
+        }
+        
     };
 
-    const handleSaveEdit = () => {
-        setVeterinarians(
-            veterinarians.map((veterinarian) =>
-                veterinarian.id === editingVeterinarian.id ? editingVeterinarian : veterinarian
-            )
+    useEffect( () => {
+         loadVeterinarios();
+         loadProvinciasData();
+    }, []);
+
+    const handleAdd = async () => {
+        if (!newVeterinarian.Nombre_Veterinario || !newVeterinarian.Clínica_Veterinario) {
+            alert("Por favor, complete todos los campos obligatorios.");
+            return;
+        }
+
+        const codigoContrato = generarCodigoContrato(newVeterinarian.Nombre_Veterinario);
+        const provinciaSeleccionada = provincias.find(
+            (p) => p.Nombre_Provincia === newContrato.Direccion
         );
-        setOpenEditDialog(false);
+
+        if (!provinciaSeleccionada) {
+            alert("La dirección seleccionada no es válida.");
+            return;
+        }
+
+        const idContratado = codigoContrato.split("").reverse().join("");
+
+        const contrato = {
+            ...newContrato,
+            Código_Contrato: codigoContrato,
+            Fecha_Inicio: new Date(newContrato.Fecha_Inicio),
+            Fecha_Terminacion: new Date(newContrato.Fecha_Terminacion),
+            Fecha_Conciliacion: new Date(newContrato.Fecha_Conciliacion),
+        };
+
+        const contratado = {
+            Código_Contrato: codigoContrato,
+            ID_Provincia: provinciaSeleccionada.ID_Provincia,
+            ID_Contratado: idContratado,
+        };
+
+        const veterinario = {
+            ...newVeterinarian,
+            ID_Contratado: idContratado,
+        };
+
+        await VeterinarioService.createVeterinario(veterinario);
+        await ContratadosService.createContratado(contratado);
+        await ContratoService.createContrato(contrato);
+
+        setVeterinarians([...veterinarians, veterinario]);
+        setOpenDialog(false);
     };
 
-    const handleAdd = () => {
-        const id = Math.max(...veterinarians.map((v) => v.id)) + 1;
-        setVeterinarians([...veterinarians, { ...newVeterinarian, id }]);
-        setNewVeterinarian({
-            nombre: "",
-            clinica: "",
-            direccion: "",
-            especialidad: "",
-            telefono: "",
-            fax: "",
-            email: "",
-            distancia: "",
-            modalidad: "",
+    const handleSearch = (e) => {
+        setSearchQuery(e.target.value.toLowerCase());
+    };
+
+    const handleSort = (column) => {
+        const direction = sortDirection === "asc" ? "desc" : "asc";
+        setSortDirection(direction);
+        setSortColumn(column);
+    };
+
+    const handleColumnVisibility = (column) => {
+        setVisibleColumns((prev) => ({
+            ...prev,
+            [column]: !prev[column],
+        }));
+    };
+
+    const formatFechaInput = (input) => {
+        let cleanInput = input.replace(/\D/g, "").slice(0, 8);
+        let formattedInput = cleanInput;
+        if (cleanInput.length > 4) {
+            formattedInput = `${cleanInput.slice(0, 4)}-${cleanInput.slice(4, 6)}`;
+        }
+        if (cleanInput.length > 6) {
+            formattedInput = `${cleanInput.slice(0, 4)}-${cleanInput.slice(4, 6)}-${cleanInput.slice(6, 8)}`;
+        }
+        return formattedInput;
+    };
+
+    const filteredVeterinarians = veterinarians
+        .filter((vet) => {
+            const vetLowerCase = JSON.stringify(vet).toLowerCase();
+            return vetLowerCase.includes(searchQuery);
+        })
+        .sort((a, b) => {
+            if (sortColumn === "Nombre_Veterinario") {
+                return sortDirection === "asc"
+                    ? a.Nombre_Veterinario.localeCompare(b.Nombre_Veterinario)
+                    : b.Nombre_Veterinario.localeCompare(a.Nombre_Veterinario);
+            }
+            if (sortColumn === "Clínica_Veterinario") {
+                return sortDirection === "asc"
+                    ? a.Clínica_Veterinario.localeCompare(b.Clínica_Veterinario)
+                    : b.Clínica_Veterinario.localeCompare(a.Clínica_Veterinario);
+            }
+            return 0;
         });
-        setOpenAddDialog(false);
-    };
-
-    // Filtrado por términos de búsqueda
-    const filteredVeterinarians = veterinarians.filter((veterinarian) =>
-        Object.values(veterinarian).some((value) =>
-            value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-        )
-    );
 
     return (
         <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
             <TextField
-                variant="outlined"
                 label="Buscar Veterinario"
+                variant="outlined"
                 fullWidth
                 margin="normal"
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={handleSearch}
             />
 
+            <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setOpenDialog(true)}
+                sx={{ mb: 2 }}
+            >
+                Agregar Veterinario
+            </Button>
+
+            <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+                <DialogTitle>Agregar Nuevo Veterinario</DialogTitle>
+                <DialogContent>
+                    <div>
+                        <Button onClick={() => setTab("veterinario")}>Veterinario</Button>
+                        <Button onClick={() => setTab("contrato")}>Contrato</Button>
+                    </div>
+
+                    {tab === "veterinario" && (
+                        <div>
+                            <TextField
+                                label="Nombre_Veterinario"
+                                fullWidth
+                                value={newVeterinarian.Nombre_Veterinario}
+                                onChange={(e) =>
+                                    setNewVeterinarian({ ...newVeterinarian, Nombre_Veterinario: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Clínica"
+                                fullWidth
+                                value={newVeterinarian.Clínica_Veterinario}
+                                onChange={(e) =>
+                                    setNewVeterinarian({ ...newVeterinarian, Clínica_Veterinario: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Dirección"
+                                fullWidth
+                                value={newVeterinarian.Dirección_Veterinario}
+                                onChange={(e) =>
+                                    setNewVeterinarian({ ...newVeterinarian, Dirección_Veterinario: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Especialidad_Veterinario"
+                                fullWidth
+                                value={newVeterinarian.Especialidad_Veterinario}
+                                onChange={(e) =>
+                                    setNewVeterinarian({ ...newVeterinarian, Especialidad_Veterinario: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Teléfono"
+                                fullWidth
+                                value={newVeterinarian.Teléfono_Veterinario}
+                                onChange={(e) =>
+                                    setNewVeterinarian({ ...newVeterinarian, Teléfono_Veterinario: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Fax_Veterinario"
+                                fullWidth
+                                value={newVeterinarian.Fax_Veterinario}
+                                onChange={(e) =>
+                                    setNewVeterinarian({ ...newVeterinarian, Fax_Veterinario: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Email_Veterinario"
+                                fullWidth
+                                value={newVeterinarian.Email_Veterinario}
+                                onChange={(e) =>
+                                    setNewVeterinarian({ ...newVeterinarian, Email_Veterinario: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Distancia_Ciudad_Veterinario"
+                                fullWidth
+                                value={newVeterinarian.Distancia_Ciudad_Veterinario}
+                                onChange={(e) =>
+                                    setNewVeterinarian({ ...newVeterinarian, Distancia_Ciudad_Veterinario: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Modalidad_Servicio_Veterinario"
+                                fullWidth
+                                value={newVeterinarian.Modalidad_Servicio_Veterinario}
+                                onChange={(e) =>
+                                    setNewVeterinarian({ ...newVeterinarian, Modalidad_Servicio_Veterinario: e.target.value })
+                                }
+                            />
+                        </div>
+                    )}
+
+                    {tab === "contrato" && (
+                        <div>
+
+                            <TextField
+                                label="Tipo de Servicio"
+                                fullWidth
+                                value={newContrato.Tipo_Servicio}
+                                onChange={(e) =>
+                                    setNewContrato({ ...newContrato, Tipo_Servicio: e.target.value })
+                                }
+                            />
+                            <Select
+                                label="Dirección"
+                                fullWidth
+                                value={newContrato.Direccion}
+                                onChange={(e) =>
+                                    setNewContrato({ ...newContrato, Direccion: e.target.value })
+                                }
+                            >
+                                {provincias.map((provincia) => (
+                                    <MenuItem
+                                        key={provincia.ID_Provincia}
+                                        value={provincia.Nombre_Provincia}
+                                    >
+                                        {provincia.Nombre_Provincia}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                            <TextField
+                                label="Teléfono"
+                                fullWidth
+                                value={newContrato.Telefono}
+                                onChange={(e) =>
+                                    setNewContrato({ ...newContrato, Telefono: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Email"
+                                fullWidth
+                                value={newContrato.Email}
+                                onChange={(e) =>
+                                    setNewContrato({ ...newContrato, Email: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Nombre_Veterinario del Responsable"
+                                fullWidth
+                                value={newContrato.Nombre_Responsable}
+                                onChange={(e) =>
+                                    setNewContrato({ ...newContrato, Nombre_Responsable: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Fecha de Inicio"
+                                fullWidth
+                                placeholder="YYYY-MM-DD"
+                                value={newContrato.Fecha_Inicio}
+                                onChange={(e) =>
+                                    setNewContrato({
+                                        ...newContrato,
+                                        Fecha_Inicio: formatFechaInput(e.target.value),
+                                    })
+                                }
+                            />
+                            <TextField
+                                label="Fecha de Terminación"
+                                fullWidth
+                                placeholder="YYYY-MM-DD"
+                                value={newContrato.Fecha_Terminacion}
+                                onChange={(e) =>
+                                    setNewContrato({
+                                        ...newContrato,
+                                        Fecha_Terminacion: formatFechaInput(e.target.value),
+                                    })
+                                }
+                            />
+                            <TextField
+                                label="Fecha de Conciliación"
+                                fullWidth
+                                placeholder="YYYY-MM-DD"
+                                value={newContrato.Fecha_Conciliacion}
+                                onChange={(e) =>
+                                    setNewContrato({
+                                        ...newContrato,
+                                        Fecha_Conciliacion: formatFechaInput(e.target.value),
+                                    })
+                                }
+                            />
+                            <TextField
+                                label="Descripción"
+                                fullWidth
+                                value={newContrato.Descripción}
+                                onChange={(e) =>
+                                    setNewContrato({ ...newContrato, Descripción: e.target.value })
+                                }
+                            />
+                        </div>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenDialog(false)}>Cancelar</Button>
+                    <Button onClick={handleAdd}>Agregar</Button>
+                </DialogActions>
+            </Dialog>
+
+            <div>
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={visibleColumns.Nombre_Veterinario}
+                            onChange={() => handleColumnVisibility("Nombre_Veterinario")}
+                        />
+                    }
+                    label="Mostrar Nombre_Veterinario"
+                />
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={visibleColumns.Clínica_Veterinario}
+                            onChange={() => handleColumnVisibility("Clínica_Veterinario")}
+                        />
+                    }
+                    label="Mostrar Clínica"
+                />
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={visibleColumns.Dirección_Veterinario}
+                            onChange={() => handleColumnVisibility("Dirección_Veterinario")}
+                        />
+                    }
+                    label="Mostrar Dirección"
+                />
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={visibleColumns.Teléfono_Veterinario}
+                            onChange={() => handleColumnVisibility("Teléfono_Veterinario")}
+                        />
+                    }
+                    label="Mostrar Teléfono"
+                />
+            </div>
+
             <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>Nombre</TableCell>
-                            <TableCell>Clínica</TableCell>
-                            <TableCell>Dirección</TableCell>
-                            <TableCell>Especialidad</TableCell>
-                            <TableCell>Teléfono</TableCell>
-                            <TableCell>Fax</TableCell>
-                            <TableCell>Email</TableCell>
-                            <TableCell>Distancia</TableCell>
-                            <TableCell>Modalidad</TableCell>
+                            {visibleColumns.Nombre_Veterinario && (
+                                <TableCell>
+                                    <Button onClick={() => handleSort("Nombre_Veterinario")}>Nombre_Veterinario</Button>
+                                </TableCell>
+                            )}
+                            {visibleColumns.Clínica_Veterinario && (
+                                <TableCell>
+                                    <Button onClick={() => handleSort("Clínica_Veterinario")}>Clínica</Button>
+                                </TableCell>
+                            )}
+                            {visibleColumns.Dirección_Veterinario && (
+                                <TableCell>Dirección</TableCell>
+                            )}
+                            {visibleColumns.Teléfono_Veterinario && (
+                                <TableCell>Teléfono</TableCell>
+                            )}
                             <TableCell>Acciones</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {filteredVeterinarians.map((veterinarian) => (
-                            <TableRow key={veterinarian.id}>
-                                <TableCell>{veterinarian.nombre}</TableCell>
-                                <TableCell>{veterinarian.clinica}</TableCell>
-                                <TableCell>{veterinarian.direccion}</TableCell>
-                                <TableCell>{veterinarian.especialidad}</TableCell>
-                                <TableCell>{veterinarian.telefono}</TableCell>
-                                <TableCell>{veterinarian.fax}</TableCell>
-                                <TableCell>{veterinarian.email}</TableCell>
-                                <TableCell>{veterinarian.distancia}</TableCell>
-                                <TableCell>{veterinarian.modalidad}</TableCell>
+                        {filteredVeterinarians.map((vet) => (
+                            <TableRow key={vet.ID_Contratado}>
+                                {visibleColumns.Nombre_Veterinario && <TableCell>{vet.Nombre_Veterinario}</TableCell>}
+                                {visibleColumns.Clínica_Veterinario && <TableCell>{vet.Clínica_Veterinario}</TableCell>}
+                                {visibleColumns.Dirección_Veterinario && <TableCell>{vet.Dirección_Veterinario}</TableCell>}
+                                {visibleColumns.Teléfono_Veterinario && <TableCell>{vet.Teléfono_Veterinario}</TableCell>}
                                 <TableCell>
-                                    <IconButton
-                                        onClick={() => handleEdit(veterinarian)}
-                                        color="primary"
-                                    >
+                                    <IconButton onClick={() => handleEdit(vet)}>
                                         <EditIcon />
                                     </IconButton>
-                                    <IconButton
-                                        onClick={() => handleDelete(veterinarian.id)}
-                                        color="error"
-                                    >
+                                    <IconButton onClick={() => handleDelete(vet.ID_Contratado)}>
                                         <DeleteIcon />
                                     </IconButton>
                                 </TableCell>
@@ -145,74 +479,11 @@ export default function VeterinarianTable() {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => setOpenAddDialog(true)}
-                sx={{ mt: 2 }}
-            >
-                Agregar Veterinario
-            </Button>
-
-            {/* Diálogo para agregar veterinario */}
-            <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
-                <DialogTitle>Agregar Nuevo Veterinario</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Por favor, ingrese los detalles del nuevo veterinario.
-                    </DialogContentText>
-                    {Object.keys(newVeterinarian).map((field) => (
-                        <TextField
-                            key={field}
-                            margin="dense"
-                            label={field.charAt(0).toUpperCase() + field.slice(1)}
-                            type="text"
-                            fullWidth
-                            variant="standard"
-                            value={newVeterinarian[field]}
-                            onChange={(e) =>
-                                setNewVeterinarian({ ...newVeterinarian, [field]: e.target.value })
-                            }
-                        />
-                    ))}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenAddDialog(false)}>Cancelar</Button>
-                    <Button onClick={handleAdd}>Agregar</Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Diálogo para editar veterinario */}
-            <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
-                <DialogTitle>Editar Veterinario</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Por favor, modifique los detalles del veterinario.
-                    </DialogContentText>
-                    {editingVeterinarian &&
-                        Object.keys(editingVeterinarian).map((field) => (
-                            <TextField
-                                key={field}
-                                margin="dense"
-                                label={field.charAt(0).toUpperCase() + field.slice(1)}
-                                type="text"
-                                fullWidth
-                                variant="standard"
-                                value={editingVeterinarian[field]}
-                                onChange={(e) =>
-                                    setEditingVeterinarian({
-                                        ...editingVeterinarian,
-                                        [field]: e.target.value,
-                                    })
-                                }
-                            />
-                        ))}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
-                    <Button onClick={handleSaveEdit}>Guardar Cambios</Button>
-                </DialogActions>
-            </Dialog>
         </Paper>
     );
 }
+
+
+
+
+

@@ -18,7 +18,7 @@ import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import { TextField } from "@mui/material";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 // import "./style.css";
 
@@ -162,7 +162,7 @@ export const ResponsiveAppBar = ({ value, Changes, Log }) => {
               </MenuItem>
             )}
           </Box>
-          {!session && (
+          {session && (
             <Box sx={{ flexGrow: 0 }}>
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
@@ -203,7 +203,7 @@ export const ResponsiveAppBar = ({ value, Changes, Log }) => {
               </Menu>
             </Box>
           )}
-          {session && (
+          {!session && (
             <Box sx={{ flexGrow: 0 }}>
               <MenuItem>
                 <Button

@@ -1,6 +1,6 @@
 class ProveedoresAlimentosService {
     async getAllProveedoresAlimentos(token) {
-      const proveedores = await fetch("http://localhost:3000/proveedores_alimentos/", {
+      const proveedores = await fetch("http://localhost:3000/proveedores_alimento/", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -12,7 +12,7 @@ class ProveedoresAlimentosService {
     }
   
     async updateProveedorAlimentos(id, proveedor) {
-      const proveedorResponse = await fetch(`http://localhost:3000/proveedores_alimentos/${id}`, {
+      const proveedorResponse = await fetch(`http://localhost:3000/proveedores_alimento/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(proveedor),
@@ -21,7 +21,7 @@ class ProveedoresAlimentosService {
     }
   
     async createProveedorAlimentos(proveedor) {
-      const proveedorResponse = await fetch("http://localhost:3000/proveedores_alimentos/", {     
+      const proveedorResponse = await fetch("http://localhost:3000/proveedores_alimento/", {     
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(proveedor),
@@ -30,7 +30,7 @@ class ProveedoresAlimentosService {
     }
   
     async deleteProveedorAlimentos(id) {
-      await fetch(`http://localhost:3000/proveedores_alimentos/${id}`, {
+      await fetch(`http://localhost:3000/proveedores_alimento/${id}`, {
         method: "DELETE",
       });
     }

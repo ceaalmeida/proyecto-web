@@ -19,7 +19,7 @@ import {
   Alert,
 } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
 
 export default function CreateAccount({ onLogin }) {
@@ -44,14 +44,15 @@ export default function CreateAccount({ onLogin }) {
   const [errorPassword, setErrorPassword] = useState("");
   const [errorConfirmPassword, setErrorConfirmPassword] = useState("");
   const [errorEmail, setErrorEmail] = useState("");
-  const [correoEnviado, setCorreoEnviado] = useState(false)
+  const [correoEnviado, setCorreoEnviado] = useState(false);
 
   const router = useRouter();
 
   useEffect(() => {
-    if (tokenGenerado !== null && !correoEnviado) {  // Asegura que `tokenGenerado` no sea null antes de enviar el correo
+    if (tokenGenerado !== null && !correoEnviado) {
+      // Asegura que `tokenGenerado` no sea null antes de enviar el correo
       enviarCorreo(tokenGenerado); // Llama a la función para enviar el correo con el token actualizado
-      setCorreoEnviado(true)
+      setCorreoEnviado(true);
     }
   }, [tokenGenerado, correoEnviado]);
 
@@ -140,9 +141,9 @@ export default function CreateAccount({ onLogin }) {
 
   const generarYEnviarToken = async () => {
     setTokenGenerado(Math.floor(100000 + Math.random() * 900000));
-    console.log(tokenGenerado)
+    console.log(tokenGenerado);
     setIsCounting(true);
-    setCorreoEnviado(false)
+    setCorreoEnviado(false);
   };
 
   const enviarCorreo = async () => {
@@ -177,14 +178,20 @@ export default function CreateAccount({ onLogin }) {
   };
 
   const validateToken = async () => {
-    console.log("El qie escribi",token)
-    console.log("El que me mando",tokenGenerado)
+    console.log("El qie escribi", token);
+    console.log("El que me mando", tokenGenerado);
     if (tokenGenerado.toString() === token) {
       try {
         await register();
         setSendingToken(false);
         setToken(null);
         setTokenGenerado(null);
+        signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        });
+        const data = await getSession()
         router.replace("/");
       } catch (error) {
         console.error(error);

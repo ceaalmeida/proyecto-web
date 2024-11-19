@@ -1,6 +1,6 @@
 const loadAllServices = async (token) => {
   const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/tipo-de-servicio/`, {
-    method:"Get",
+    method:"GET",
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`

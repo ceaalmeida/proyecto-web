@@ -70,15 +70,6 @@ export function AnimalProfile({ animal, onButtonClick }) {
             <CardContent>
               <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
-                  <img
-                    src={animal.Foto}
-                    alt={`Foto de ${animal.Nombre}`}
-                    style={{
-                      width: "100%",
-                      height: "auto",
-                      borderRadius: "4px",
-                    }}
-                  />
                   <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
                     Información Básica
                   </Typography>

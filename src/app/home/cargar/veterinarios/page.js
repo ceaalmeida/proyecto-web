@@ -30,6 +30,7 @@ import ContratoService from "../../../api/contratos/contratos.service";
 import VeterinarioService from "../../../api/veterinario/veterinario.service";
 import { loadAllProvincias } from "../../../api/provincia/provincia.service";
 import { useSession } from "next-auth/react";
+import contratosService from "../../../api/contratos/contratos.service";
 
 // id.aleatorio
 const generarCodigoContrato = (Nombre_Veterinario_Veterinario) => {
@@ -110,6 +111,7 @@ export default function VeterinarianTable() {
             alert("La dirección seleccionada no es válida.");
             return;
         }
+        
 
         const idContratado = codigoContrato.split("").reverse().join("");
 
@@ -132,12 +134,89 @@ export default function VeterinarianTable() {
             ID_Contratado: idContratado,
         };
 
-        await VeterinarioService.createVeterinario(veterinario);
-        await ContratadosService.createContratado(contratado);
         await ContratoService.createContrato(contrato);
+        await ContratadosService.createContratado(contratado);
+        await VeterinarioService.createVeterinario(veterinario);
 
         setVeterinarians([...veterinarians, veterinario]);
         setOpenDialog(false);
+    };
+    const handleEdit = (vet) => {
+        setNewVeterinarian(vet); 
+        setOpenDialog(true); 
+    };
+    
+    const handleDelete = async (id) => {
+        try {
+            // Paso 1: Buscar al veterinario que se eliminará
+            const veterinarianToDelete = veterinarians.find((vet) => vet.ID_Contratado === id);
+            if (!veterinarianToDelete) {
+                alert("No se encontró el veterinario.");
+                return;
+            }
+    
+            console.log("Veterinario encontrado:", veterinarianToDelete);
+    
+            // Paso 2: Buscar el contratado relacionado usando su ID_Contratado
+            const contratado = await ContratadosService.getContratadoById(veterinarianToDelete.ID_Contratado);
+            if (!contratado) {
+                alert("No se encontró el contratado asociado.");
+                return;
+            }
+    
+            console.log("Contratado encontrado:", contratado);
+    
+            // Paso 3: Obtener el Código_Contrato del contratado
+            const codigoContrato = contratado.Código_Contrato;
+            if (!codigoContrato) {
+                alert("No se pudo encontrar el código de contrato asociado.");
+                return;
+            }
+    
+            console.log("Código de contrato:", codigoContrato);
+    
+            
+            await VeterinarioService.deleteVeterinario(id);
+            console.log("Veterinario eliminado.");
+            
+            
+            await ContratadosService.deleteContratado(contratado.ID_Contratado);
+            console.log("Contratado eliminado.");
+            
+            await ContratoService.deleteContrato(codigoContrato);
+            console.log("Contrato eliminado.");
+            
+    
+            // Actualizar el estado local eliminando al veterinario
+            setVeterinarians(veterinarians.filter((vet) => vet.ID_Contratado !== id));
+            alert("Veterinario y sus relaciones eliminados correctamente.");
+        } catch (error) {
+            console.error("Error eliminando veterinario y relaciones:", error);
+            alert("Hubo un error al eliminar el veterinario y sus relaciones.");
+        }
+    };
+    
+    
+    const handleSave = async () => {
+        try {
+            if (newVeterinarian.ID_Contratado) {
+                // Actualizar veterinario
+                await VeterinarioService.updateVeterinario(newVeterinarian.ID_Contratado, newVeterinarian);
+                setVeterinarians(
+                    veterinarians.map((vet) =>
+                        vet.ID_Contratado === newVeterinarian.ID_Contratado ? newVeterinarian : vet
+                    )
+                );
+                alert("Veterinario actualizado correctamente.");
+            } else {
+                // Crear nuevo veterinario (ya implementado en handleAdd)
+                await    handleAdd();
+            }
+            setOpenDialog(false); // Cierra el formulario
+        } catch (error) {
+            console.error("Error al guardar el veterinario:", error);
+            alert("Ocurrió un error al intentar guardar el veterinario.");
+        }
     };
 
     const handleSearch = (e) => {
@@ -392,9 +471,11 @@ export default function VeterinarianTable() {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpenDialog(false)}>Cancelar</Button>
-                    <Button onClick={handleAdd}>Agregar</Button>
-                </DialogActions>
+    <Button onClick={() => setOpenDialog(false)}>Cancelar</Button>
+    <Button onClick={handleSave}>
+        {newVeterinarian.ID_Contratado ? "Guardar Cambios" : "Agregar"}
+    </Button>
+</DialogActions>
             </Dialog>
 
             <div>

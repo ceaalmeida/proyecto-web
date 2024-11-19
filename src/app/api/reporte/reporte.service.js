@@ -10,8 +10,7 @@ class ReportService {
         },
       }
     );
-    const data = await resp.json();
-   // window.alert(data[1]);
+    const data = await resp.json();   
     return data;
   }
 

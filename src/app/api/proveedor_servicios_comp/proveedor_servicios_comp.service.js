@@ -1,6 +1,6 @@
 class ProveedorServiciosComplementariosService {
     async getAllProveedores(token) {
-      const proveedores = await fetch("http://localhost:3000/proveedores_servicios_complementarios/", {
+      const proveedores = await fetch("http://localhost:3000/proveedor-servicios-complementarios/", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -12,7 +12,7 @@ class ProveedorServiciosComplementariosService {
     }
   
     async updateProveedor(id, proveedor) {
-      const proveedorResponse = await fetch(`http://localhost:3000/proveedores_servicios_complementarios/${id}`, {
+      const proveedorResponse = await fetch(`http://localhost:3000/proveedor-servicios-complementarios/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(proveedor),
@@ -21,7 +21,7 @@ class ProveedorServiciosComplementariosService {
     }
   
     async createProveedor(proveedor) {
-      const proveedorResponse = await fetch("http://localhost:3000/proveedores_servicios_complementarios/", {     
+      const proveedorResponse = await fetch("http://localhost:3000/proveedor-servicios-complementarios/", {     
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(proveedor),
@@ -30,7 +30,7 @@ class ProveedorServiciosComplementariosService {
     }
   
     async deleteProveedor(id) {
-      await fetch(`http://localhost:3000/proveedores_servicios_complementarios/${id}`, {
+      await fetch(`http://localhost:3000/proveedor-servicios-complementarios/${id}`, {
         method: "DELETE",
       });
     }

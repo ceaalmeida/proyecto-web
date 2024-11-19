@@ -216,7 +216,7 @@ export default function DonacionesTable() {
   //   });
 
   return (
-    <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
+    <Paper sx={{ width: "90%", overflow: "hidden", p: 2 }}>
       <TextField
         label="Buscar donaciones"
         variant="outlined"
@@ -256,7 +256,7 @@ export default function DonacionesTable() {
           </MenuItem>
         ))}
       </Menu>
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
         {" "}
         <Button
           variant="contained"

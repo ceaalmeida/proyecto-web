@@ -36,13 +36,7 @@ export function AnimalCard({ elements, onButtonClick }) {
           sx={{ maxWidth: 345 }}
           className="card"
         >
-          <CardMedia
-            className="cont"
-            component="img"
-            alt={element.Especie}
-            height="140"
-            image="/animal.jpg"
-          />
+          
           <CardContent>
             <Typography gutterBottom variant="h5" component="div">
               {element.Nombre}

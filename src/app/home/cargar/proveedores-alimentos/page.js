@@ -1,5 +1,4 @@
-"use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Table,
     TableBody,
@@ -13,188 +12,284 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    DialogContentText,
     DialogTitle,
+    IconButton,
+    Select,
+    MenuItem,
     Checkbox,
     FormControlLabel,
-    IconButton,
-    Menu,
-    MenuItem,
 } from "@mui/material";
-import {
-    Add as AddIcon,
-    Edit as EditIcon,
-    Delete as DeleteIcon,
-    ViewColumn as ViewColumnIcon,
-} from "@mui/icons-material";
+import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
+import ProveedoresService from "../../../api/proveedor_alimentos/proveedor_alimentos.service";
+import ContratadosService from "../../../api/contratados/contratados.service";
+import ContratoService from "../../../api/contratos/contratos.service";
 
-const initialProveedoresAlimentos = [
-    {
-        id: 1,
-        nombre: "Alimentos Gourmet",
-        direccion: "Calle 123, Ciudad",
-        email: "contacto@alimentosgourmet.com",
-        idAlimento: "1",
-    },
-    {
-        id: 2,
-        nombre: "NutriPet",
-        direccion: "Avenida 456, Ciudad",
-        email: "info@nutripet.com",
-        idAlimento: "2",
-    },
-];
+// Generar código único basado en el nombre
+const generarCodigoProveedor = (nombreProveedor) => {
+    return nombreProveedor.slice(0, 6) + Math.floor(Math.random() * 100000);
+};
 
-export default function ProveedorAlimentosTable() {
-    const [proveedores, setProveedores] = useState(initialProveedoresAlimentos);
-    const [sortOrder, setSortOrder] = useState("asc");
-    const [visibleColumns, setVisibleColumns] = useState([
-        "nombre",
-        "direccion",
-        "email",
-    ]);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [editingProveedor, setEditingProveedor] = useState(null);
+export default function ProveedoresAlimentosTable() {
+    const [proveedores, setProveedores] = useState([]);
     const [newProveedor, setNewProveedor] = useState({
-        nombre: "",
-        direccion: "",
-        email: "",
-        idAlimento: "",
+        Nombre_Proveedor: "",
+        Dirección: "",
+        Email: "",
+        ID_Alimento: "",
     });
-    const [openAddDialog, setOpenAddDialog] = useState(false);
-    const [openEditDialog, setOpenEditDialog] = useState(false);
-    const [anchorEl, setAnchorEl] = useState(null);
+    const [newContrato, setNewContrato] = useState({
+        Código_Contrato: "",
+        Descripción: "",
+        Fecha_Inicio: "",
+        Fecha_Terminacion: "",
+        Fecha_Conciliacion: "",
+    });
+    const [searchQuery, setSearchQuery] = useState("");
+    const [openDialog, setOpenDialog] = useState(false);
+    const [tab, setTab] = useState("proveedor");
 
-    const handleSort = () => {
-        setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    const loadProveedores = async () => {
+        const data = await ProveedoresService.getAllProveedores();
+        setProveedores(data);
     };
 
-    const handleSearch = (event) => {
-        setSearchTerm(event.target.value);
-    };
+    useEffect(() => {
+        loadProveedores();
+    }, []);
 
-    const handleDelete = (id) => {
-        setProveedores(proveedores.filter((proveedor) => proveedor.id !== id));
+    const handleAdd = async () => {
+        if (!newProveedor.Nombre_Proveedor || !newProveedor.Email) {
+            alert("Por favor, complete todos los campos obligatorios.");
+            return;
+        }
+
+        const codigoProveedor = generarCodigoProveedor(newProveedor.Nombre_Proveedor);
+        const idContratado = codigoProveedor.split("").reverse().join("");
+
+        const contrato = {
+            ...newContrato,
+            Código_Contrato: codigoProveedor,
+            Fecha_Inicio: new Date(newContrato.Fecha_Inicio),
+            Fecha_Terminacion: new Date(newContrato.Fecha_Terminacion),
+            Fecha_Conciliacion: new Date(newContrato.Fecha_Conciliacion),
+        };
+
+        const contratado = {
+            Código_Contrato: codigoProveedor,
+            ID_Contratado: idContratado,
+        };
+
+        const proveedor = {
+            ...newProveedor,
+            ID_Contratado: idContratado,
+        };
+
+        await ContratoService.createContrato(contrato);
+        await ContratadosService.createContratado(contratado);
+        await ProveedoresService.createProveedor(proveedor);
+
+        setProveedores([...proveedores, proveedor]);
+        setOpenDialog(false);
     };
 
     const handleEdit = (proveedor) => {
-        setEditingProveedor(proveedor);
-        setOpenEditDialog(true);
+        setNewProveedor(proveedor);
+        setOpenDialog(true);
     };
 
-    const handleSaveEdit = () => {
-        setProveedores(
-            proveedores.map((proveedor) =>
-                proveedor.id === editingProveedor.id ? editingProveedor : proveedor
-            )
-        );
-        setOpenEditDialog(false);
-    };
-
-    const handleAdd = () => {
-        const id = Math.max(...proveedores.map((p) => p.id)) + 1;
-        setProveedores([...proveedores, { ...newProveedor, id }]);
-        setNewProveedor({ nombre: "", direccion: "", email: "", idAlimento: "" });
-        setOpenAddDialog(false);
-    };
-
-    const toggleColumn = (column) => {
-        setVisibleColumns((prev) =>
-            prev.includes(column)
-                ? prev.filter((col) => col !== column)
-                : [...prev, column]
-        );
-    };
-
-    const filteredProveedores = proveedores
-        .filter((proveedor) =>
-            Object.values(proveedor).some((value) =>
-                value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-            )
-        )
-        .sort((a, b) => {
-            if (sortOrder === "asc") {
-                return a.nombre.localeCompare(b.nombre);
+    const handleSave = async () => {
+        try {
+            if (newProveedor.ID_Contratado) {
+                // Actualizar proveedor existente
+                await ProveedoresService.updateProveedor(newProveedor.ID_Contratado, newProveedor);
+                setProveedores(
+                    proveedores.map((prov) =>
+                        prov.ID_Contratado === newProveedor.ID_Contratado ? newProveedor : prov
+                    )
+                );
+                alert("Proveedor actualizado correctamente.");
             } else {
-                return b.nombre.localeCompare(a.nombre);
+                // Crear nuevo proveedor
+                await handleAdd();
             }
-        });
+            setOpenDialog(false);
+        } catch (error) {
+            console.error("Error al guardar el proveedor:", error);
+            alert("Ocurrió un error al intentar guardar el proveedor.");
+        }
+    };
+
+    const handleDelete = async (id) => {
+        try {
+            const proveedorToDelete = proveedores.find((prov) => prov.ID_Contratado === id);
+            if (!proveedorToDelete) {
+                alert("No se encontró el proveedor.");
+                return;
+            }
+
+            const contratado = await ContratadosService.getContratadoById(proveedorToDelete.ID_Contratado);
+            if (!contratado) {
+                alert("No se encontró el contratado asociado.");
+                return;
+            }
+
+            const codigoContrato = contratado.Código_Contrato;
+
+            await ProveedoresService.deleteProveedor(id);
+            await ContratadosService.deleteContratado(contratado.ID_Contratado);
+            await ContratoService.deleteContrato(codigoContrato);
+
+            setProveedores(proveedores.filter((prov) => prov.ID_Contratado !== id));
+            alert("Proveedor y sus relaciones eliminados correctamente.");
+        } catch (error) {
+            console.error("Error eliminando proveedor y relaciones:", error);
+            alert("Hubo un error al eliminar el proveedor y sus relaciones.");
+        }
+    };
+
+    const handleSearch = (e) => {
+        setSearchQuery(e.target.value.toLowerCase());
+    };
+
+    const filteredProveedores = proveedores.filter((prov) =>
+        JSON.stringify(prov).toLowerCase().includes(searchQuery)
+    );
 
     return (
         <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
             <TextField
-                label="Buscar proveedores"
+                label="Buscar Proveedor"
                 variant="outlined"
-                value={searchTerm}
+                fullWidth
+                margin="normal"
                 onChange={handleSearch}
-                sx={{ mb: 2 }}
             />
-            <IconButton
-                onClick={(event) => setAnchorEl(event.currentTarget)}
-                sx={{ mb: 2, ml: 2 }}
+
+            <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setOpenDialog(true)}
+                sx={{ mb: 2 }}
             >
-                <ViewColumnIcon />
-            </IconButton>
-            <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={() => setAnchorEl(null)}
-            >
-                {["nombre", "direccion", "email"].map((column) => (
-                    <MenuItem key={column}>
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={visibleColumns.includes(column)}
-                                    onChange={() => toggleColumn(column)}
-                                />
-                            }
-                            label={column.charAt(0).toUpperCase() + column.slice(1)}
-                        />
-                    </MenuItem>
-                ))}
-            </Menu>
+                Agregar Proveedor
+            </Button>
+
+            <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+                <DialogTitle>Agregar Nuevo Proveedor</DialogTitle>
+                <DialogContent>
+                    <div>
+                        <Button onClick={() => setTab("proveedor")}>Proveedor</Button>
+                        <Button onClick={() => setTab("contrato")}>Contrato</Button>
+                    </div>
+
+                    {tab === "proveedor" && (
+                        <>
+                            <TextField
+                                label="Nombre del Proveedor"
+                                fullWidth
+                                value={newProveedor.Nombre_Proveedor}
+                                onChange={(e) =>
+                                    setNewProveedor({ ...newProveedor, Nombre_Proveedor: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Dirección"
+                                fullWidth
+                                value={newProveedor.Dirección}
+                                onChange={(e) =>
+                                    setNewProveedor({ ...newProveedor, Dirección: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Email"
+                                fullWidth
+                                value={newProveedor.Email}
+                                onChange={(e) =>
+                                    setNewProveedor({ ...newProveedor, Email: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="ID Alimento"
+                                fullWidth
+                                value={newProveedor.ID_Alimento}
+                                onChange={(e) =>
+                                    setNewProveedor({ ...newProveedor, ID_Alimento: e.target.value })
+                                }
+                            />
+                        </>
+                    )}
+
+                    {tab === "contrato" && (
+                        <>
+                            <TextField
+                                label="Descripción"
+                                fullWidth
+                                value={newContrato.Descripción}
+                                onChange={(e) =>
+                                    setNewContrato({ ...newContrato, Descripción: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Fecha de Inicio"
+                                fullWidth
+                                placeholder="YYYY-MM-DD"
+                                value={newContrato.Fecha_Inicio}
+                                onChange={(e) =>
+                                    setNewContrato({ ...newContrato, Fecha_Inicio: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Fecha de Terminación"
+                                fullWidth
+                                placeholder="YYYY-MM-DD"
+                                value={newContrato.Fecha_Terminacion}
+                                onChange={(e) =>
+                                    setNewContrato({ ...newContrato, Fecha_Terminacion: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="Fecha de Conciliación"
+                                fullWidth
+                                placeholder="YYYY-MM-DD"
+                                value={newContrato.Fecha_Conciliacion}
+                                onChange={(e) =>
+                                    setNewContrato({ ...newContrato, Fecha_Conciliacion: e.target.value })
+                                }
+                            />
+                        </>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenDialog(false)}>Cancelar</Button>
+                    <Button onClick={handleSave}>
+                        {newProveedor.ID_Contratado ? "Guardar Cambios" : "Agregar"}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                <Table>
                     <TableHead>
                         <TableRow>
-                            {visibleColumns.includes("nombre") && (
-                                <TableCell onClick={handleSort} sx={{ cursor: "pointer" }}>
-                                    Nombre {sortOrder === "asc" ? "↑" : "↓"}
-                                </TableCell>
-                            )}
-                            {visibleColumns.includes("direccion") && (
-                                <TableCell>Dirección</TableCell>
-                            )}
-                            {visibleColumns.includes("email") && (
-                                <TableCell>Email</TableCell>
-                            )}
+                            <TableCell>Nombre del Proveedor</TableCell>
+                            <TableCell>Dirección</TableCell>
+                            <TableCell>Email</TableCell>
+                            <TableCell>ID Alimento</TableCell>
                             <TableCell>Acciones</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {filteredProveedores.map((proveedor) => (
-                            <TableRow key={proveedor.id}>
-                                {visibleColumns.includes("nombre") && (
-                                    <TableCell>{proveedor.nombre}</TableCell>
-                                )}
-                                {visibleColumns.includes("direccion") && (
-                                    <TableCell>{proveedor.direccion}</TableCell>
-                                )}
-                                {visibleColumns.includes("email") && (
-                                    <TableCell>{proveedor.email}</TableCell>
-                                )}
+                        {filteredProveedores.map((prov) => (
+                            <TableRow key={prov.ID_Contratado}>
+                                <TableCell>{prov.Nombre_Proveedor}</TableCell>
+                                <TableCell>{prov.Dirección}</TableCell>
+                                <TableCell>{prov.Email}</TableCell>
+                                <TableCell>{prov.ID_Alimento}</TableCell>
                                 <TableCell>
-                                    <IconButton
-                                        onClick={() => handleEdit(proveedor)}
-                                        color="primary"
-                                    >
+                                    <IconButton onClick={() => handleEdit(prov)}>
                                         <EditIcon />
                                     </IconButton>
-                                    <IconButton
-                                        onClick={() => handleDelete(proveedor.id)}
-                                        color="error"
-                                    >
+                                    <IconButton onClick={() => handleDelete(prov.ID_Contratado)}>
                                         <DeleteIcon />
                                     </IconButton>
                                 </TableCell>
@@ -203,74 +298,6 @@ export default function ProveedorAlimentosTable() {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => setOpenAddDialog(true)}
-                sx={{ mt: 2 }}
-            >
-                Agregar Proveedor de Alimentos
-            </Button>
-
-            {/* Diálogo para agregar proveedor */}
-            <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
-                <DialogTitle>Agregar Nuevo Proveedor</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Por favor, ingrese los detalles del nuevo proveedor.
-                    </DialogContentText>
-                    {["nombre", "direccion", "email", "idAlimento"].map((field) => (
-                        <TextField
-                            key={field}
-                            margin="dense"
-                            label={field.charAt(0).toUpperCase() + field.slice(1)}
-                            type="text"
-                            fullWidth
-                            variant="standard"
-                            value={newProveedor[field]}
-                            onChange={(e) =>
-                                setNewProveedor({ ...newProveedor, [field]: e.target.value })
-                            }
-                        />
-                    ))}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenAddDialog(false)}>Cancelar</Button>
-                    <Button onClick={handleAdd}>Agregar</Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Diálogo para editar proveedor */}
-            <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
-                <DialogTitle>Editar Proveedor</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Por favor, modifique los detalles del proveedor.
-                    </DialogContentText>
-                    {editingProveedor &&
-                        ["nombre", "direccion", "email", "idAlimento"].map((field) => (
-                            <TextField
-                                key={field}
-                                margin="dense"
-                                label={field.charAt(0).toUpperCase() + field.slice(1)}
-                                type="text"
-                                fullWidth
-                                variant="standard"
-                                value={editingProveedor[field]}
-                                onChange={(e) =>
-                                    setEditingProveedor({
-                                        ...editingProveedor,
-                                        [field]: e.target.value,
-                                    })
-                                }
-                            />
-                        ))}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenEditDialog(false)}>Cancelar</Button>
-                    <Button onClick={handleSaveEdit}>Guardar Cambios</Button>
-                </DialogActions>
-            </Dialog>
         </Paper>
     );
 }

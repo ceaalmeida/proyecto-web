@@ -28,6 +28,13 @@ import {
 } from "@mui/icons-material";
 import ActividadService from "../../../api/actividad/actividad.service";
 import { useSession } from "next-auth/react";
+import AnimalService from "../../../api/animal/animal.service";
+import ProveedoresAlimentosService from "../../../api/proveedor_alimentos/proveedor_alimentos.service"
+import ProveedorServiciosComplementariosService from "../../../api/proveedor_servicios_comp/proveedor_servicios_comp.service"
+import VeterinarioService from "../../../api/veterinario/veterinario.service";
+import {
+  loadAllTransports,
+} from "../../../api/transporte/transporte.service";
 
 function ActivityTable() {
   const [activities, setActivities] = useState([]);
@@ -38,6 +45,10 @@ function ActivityTable() {
   const [deleting, setDeleting] = useState(false);
   const [borrar, setBorrar] = useState(null);
   const [listaAnimal,setListaAnimal]=useState([])
+  const [listaTransporte,setListaTransporte]=useState([])
+  const [proveedoresAlimentos,setProveedoresAlimentos]=useState([])
+  const [proveedorServiciosComplementarios,setProveedorServiciosComplementarios]=useState([])
+  const [veterinarios,setVeterinarios]=useState([])
   const [newActivity, setNewActivity] = useState({
     Descripción_Actividad: "",
     Precio: "",
@@ -51,10 +62,46 @@ function ActivityTable() {
   const { data: session, status } = useSession();
 
   useEffect(() => {
+    const getProveedoresAlimentos = async () => {
+      const res = await ProveedoresAlimentosService.getAllProveedoresAlimentos(session?.user?.token);
+      setProveedoresAlimentos(res);
+    };
+
+    const getProveedorServiciosComplementarios = async () => {
+      const res = await ProveedorServiciosComplementariosService.getAllProveedores(session?.user?.token);
+      setProveedorServiciosComplementarios(res);
+    };
+
+    const getVeterinarios = async () => {
+      const res = await VeterinarioService.getAllVeterinarios(session?.user.token);
+      setVeterinarios(res);
+    };
+
+    getProveedoresAlimentos();
+    getProveedorServiciosComplementarios();
+    getVeterinarios();
+  }, [session]);
+
+  useEffect(()=>{
+    const getTransporte= async ()=>{
+      const res= await loadAllTransports(session?.user?.token)
+      setListaTransporte(res)
+    }
+    getTransporte()
+  },[session])
+
+  useEffect(()=>{   
+    const getAnimlaes=async()=>{
+      const res=await AnimalService.getAllAnimal(session?.user.token)
+      setListaAnimal(res)
+    }
+    getAnimlaes() 
+  },[session])
+
+  useEffect(() => {
     const ini = async () => {
       const resp = await ActividadService.getAll(session?.user?.token);
-      setActivities(resp);
-      window.alert(resp.Descripción_Actividad);
+      setActivities(resp);      
     };
     ini();
   }, []);
@@ -145,7 +192,7 @@ function ActivityTable() {
   // );
 
   return (
-    <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
+    <Paper sx={{ width: "90%", overflow: "hidden", p: 2 }}>
       <TextField
         label="Buscar actividades"
         variant="outlined"
@@ -153,7 +200,7 @@ function ActivityTable() {
         onChange={handleSearch}
         sx={{ mb: 2 }}
       />
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -267,17 +314,17 @@ function ActivityTable() {
                 {field==="Animal" && listaAnimal.map((tab)=>(
                   <MenuItem value={tab.ID_Animal}>{tab.Nombre}</MenuItem>
                 ))}
-                {field==="Contratado_Veterinario" && listaAnimal.map((tab)=>(
-                  <MenuItem value>{}</MenuItem>
+                {field==="Contratado_Veterinario" && veterinarios.map((tab)=>(
+                  <MenuItem value={tab.ID_Contratado}>{tab.Nombre_Veterinario}</MenuItem>
                 ))}
-                {field==="Contratado_Proveedor_Alimentos" && listaAnimal.map((tab)=>(
-                  <MenuItem value>{}</MenuItem>
+                {field==="Contratado_Proveedor_Alimentos" && proveedoresAlimentos.map((tab)=>(
+                  <MenuItem value={tab.ID_Contratado}>{tab.Nombre_Proveedor}</MenuItem>
                 ))}
-                {field==="Contratado_Proveedor_Servicios_Complementarios" && listaAnimal.map((tab)=>(
-                  <MenuItem value>{}</MenuItem>
+                {field==="Contratado_Proveedor_Servicios_Complementarios" && proveedorServiciosComplementarios.map((tab)=>(
+                  <MenuItem value={tab.ID_Contratado}>{tab.Nombre_Proveedor}</MenuItem>
                 ))}
-                {field==="Transporte" && listaAnimal.map((tab)=>(
-                  <MenuItem value>{}</MenuItem>
+                {field==="Transporte" && listaTransporte.map((tab)=>(
+                  <MenuItem value={tab.ID_Transporte}>{tab.Vehículo}</MenuItem>
                 ))}
                 
               </Select>

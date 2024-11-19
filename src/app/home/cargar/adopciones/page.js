@@ -242,7 +242,7 @@ export default function AdopcionesTable() {
   );
 
   return (
-    <Paper sx={{ width: "100%", overflow: "hidden", p: 2 }}>
+    <Paper sx={{ width: "90%", overflow: "hidden", p: 2 }}>
       <TextField
         label="Buscar adopciones"
         variant="outlined"
@@ -276,7 +276,7 @@ export default function AdopcionesTable() {
         ))}
       </Menu>
 
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
         <Button
           variant="contained"
           startIcon={<AddIcon />}

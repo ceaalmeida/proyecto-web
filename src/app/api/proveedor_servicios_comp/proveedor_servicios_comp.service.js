@@ -1,7 +1,11 @@
 class ProveedorServiciosComplementariosService {
-    async getAllProveedores() {
+    async getAllProveedores(token) {
       const proveedores = await fetch("http://localhost:3000/proveedores_servicios_complementarios/", {
         method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       });
       const data = await proveedores.json();
       return data;

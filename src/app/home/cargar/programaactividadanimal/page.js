@@ -12,15 +12,66 @@ import {
   FormControl,
   InputLabel,
   Select,
+  Button,
+  CircularProgress,
   MenuItem,
 } from "@mui/material";
 import AnimalService from "../../../api/animal/animal.service";
+import AddIcon from "@mui/icons-material/Add";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+
+const row=[
+  { "key": "nombre_animal", "label": "Nombre del Animal" },
+  { "key": "especie", "label": "Especie" },
+  { "key": "raza", "label": "Raza" },
+  { "key": "edad", "label": "Edad" },
+  { "key": "peso", "label": "Peso" },
+  { "key": "dias_refugio", "label": "Días en Refugio" },
+  { "key": "dia", "label": "Fecha" },
+  { "key": "hora", "label": "Hora" },
+  { "key": "descripcion_actividad", "label": "Descripción Actividad" },
+  { "key": "precio_actividad", "label": "Precio Actividad" },
+  { "key": "nombre_veterinario", "label": "Veterinario" },
+  { "key": "tipo_alimento", "label": "Tipo de Alimento" },
+  { "key": "precio_total_cuidado_veterinario", "label": "Cuidado Veterinario" },
+  { "key": "precio_transporte", "label": "Precio Transporte" },
+  { "key": "precio_total_mantenimiento", "label": "Total Mantenimiento" }
+]
 
 export default function TablePAA() {
   const { data: session } = useSession();
   const [data, setData] = useState([]);
   const [animales, setAnimales] = useState([]);
   const [id, setID] = useState(0);
+  const [exportando, setExportando] = useState(false);
+  const titulo ="Tabla_Programa_Actividad"
+
+  const exportarPDF = () => {
+    setExportando(true);
+    const doc = new jsPDF("portrait", "pt", "A4");
+    const marginLeft = 40;
+    const title = `${titulo} Report`;
+
+    // Configura las cabeceras de la tabla
+    const headers = [row.map((col) => col.label)];
+
+    // Mapea los datos para llenar la tabla en PDF
+    const dataRows = data.map((item) => row.map((col) => item[col.key]));
+
+    doc.setFontSize(15);
+    doc.text(title, marginLeft, 40);
+
+    doc.autoTable({
+      startY: 50,
+      head: headers,
+      body: dataRows,
+      margin: { left: marginLeft },
+    });
+
+    doc.save(`${titulo}_report.pdf`);
+    setExportando(false);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -101,6 +152,14 @@ export default function TablePAA() {
           </TableBody>
         </Table>
       </TableContainer>
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={exportarPDF}
+        sx={{ mt: 2 }}
+      >
+        {exportando ? <CircularProgress /> : "Exportar a PDF"}
+      </Button>
     </Paper>
   );
 }
